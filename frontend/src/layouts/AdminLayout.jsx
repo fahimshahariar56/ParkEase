@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard,
@@ -18,10 +18,18 @@ import {
 } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/login');
+  };
 
   const adminNav = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard },
@@ -89,12 +97,17 @@ export const AdminLayout = () => {
           <div className="pt-2 border-t border-border/40">
             <div className="flex items-center justify-between text-xs">
               <div className="truncate">
-                <div className="font-bold text-text truncate">Admin Operator</div>
-                <div className="text-[10px] text-text-muted truncate">admin@parkease.io</div>
+                <div className="font-bold text-text truncate">{user?.fullName || 'Admin Operator'}</div>
+                <div className="text-[10px] text-text-muted truncate">{user?.email || 'admin@parkease.io'}</div>
               </div>
-              <Link to="/login" title="Sign Out">
-                <Button variant="ghost" size="sm" icon={LogOut} className="px-2 text-text-muted hover:text-status-occupied" />
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={LogOut}
+                onClick={handleSignOut}
+                title="Sign Out"
+                className="px-2 text-text-muted hover:text-status-occupied"
+              />
             </div>
           </div>
         </div>
@@ -194,11 +207,9 @@ export const AdminLayout = () => {
               </nav>
 
               <div className="p-4 border-t border-border">
-                <Link to="/login" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="outline" size="sm" fullWidth icon={LogOut}>
-                    Sign Out
-                  </Button>
-                </Link>
+                <Button variant="outline" size="sm" fullWidth icon={LogOut} onClick={handleSignOut}>
+                  Sign Out
+                </Button>
               </div>
             </motion.div>
           </div>

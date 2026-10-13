@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Car, MapPin, User, BookmarkCheck, LogOut, Menu, X, Shield } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const CustomerLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/login');
+  };
 
   const navItems = [
     { label: 'Find Parking', path: '/parking', icon: MapPin },
@@ -60,18 +68,18 @@ export const CustomerLayout = () => {
 
           {/* Right User Actions */}
           <div className="hidden md:flex items-center gap-3">
+            <span className="text-xs text-text-muted hidden lg:inline">{user?.fullName || user?.email}</span>
             <ThemeToggle />
             <div className="h-5 w-px bg-border" />
-            <Link to="/login">
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={LogOut}
-                className="text-text-muted hover:text-status-occupied"
-              >
-                Sign Out
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={LogOut}
+              onClick={handleSignOut}
+              className="text-text-muted hover:text-status-occupied"
+            >
+              Sign Out
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,11 +125,9 @@ export const CustomerLayout = () => {
                 );
               })}
               <div className="pt-3 border-t border-border/60">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="sm" fullWidth icon={LogOut}>
-                    Sign Out
-                  </Button>
-                </Link>
+                <Button variant="outline" size="sm" fullWidth icon={LogOut} onClick={handleSignOut}>
+                  Sign Out
+                </Button>
               </div>
             </motion.div>
           )}
