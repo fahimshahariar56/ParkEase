@@ -7,6 +7,8 @@ import { parkingRouter } from '../modules/parking/parking.routes.js';
 import { reservationsRouter } from '../modules/reservations/reservations.routes.js';
 import { sessionsRouter } from '../modules/sessions/sessions.routes.js';
 import { paymentsRouter } from '../modules/payments/payments.routes.js';
+import { pricingRouter } from '../modules/pricing/pricing.routes.js';
+import { reportsRouter } from '../modules/reports/reports.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -44,6 +46,14 @@ rootRouter.use('/sessions', sessionsRouter);
 // Payments Module routes (Demo Payment Flow — Day 21)
 rootRouter.use('/api/v1/payments', paymentsRouter);
 rootRouter.use('/payments', paymentsRouter);
+
+// Pricing Rules Module routes
+rootRouter.use('/api/v1/pricing-rules', pricingRouter);
+rootRouter.use('/pricing-rules', pricingRouter);
+
+// Reports & Database Demonstration routes (Day 22)
+rootRouter.use('/api/v1/reports', reportsRouter);
+rootRouter.use('/reports', reportsRouter);
 
 
 // Protected Verification Routes (RBAC & Ownership verification)
@@ -134,6 +144,20 @@ rootRouter.get('/', (req, res) => {
         get: 'GET /api/v1/sessions/:id',
         recordEntry: 'POST /api/v1/sessions/entry',
         recordExit: 'PATCH /api/v1/sessions/:id/exit',
+      },
+      pricingRules: {
+        list: 'GET /api/v1/pricing-rules',
+        effective: 'GET /api/v1/pricing-rules/effective',
+        get: 'GET /api/v1/pricing-rules/:id',
+        create: 'POST /api/v1/pricing-rules',
+        deactivate: 'PATCH /api/v1/pricing-rules/:id/deactivate',
+      },
+      reports: {
+        summary: 'GET /api/v1/reports/summary',
+        occupancy: 'GET /api/v1/reports/occupancy',
+        reservations: 'GET /api/v1/reports/reservations',
+        sessions: 'GET /api/v1/reports/sessions',
+        payments: 'GET /api/v1/reports/payments',
       },
     },
   });

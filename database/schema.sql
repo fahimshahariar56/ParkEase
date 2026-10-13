@@ -110,4 +110,50 @@ CREATE TABLE IF NOT EXISTS reservations (
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Parking Sessions table (Day 20)
+CREATE TABLE IF NOT EXISTS parking_sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  reservation_id INT NULL UNIQUE,
+  vehicle_id INT NOT NULL,
+  slot_id INT NOT NULL,
+  entry_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  exit_time TIMESTAMP NULL,
+  hourly_rate_snapshot DECIMAL(10, 2) NOT NULL,
+  total_fee DECIMAL(10, 2) NULL,
+  status ENUM('ACTIVE', 'COMPLETED') NOT NULL DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_sessions_slot (slot_id),
+  INDEX idx_sessions_vehicle (vehicle_id),
+  INDEX idx_sessions_status (status),
+  INDEX idx_sessions_entry_time (entry_time),
+  CONSTRAINT fk_sessions_reservation
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT fk_sessions_vehicle
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_sessions_slot
+    FOREIGN KEY (slot_id) REFERENCES parking_slots (id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Payments table (Day 21: Simulated Demo Payments)
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id INT NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  demo_method ENUM('SIMULATED_CARD', 'SIMULATED_MOBILE_WALLET', 'SIMULATED_CASH') NOT NULL DEFAULT 'SIMULATED_CARD',
+  status ENUM('PAID', 'REFUNDED', 'FAILED') NOT NULL DEFAULT 'PAID',
+  transaction_reference VARCHAR(100) NOT NULL UNIQUE,
+  paid_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_payments_session (session_id),
+  INDEX idx_payments_status (status),
+  INDEX idx_payments_paid_at (paid_at),
+  CONSTRAINT fk_payments_session
+    FOREIGN KEY (session_id) REFERENCES parking_sessions (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 

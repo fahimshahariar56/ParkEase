@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS reservations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_res_slot_time (slot_id, start_time, end_time),
+  INDEX idx_res_start_time (start_time),
   INDEX idx_res_user (user_id),
   INDEX idx_res_vehicle (vehicle_id),
   INDEX idx_res_status (status),
@@ -149,6 +150,7 @@ CREATE TABLE IF NOT EXISTS parking_sessions (
   INDEX idx_sessions_slot (slot_id),
   INDEX idx_sessions_vehicle (vehicle_id),
   INDEX idx_sessions_status (status),
+  INDEX idx_sessions_entry_time (entry_time),
   CONSTRAINT fk_sessions_reservation
     FOREIGN KEY (reservation_id) REFERENCES reservations (id)
     ON DELETE SET NULL ON UPDATE CASCADE,
@@ -175,7 +177,9 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_payments_session (session_id),
   INDEX idx_payments_status (status),
+  INDEX idx_payments_paid_at (paid_at),
   CONSTRAINT fk_payments_session
     FOREIGN KEY (session_id) REFERENCES parking_sessions (id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

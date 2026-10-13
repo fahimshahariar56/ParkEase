@@ -323,6 +323,70 @@ export const paymentsApi = {
     }, token),
 };
 
+// ─── Pricing Rules (Day 22) ───────────────────────────────────────────────────
 
+export const pricingApi = {
+  /** List all pricing rules. Optional: ?vehicleType=&isActive= */
+  getPricingRules: (params = {}) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/pricing-rules${query}`, { method: 'GET' });
+  },
 
+  /** Get currently-effective rate per vehicle type (no auth required). */
+  getEffectiveRates: () =>
+    request('/pricing-rules/effective', { method: 'GET' }),
 
+  /** Get a single pricing rule by ID. */
+  getPricingRuleById: (id) =>
+    request(`/pricing-rules/${id}`, { method: 'GET' }),
+
+  /** Create a new pricing rule (admin only). Deactivates the previous rule for the same type. */
+  createPricingRule: (payload, token) =>
+    request('/pricing-rules', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  /** Deactivate a pricing rule (admin only). */
+  deactivatePricingRule: (id, token) =>
+    request(`/pricing-rules/${id}/deactivate`, {
+      method: 'PATCH',
+    }, token),
+};
+
+// ─── Reports & Analytics (Day 22) ─────────────────────────────────────────────
+
+export const reportsApi = {
+  /** Get overview KPI summary across all reporting domains. */
+  getSummary: (token) =>
+    request('/reports/summary', { method: 'GET' }, token),
+
+  /** Get real-time and lot-level parking occupancy metrics. */
+  getOccupancy: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/reports/occupancy${query}`, { method: 'GET' }, token);
+  },
+
+  /** Get reservation analytics, status breakdown, and time series. */
+  getReservations: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/reports/reservations${query}`, { method: 'GET' }, token);
+  },
+
+  /** Get parking session analytics, duration, and recorded revenue. */
+  getSessions: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/reports/sessions${query}`, { method: 'GET' }, token);
+  },
+
+  /** Get demo payment audit report with simulated transaction details. */
+  getPayments: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/reports/payments${query}`, { method: 'GET' }, token);
+  },
+};
