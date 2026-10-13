@@ -1,0 +1,161 @@
+import React from 'react';
+import { Card, Badge, Button, Input } from '../components/ui';
+import { Plus, Building2, Grid3X3, CalendarCheck, ArrowRightLeft, Users, DollarSign, BarChart3 } from 'lucide-react';
+
+export const AdminLotsPage = () => (
+  <div className="space-y-6 font-mono">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Parking Lots Management</h1>
+        <p className="text-xs text-text-muted mt-1">Configure physical lots, location capacity, and status.</p>
+      </div>
+      <Button variant="primary" size="sm" icon={Plus}>Add Lot</Button>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card title="Central Plaza Parking" subtitle="102 Downtown Avenue" headerAction={<Badge variant="available">Active</Badge>}>
+        <div className="text-xs space-y-1 text-text-muted">
+          <p>Total Capacity: <span className="font-bold text-text">60 Slots</span></p>
+          <p>Floors: Ground, Level 1, Level 2</p>
+        </div>
+      </Card>
+      <Card title="North Terminal Lot" subtitle="Terminal Blvd North" headerAction={<Badge variant="available">Active</Badge>}>
+        <div className="text-xs space-y-1 text-text-muted">
+          <p>Total Capacity: <span className="font-bold text-text">40 Slots</span></p>
+          <p>Floors: Ground, Rooftop</p>
+        </div>
+      </Card>
+    </div>
+  </div>
+);
+
+export const AdminSlotsPage = () => (
+  <div className="space-y-6 font-mono">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Parking Slots Inventory</h1>
+        <p className="text-xs text-text-muted mt-1">View slot occupancy and toggle maintenance flags.</p>
+      </div>
+      <Button variant="primary" size="sm" icon={Plus}>Add Slot</Button>
+    </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {['A-101', 'A-102', 'A-103', 'A-104', 'B-201', 'B-202', 'B-203', 'B-204'].map((slot, i) => {
+        const status = i === 1 ? 'occupied' : i === 2 ? 'pending' : i === 5 ? 'maintenance' : 'available';
+        return (
+          <Card key={slot} title={`Slot #${slot}`} subtitle="Standard Car" headerAction={<Badge variant={status}>{status}</Badge>}>
+            <div className="text-[11px] text-text-muted">Floor Level {slot[0]}</div>
+          </Card>
+        );
+      })}
+    </div>
+  </div>
+);
+
+export const AdminReservationsPage = () => (
+  <div className="space-y-6 font-mono">
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight">Reservation Management</h1>
+      <p className="text-xs text-text-muted mt-1">Review active bookings, cancel requests, and check-in status.</p>
+    </div>
+    <div className="park-card p-4 space-y-3">
+      {[
+        { id: 'RES-8801', customer: 'Shahariar Fahim', slot: 'A-102', time: '10:00 - 12:00', status: 'pending' },
+        { id: 'RES-8802', customer: 'Sarah Jenkins', slot: 'B-201', time: '14:00 - 16:00', status: 'available' },
+      ].map((res) => (
+        <div key={res.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-input bg-surface-raised border border-border/60 text-xs gap-2">
+          <div>
+            <span className="font-bold text-text">{res.id}</span> • {res.customer} ({res.slot})
+            <div className="text-text-muted text-[11px]">{res.time}</div>
+          </div>
+          <Badge variant={res.status}>{res.status === 'pending' ? 'Confirmed' : 'Completed'}</Badge>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+export const AdminSessionsPage = () => (
+  <div className="space-y-6 font-mono">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Vehicle Entry & Exit</h1>
+        <p className="text-xs text-text-muted mt-1">Record physical arrival, departure, and fee calculation.</p>
+      </div>
+      <Button variant="primary" size="sm" icon={ArrowRightLeft}>Record Entry</Button>
+    </div>
+    <Card title="Active Parking Sessions" subtitle="Currently parked vehicles">
+      <div className="text-xs space-y-3">
+        <div className="flex items-center justify-between p-3 rounded-input bg-surface-raised border border-border">
+          <div>
+            <div className="font-bold text-text">DHK-METRO-GA-1122</div>
+            <div className="text-text-muted text-[11px]">Slot #A-102 • Entry: 14:15 (Duration: 1h 12m)</div>
+          </div>
+          <Button variant="secondary" size="sm">Record Exit</Button>
+        </div>
+      </div>
+    </Card>
+  </div>
+);
+
+export const AdminCustomersPage = () => (
+  <div className="space-y-6 font-mono">
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight">Registered Customers</h1>
+      <p className="text-xs text-text-muted mt-1">Customer accounts created through public registration.</p>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card title="Shahariar Ahammad Fahim" subtitle="fahim.shahariar.cse@gmail.com">
+        <div className="text-xs text-text-muted space-y-1">
+          <p>Role: <span className="text-brand font-bold">CUSTOMER</span></p>
+          <p>Registered Vehicles: 2</p>
+          <p>Total Reservations: 5</p>
+        </div>
+      </Card>
+    </div>
+  </div>
+);
+
+export const AdminPricingPage = () => (
+  <div className="space-y-6 font-mono">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Pricing Rules</h1>
+        <p className="text-xs text-text-muted mt-1">Configure hourly rates by slot type and vehicle category.</p>
+      </div>
+      <Button variant="primary" size="sm" icon={Plus}>New Rule</Button>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <Card title="Standard Car" subtitle="Hourly Rate">
+        <div className="text-xl font-bold text-brand">$4.00 / hr</div>
+      </Card>
+      <Card title="SUV / Van" subtitle="Hourly Rate">
+        <div className="text-xl font-bold text-brand">$5.00 / hr</div>
+      </Card>
+      <Card title="Motorcycle" subtitle="Hourly Rate">
+        <div className="text-xl font-bold text-brand">$2.00 / hr</div>
+      </Card>
+    </div>
+  </div>
+);
+
+export const AdminReportsPage = () => (
+  <div className="space-y-6 font-mono">
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight">Operational Reports</h1>
+      <p className="text-xs text-text-muted mt-1">Occupancy metrics and clearly labelled Demo Revenue.</p>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card title="Occupancy Analysis" subtitle="Daily utilization rate">
+        <div className="text-xs text-text-muted space-y-2">
+          <p>Peak Hours: 09:00 - 11:30 & 16:30 - 19:00</p>
+          <p>Average Daily Utilization: 81.4%</p>
+        </div>
+      </Card>
+      <Card title="Demo Revenue Summary" subtitle="Simulated totals only">
+        <div className="text-xs text-text-muted space-y-2">
+          <div className="text-lg font-bold text-brand">$3,420.00 Demo Total</div>
+          <p className="text-amber-500">Notice: No real financial transactions exist.</p>
+        </div>
+      </Card>
+    </div>
+  </div>
+);
