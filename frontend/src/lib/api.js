@@ -222,5 +222,39 @@ export const parkingApi = {
   },
 };
 
+// ─── Reservations ────────────────────────────────────────────────────────────
+
+export const reservationsApi = {
+  getReservations: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/reservations${query}`, { method: 'GET' }, token);
+  },
+
+  getMyReservations: (token) =>
+    request('/reservations/my', { method: 'GET' }, token),
+
+  getReservationById: (id, token) =>
+    request(`/reservations/${id}`, { method: 'GET' }, token),
+
+  createReservation: (payload, token) =>
+    request('/reservations', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  cancelReservation: (id, token) =>
+    request(`/reservations/${id}/cancel`, {
+      method: 'PATCH',
+    }, token),
+
+  updateReservationStatus: (id, status, token) =>
+    request(`/reservations/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }, token),
+};
+
+
 
 

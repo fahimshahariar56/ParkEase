@@ -4,6 +4,7 @@ import { authRouter } from '../modules/auth/auth.routes.js';
 import { usersRouter } from '../modules/users/users.routes.js';
 import { vehiclesRouter } from '../modules/vehicles/vehicles.routes.js';
 import { parkingRouter } from '../modules/parking/parking.routes.js';
+import { reservationsRouter } from '../modules/reservations/reservations.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -29,6 +30,11 @@ rootRouter.use('/vehicles', vehiclesRouter);
 // Parking Module routes (Lots & slots management)
 rootRouter.use('/api/v1/parking', parkingRouter);
 rootRouter.use('/parking', parkingRouter);
+
+// Reservations Module routes (Booking creation & cancellation)
+rootRouter.use('/api/v1/reservations', reservationsRouter);
+rootRouter.use('/reservations', reservationsRouter);
+
 
 // Protected Verification Routes (RBAC & Ownership verification)
 rootRouter.get('/api/v1/admin/protected-ping', authenticate, authorizeRoles('ADMIN'), (req, res) => {
@@ -103,6 +109,13 @@ rootRouter.get('/', (req, res) => {
           update: 'PATCH /api/v1/parking/slots/:id',
           delete: 'DELETE /api/v1/parking/slots/:id',
         },
+      },
+      reservations: {
+        list: 'GET /api/v1/reservations',
+        get: 'GET /api/v1/reservations/:id',
+        create: 'POST /api/v1/reservations',
+        cancel: 'PATCH /api/v1/reservations/:id/cancel',
+        updateStatus: 'PATCH /api/v1/reservations/:id/status',
       },
     },
   });

@@ -68,3 +68,46 @@ CREATE TABLE IF NOT EXISTS parking_slots (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Pricing Rules table
+CREATE TABLE IF NOT EXISTS pricing_rules (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  vehicle_type ENUM('MOTORCYCLE', 'STANDARD_CAR', 'SUV', 'VAN', 'TRUCK') NOT NULL,
+  hourly_rate DECIMAL(10, 2) NOT NULL,
+  effective_from TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  effective_to TIMESTAMP NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_pricing_rules_type (vehicle_type),
+  INDEX idx_pricing_rules_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Reservations table
+CREATE TABLE IF NOT EXISTS reservations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  vehicle_id INT NOT NULL,
+  slot_id INT NOT NULL,
+  start_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP NOT NULL,
+  hourly_rate_snapshot DECIMAL(10, 2) NOT NULL,
+  total_estimated_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  status ENUM('PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'NO_SHOW') NOT NULL DEFAULT 'CONFIRMED',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_res_slot_time (slot_id, start_time, end_time),
+  INDEX idx_res_user (user_id),
+  INDEX idx_res_vehicle (vehicle_id),
+  INDEX idx_res_status (status),
+  CONSTRAINT fk_reservations_user
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_reservations_vehicle
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_reservations_slot
+    FOREIGN KEY (slot_id) REFERENCES parking_slots (id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
