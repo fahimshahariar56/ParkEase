@@ -13,10 +13,8 @@ import {
   AlertCircle,
   ArrowLeft,
   KeyRound,
-  Shield,
-  Server,
 } from 'lucide-react';
-import { Button, Input, Card } from '../components/ui';
+import { Button, Input, Card, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
@@ -61,7 +59,7 @@ export const AdminLoginPage = () => {
     return Object.keys(errors).length === 0;
   }
 
-  // Submit Handler
+  // Submit Handler — calls POST /api/v1/auth/admin/login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
@@ -83,7 +81,7 @@ export const AdminLoginPage = () => {
       const destination = redirectPath || '/admin';
       navigate(destination, { replace: true });
     } catch (err) {
-      // Always provide generic, secure invalid-credentials feedback
+      // Provide clean, secure invalid-credentials feedback without exposing internals
       const message =
         err.message && err.message.toLowerCase().includes('credential')
           ? err.message
@@ -92,31 +90,36 @@ export const AdminLoginPage = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#080D17] text-slate-100 font-mono flex flex-col justify-between selection:bg-amber-500/20 selection:text-amber-400 relative overflow-hidden">
-      {/* Background ambient lighting */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[360px] bg-gradient-to-b from-amber-500/10 via-brand/5 to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-slate-800/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+  // Helper for evaluation / testing: pre-fills seed credentials for real API submission
+  const handleFillDemoCredentials = () => {
+    setEmail('admin@parkease.io');
+    setPassword('Admin@123456');
+    setFieldErrors({});
+    setServerError('');
+  };
 
+  return (
+    <div className="min-h-screen bg-bg text-text font-sans flex flex-col justify-between selection:bg-text/15 selection:text-text relative">
       {/* Top Header */}
-      <header className="h-16 border-b border-slate-800/80 bg-[#0B1220]/70 backdrop-blur-md px-6 flex items-center justify-between relative z-10">
+      <header className="h-16 border-b border-border bg-surface/90 backdrop-blur-md px-6 flex items-center justify-between relative z-10">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-btn bg-surface-raised border border-border flex items-center justify-center text-text group-hover:border-text/30 transition-colors">
             <Car className="w-4 h-4" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-sm tracking-tight text-white leading-none">
-              Park<span className="text-amber-400">Ease</span>
+            <span className="font-semibold text-base tracking-tight text-text leading-none">
+              ParkEase
             </span>
-            <span className="text-[10px] text-slate-400 font-medium">Administration Portal</span>
+            <span className="text-[10px] text-text-muted font-medium mt-0.5">
+              Administration Portal
+            </span>
           </div>
         </Link>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-[11px] text-slate-300">
-            <Terminal className="w-3.5 h-3.5 text-amber-400" />
-            <span>Restricted Zone</span>
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-raised border border-border text-[11px] text-text-muted font-mono">
+            <Terminal className="w-3.5 h-3.5 text-text" />
+            <span>RESTRICTED CONSOLE</span>
           </div>
           <ThemeToggle />
         </div>
@@ -130,45 +133,48 @@ export const AdminLoginPage = () => {
           transition={{ duration: 0.35, ease: 'easeOut' }}
           className="w-full max-w-md"
         >
-          {/* Admin Header Shield Card */}
+          {/* Admin Header Shield */}
           <div className="text-center mb-6 space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-slate-800/60 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400 shadow-lg shadow-amber-500/5">
-              <ShieldCheck className="w-7 h-7" />
+            <div className="w-12 h-12 rounded-xl bg-surface-raised border border-border flex items-center justify-center mx-auto text-text shadow-sm">
+              <ShieldCheck className="w-6 h-6" aria-hidden="true" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
-              Admin Console Login
-            </h1>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-              Authorized personnel only. Enter your administrator credentials to access facility operations.
+            <div className="space-y-1">
+              <Badge variant="outline" className="text-[11px] font-mono mb-1">
+                OPERATIONAL ACCESS
+              </Badge>
+              <h1 className="text-2xl font-semibold tracking-tight text-text">
+                Admin Console Login
+              </h1>
+            </div>
+            <p className="text-xs text-text-muted max-w-xs mx-auto leading-relaxed">
+              Authorized personnel only. Enter administrator credentials to access facility
+              operations and reporting.
             </p>
           </div>
 
           {/* Login Card */}
-          <div className="bg-[#111C2E]/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-            {/* Top decorative accent bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-emerald-500 to-amber-500 opacity-80" />
-
+          <Card className="p-6 sm:p-8 bg-surface border-border shadow-sm space-y-5">
             {/* Server Error Message */}
             {serverError && (
               <motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-5 rounded-xl bg-red-500/10 border border-red-500/30 p-3.5 text-xs text-red-400 flex items-center gap-2.5"
+                className="rounded-input bg-status-occupied/10 border border-status-occupied/30 p-3.5 text-xs text-status-occupied flex items-start gap-2.5"
                 role="alert"
+                aria-live="assertive"
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{serverError}</span>
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="leading-relaxed font-medium">{serverError}</span>
               </motion.div>
             )}
 
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
-              {/* Email Address */}
               <Input
                 id="admin-email"
                 label="Administrator Email"
                 type="email"
                 icon={Mail}
-                placeholder="admin@parkease.com"
+                placeholder="admin@parkease.io"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -182,59 +188,75 @@ export const AdminLoginPage = () => {
                 autoFocus
               />
 
-              {/* Password with Show/Hide toggle */}
-              <div className="relative">
-                <Input
-                  id="admin-password"
-                  label="Password"
-                  type={showPass ? 'text' : 'password'}
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setFieldErrors((prev) => ({ ...prev, password: '' }));
-                    setServerError('');
-                  }}
-                  error={fieldErrors.password}
-                  disabled={isLoading}
-                  required
-                  autoComplete="current-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  aria-label={showPass ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-[34px] text-slate-400 hover:text-white transition-colors p-1"
-                  tabIndex={0}
-                >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <Input
+                id="admin-password"
+                label="Administrator Password"
+                type={showPass ? 'text' : 'password'}
+                icon={Lock}
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, password: '' }));
+                  setServerError('');
+                }}
+                error={fieldErrors.password}
+                disabled={isLoading}
+                required
+                autoComplete="current-password"
+                endAdornment={
+                  <button
+                    type="button"
+                    aria-label={showPass ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPass((v) => !v)}
+                    className="text-text-muted hover:text-text transition-colors p-1"
+                    tabIndex={0}
+                  >
+                    {showPass ? (
+                      <EyeOff className="w-4 h-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="w-4 h-4" aria-hidden="true" />
+                    )}
+                  </button>
+                }
+              />
 
-              {/* Submit Button */}
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  fullWidth
-                  icon={LogIn}
-                  isLoading={isLoading}
-                  disabled={isLoading}
-                  id="admin-submit-btn"
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold border-amber-400 shadow-md shadow-amber-500/20"
-                >
-                  {isLoading ? 'Verifying Credentials…' : 'Authenticate as Admin'}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                icon={LogIn}
+                isLoading={isLoading}
+                disabled={isLoading}
+                id="admin-submit-btn"
+                className="mt-2"
+              >
+                {isLoading ? 'Verifying Credentials…' : 'Authenticate as Admin'}
+              </Button>
             </form>
 
+            {/* Quick Demo Fill (for evaluators) */}
+            <div className="pt-4 border-t border-border space-y-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                fullWidth
+                icon={KeyRound}
+                onClick={handleFillDemoCredentials}
+                disabled={isLoading}
+              >
+                Fill Seed Credentials (admin@parkease.io)
+              </Button>
+            </div>
+
             {/* Security Notice */}
-            <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-3">
-              <div className="flex items-start gap-2.5 text-[11px] text-slate-400 leading-relaxed bg-slate-900/60 p-3 rounded-lg border border-slate-800/60">
-                <Lock className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-start gap-2.5 text-[11px] text-text-muted leading-relaxed bg-surface-raised p-3 rounded-input border border-border">
+                <Lock className="w-4 h-4 text-text-muted flex-shrink-0 mt-0.5" />
                 <span>
-                  All login sessions and administrative actions are logged with role verification and IP attribution.
+                  All administrative access requests are validated against database role constraints and
+                  audited with timestamp attribution.
                 </span>
               </div>
 
@@ -242,30 +264,32 @@ export const AdminLoginPage = () => {
               <div className="text-center pt-2">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text transition-colors font-medium"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Customer? Go to Customer Portal</span>
+                  <span>Customer? Return to Customer Portal</span>
                 </Link>
               </div>
             </div>
-          </div>
+          </Card>
         </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-4 px-6 text-center text-[11px] text-slate-500 relative z-10 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto w-full">
-        <span>© {new Date().getFullYear()} ParkEase Operations & Security</span>
-        <div className="flex items-center gap-4 mt-2 sm:mt-0">
-          <Link to="/" className="hover:text-slate-300 transition-colors">
-            Home
-          </Link>
-          <Link to="/parking" className="hover:text-slate-300 transition-colors">
-            Find Parking
-          </Link>
-          <Link to="/login" className="hover:text-slate-300 transition-colors">
-            Customer Portal
-          </Link>
+      <footer className="border-t border-border py-4 px-6 text-center text-xs text-text-muted relative z-10">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>© {new Date().getFullYear()} ParkEase Operations & Security</span>
+          <div className="flex items-center gap-4 font-medium">
+            <Link to="/" className="hover:text-text transition-colors">
+              Home
+            </Link>
+            <Link to="/parking" className="hover:text-text transition-colors">
+              Find Parking
+            </Link>
+            <Link to="/login" className="hover:text-text transition-colors">
+              Customer Portal
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

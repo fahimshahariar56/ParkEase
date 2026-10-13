@@ -12,11 +12,13 @@ export const Input = React.forwardRef((
     error,
     helperText,
     icon: Icon,
+    endAdornment,
     id,
     type = 'text',
     disabled = false,
     required = false,
     className = '',
+    inputClassName = '',
     placeholder,
     ...props
   },
@@ -67,12 +69,20 @@ export const Input = React.forwardRef((
             'focus:outline-none focus:ring-1',
             'disabled:opacity-40 disabled:cursor-not-allowed',
             Icon ? 'pl-9' : '',
+            endAdornment ? 'pr-10' : '',
             error
               ? 'border-status-occupied focus:ring-status-occupied focus:border-status-occupied'
               : 'border-border hover:border-text/20 focus:ring-text/30 focus:border-text/40',
+            inputClassName,
           ].join(' ')}
           {...props}
         />
+
+        {endAdornment && (
+          <div className="absolute right-3 flex items-center">
+            {endAdornment}
+          </div>
+        )}
       </div>
 
       {error ? (
