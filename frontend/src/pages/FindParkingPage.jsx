@@ -9,9 +9,10 @@ import {
   CheckCircle2,
   ParkingSquare,
   AlertTriangle,
+  ArrowRight,
 } from 'lucide-react';
-import { Button, Badge, EmptyState, ErrorState, CardSkeleton } from '../components/ui';
-import { parkingApi, vehiclesApi } from '../lib/api';
+import { Button, Badge, Dialog, EmptyState, ErrorState, CardSkeleton, useToast } from '../components/ui';
+import { parkingApi, vehiclesApi, reservationsApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -77,9 +78,229 @@ function toISO(localStr) {
   return new Date(localStr).toISOString();
 }
 
+// ─── ReservationConfirmDialog ────────────────────────────────────────────────
+
+function formatDateTimeShort(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString([], {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+const ReservationConfirmDialog = ({
+  isOpen,
+  slot,
+  filters,
+  userVehicles,
+  token,
+  onSuccess,
+  onClose,
+}) => {
+  const { toast } = useToast();
+  const [vehicleId, setVehicleId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [confirmed, setConfirmed] = useState(null); // reservation object on success
+
+  // Reset when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setVehicleId(userVehicles.length === 1 ? String(userVehicles[0].id) : '');
+      setSubmitError('');
+      setConfirmed(null);
+      setIsSubmitting(false);
+    }
+  }, [isOpen, userVehicles]);
+
+  const handleConfirm = async () => {
+    if (!vehicleId) {
+      setSubmitError('Please select a vehicle.');
+      return;
+    }
+    if (!filters.startTime || !filters.endTime) {
+      setSubmitError('Please select a time window on the search form first.');
+      return;
+    }
+    setSubmitError('');
+    setIsSubmitting(true);
+    try {
+      const res = await reservationsApi.createReservation(
+        {
+          vehicleId: Number(vehicleId),
+          slotId: slot.id,
+          startTime: filters.startTime,
+          endTime: filters.endTime,
+        },
+        token
+      );
+      const reservation = res.data?.reservation;
+      setConfirmed(reservation);
+      toast({
+        type: 'success',
+        title: 'Reservation Confirmed',
+        message: `Slot ${slot.slotNumber} reserved. Ref #${reservation?.id}.`,
+        duration: 6000,
+      });
+      onSuccess();
+    } catch (err) {
+      setSubmitError(err.message || 'Failed to create reservation. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const durationHours = filters.startTime && filters.endTime
+    ? Math.max(1, Math.ceil((new Date(filters.endTime) - new Date(filters.startTime)) / 3600000))
+    : null;
+
+  return (
+    <Dialog
+      isOpen={isOpen}
+      onClose={confirmed ? onClose : () => !isSubmitting && onClose()}
+      title={confirmed ? 'Reservation Confirmed' : `Reserve Slot ${slot?.slotNumber ?? ''}`}
+      description={
+        confirmed
+          ? `Reference #${confirmed.id}`
+          : slot?.lotName ?? ''
+      }
+      footer={
+        confirmed ? (
+          <>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={ArrowRight}
+              onClick={() => {
+                onClose();
+                window.location.replace('/reservations');
+              }}
+            >
+              View Reservations
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="ghost" size="sm" onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              isLoading={isSubmitting}
+              onClick={handleConfirm}
+            >
+              Confirm Reservation
+            </Button>
+          </>
+        )
+      }
+    >
+      {confirmed ? (
+        /* ── Success state ── */
+        <div className="text-center py-4 space-y-3 font-mono">
+          <div className="w-14 h-14 rounded-full bg-status-available/15 text-status-available border border-status-available/30 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-7 h-7" />
+          </div>
+          <h3 className="font-bold text-base text-text">Booking Successful</h3>
+          <p className="text-xs text-text-muted">
+            Slot <span className="text-brand font-semibold">{slot?.slotNumber}</span>
+            {slot?.lotName && <> at {slot.lotName}</>} has been reserved.
+          </p>
+          <div className="text-xs bg-brand/10 border border-brand/20 text-brand rounded-input px-3 py-2 font-medium">
+            DEMO — No real money charged
+          </div>
+        </div>
+      ) : (
+        /* ── Confirmation form ── */
+        <div className="space-y-4 font-mono text-xs">
+          {/* Slot details */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between py-1.5 border-b border-border/40">
+              <span className="text-text-muted">Slot</span>
+              <span className="font-semibold text-text">
+                {slot?.slotNumber} · {SLOT_TYPE_LABELS[slot?.slotType] || slot?.slotType}
+              </span>
+            </div>
+            {slot?.lotName && (
+              <div className="flex justify-between py-1.5 border-b border-border/40">
+                <span className="text-text-muted">Location</span>
+                <span className="font-medium text-text">{slot.lotName}</span>
+              </div>
+            )}
+            {filters.startTime && (
+              <div className="flex justify-between py-1.5 border-b border-border/40">
+                <span className="text-text-muted">From</span>
+                <span className="font-medium text-text">{formatDateTimeShort(filters.startTime)}</span>
+              </div>
+            )}
+            {filters.endTime && (
+              <div className="flex justify-between py-1.5 border-b border-border/40">
+                <span className="text-text-muted">To</span>
+                <span className="font-medium text-text">{formatDateTimeShort(filters.endTime)}</span>
+              </div>
+            )}
+            {durationHours && (
+              <div className="flex justify-between py-1.5 border-b border-border/40">
+                <span className="text-text-muted">Duration</span>
+                <span className="font-medium text-text">{durationHours} hr{durationHours !== 1 ? 's' : ''} (est.)</span>
+              </div>
+            )}
+          </div>
+
+          {/* Vehicle selector */}
+          <div className="space-y-1.5">
+            <label htmlFor="confirm-vehicle" className="block text-xs font-medium text-text-muted">
+              Vehicle <span className="text-status-occupied">*</span>
+            </label>
+            {userVehicles.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-status-pending bg-status-pending/10 border border-status-pending/30 rounded-input px-3 py-2">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                No registered vehicles. Add a vehicle from your Profile page first.
+              </div>
+            ) : (
+              <select
+                id="confirm-vehicle"
+                value={vehicleId}
+                onChange={(e) => { setVehicleId(e.target.value); setSubmitError(''); }}
+                className="w-full bg-surface-raised text-text text-sm font-mono border border-border rounded-input px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand appearance-none"
+                aria-required="true"
+              >
+                <option value="">— Select a vehicle —</option>
+                {userVehicles.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.plateNumber} · {v.vehicleType}
+                    {v.makeModel ? ` (${v.makeModel})` : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Demo notice */}
+          <div className="text-[11px] bg-brand/10 border border-brand/20 text-brand rounded-input px-3 py-2 font-medium">
+            DEMO PAYMENT — NO REAL MONEY CHARGED
+          </div>
+
+          {/* Error */}
+          {submitError && (
+            <div className="flex items-center gap-2 text-xs text-status-occupied bg-status-occupied/10 border border-status-occupied/30 rounded-input px-3 py-2">
+              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+              {submitError}
+            </div>
+          )}
+        </div>
+      )}
+    </Dialog>
+  );
+};
+
 // ─── SlotCard ────────────────────────────────────────────────────────────────
 
-const SlotCard = ({ slot, isSelected, onSelect }) => {
+const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
   const isAvailable = slot.status === 'AVAILABLE';
   const badgeVariant = STATUS_BADGE_VARIANT[slot.status] || 'neutral';
   const statusLabel = STATUS_LABEL[slot.status] || slot.status;
@@ -156,16 +377,30 @@ const SlotCard = ({ slot, isSelected, onSelect }) => {
               : 'Click to select'
             : statusLabel}
         </span>
-        <Button
-          variant={isSelected ? 'outline' : isAvailable ? 'primary' : 'secondary'}
-          size="sm"
-          disabled={!isAvailable}
-          onClick={isAvailable ? () => onSelect(slot) : undefined}
-          tabIndex={-1} // slot div is the keyboard target
-          aria-hidden="true"
-        >
-          {isSelected ? 'Deselect' : isAvailable ? 'Select' : 'Unavailable'}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isSelected && (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={ArrowRight}
+              onClick={(e) => { e.stopPropagation(); onReserve(slot); }}
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              Reserve
+            </Button>
+          )}
+          <Button
+            variant={isSelected ? 'outline' : isAvailable ? 'secondary' : 'secondary'}
+            size="sm"
+            disabled={!isAvailable}
+            onClick={isAvailable ? (e) => { e.stopPropagation(); onSelect(slot); } : undefined}
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            {isSelected ? 'Deselect' : isAvailable ? 'Select' : 'Unavailable'}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -173,7 +408,7 @@ const SlotCard = ({ slot, isSelected, onSelect }) => {
 
 // ─── SelectionSummary ─────────────────────────────────────────────────────────
 
-const SelectionSummary = ({ slot, filters, onClear }) => {
+const SelectionSummary = ({ slot, filters, onClear, onReserve }) => {
   if (!slot) return null;
 
   return (
@@ -205,11 +440,11 @@ const SelectionSummary = ({ slot, filters, onClear }) => {
             {new Date(filters.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
-        <div className="text-xs text-brand/80 bg-brand/10 border border-brand/20 rounded-input px-2.5 py-1 font-medium">
-          DEMO — No real money charged
-        </div>
         <Button variant="ghost" size="sm" onClick={onClear}>
           Clear
+        </Button>
+        <Button variant="primary" size="sm" icon={ArrowRight} onClick={() => onReserve(slot)}>
+          Reserve
         </Button>
       </div>
     </div>
@@ -445,6 +680,9 @@ export const FindParkingPage = () => {
   // Selection state
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+  // Reservation confirmation dialog state
+  const [reserveTarget, setReserveTarget] = useState(null);
+
   // Avoid stale-closure issues during concurrent fetch
   const fetchIdRef = useRef(0);
 
@@ -579,6 +817,19 @@ export const FindParkingPage = () => {
     setSelectedSlot((prev) => (prev?.id === slot.id ? null : slot));
   }, []);
 
+  // ── Open reservation dialog ──────────────────────────────────────────────
+  const handleReserve = useCallback((slot) => {
+    setSelectedSlot(slot);
+    setReserveTarget(slot);
+  }, []);
+
+  // ── After successful reservation ─────────────────────────────────────────
+  const handleReservationSuccess = useCallback(() => {
+    // Refresh slots so the just-reserved slot won't show as available
+    fetchSlots(filters);
+    setSelectedSlot(null);
+  }, [fetchSlots, filters]);
+
   // ── Summary stats from current results ───────────────────────────────────
   const availableCount = slots.filter((s) => s.status === 'AVAILABLE').length;
 
@@ -637,6 +888,7 @@ export const FindParkingPage = () => {
         slot={selectedSlot}
         filters={filters}
         onClear={() => setSelectedSlot(null)}
+        onReserve={handleReserve}
       />
 
       {/* Results */}
@@ -695,19 +947,24 @@ export const FindParkingPage = () => {
                 slot={slot}
                 isSelected={selectedSlot?.id === slot.id}
                 onSelect={handleSelectSlot}
+                onReserve={handleReserve}
               />
             ))}
           </div>
         )}
       </section>
 
-      {/* Day 14 scope note: reservation confirmation is Day 15 */}
-      {selectedSlot && (
-        <div className="park-card border-border p-4 text-xs text-text-muted font-mono flex items-center gap-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-brand flex-shrink-0" />
-          Slot <span className="text-brand font-semibold">{selectedSlot.slotNumber}</span> selected.
-          Reservation confirmation will be available in the next step.
-        </div>
+      {/* Reservation confirmation dialog */}
+      {reserveTarget && (
+        <ReservationConfirmDialog
+          isOpen={Boolean(reserveTarget)}
+          slot={reserveTarget}
+          filters={filters}
+          userVehicles={userVehicles}
+          token={token}
+          onSuccess={handleReservationSuccess}
+          onClose={() => setReserveTarget(null)}
+        />
       )}
     </div>
   );

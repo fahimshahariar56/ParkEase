@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Car, MapPin, User, BookmarkCheck, LogOut, Menu, X, Shield } from 'lucide-react';
+import { Car, MapPin, User, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,7 @@ export const CustomerLayout = () => {
 
   const navItems = [
     { label: 'Find Parking', path: '/parking', icon: MapPin },
+    { label: 'Reservations', path: '/reservations', icon: CalendarCheck },
     { label: 'Profile & Vehicles', path: '/profile', icon: User },
   ];
 

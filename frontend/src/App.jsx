@@ -16,6 +16,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FindParkingPage } from './pages/FindParkingPage';
 import { CustomerProfilePage } from './pages/CustomerProfilePage';
+import { ReservationsPage } from './pages/ReservationsPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import {
   AdminLotsPage,
@@ -50,6 +51,7 @@ export default function App() {
                 }
               >
                 <Route path="/parking" element={<FindParkingPage />} />
+                <Route path="/reservations" element={<ReservationsPage />} />
                 <Route path="/profile" element={<CustomerProfilePage />} />
               </Route>
 
