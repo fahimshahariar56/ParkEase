@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Car, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
@@ -7,10 +7,12 @@ import { Button } from '../components/ui/Button';
 
 export const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
-    { label: 'Features', href: '/#features' },
-    { label: 'How It Works', href: '/#how-it-works' },
+    { label: 'Features', path: '/features' },
+    { label: 'How It Works', path: '/how-it-works' },
+    { label: 'About', path: '/about' },
   ];
 
   return (
@@ -35,16 +37,25 @@ export const PublicLayout = () => {
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm text-text-muted font-medium">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="hover:text-text transition-colors py-1"
-              >
-                {link.label}
-              </a>
-            ))}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium" aria-label="Public Navigation">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`
+                    py-1 transition-colors
+                    ${isActive
+                      ? 'text-text font-semibold border-b-2 border-text'
+                      : 'text-text-muted hover:text-text border-b-2 border-transparent'}
+                  `}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Actions */}
@@ -88,16 +99,25 @@ export const PublicLayout = () => {
               className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-3 overflow-hidden"
             >
               <div className="flex flex-col space-y-1 text-sm text-text-muted font-medium">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2 px-3 rounded-sm hover:bg-surface hover:text-text transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = location.pathname === link.path;
+                  return (
+                    <Link
+                      key={link.label}
+                      to={link.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`
+                        py-2 px-3 rounded-btn transition-colors
+                        ${isActive
+                          ? 'bg-surface text-text font-semibold border border-border'
+                          : 'hover:bg-surface hover:text-text'}
+                      `}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </div>
               <div className="pt-3 border-t border-border flex flex-col gap-2">
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
@@ -128,9 +148,12 @@ export const PublicLayout = () => {
             <ShieldCheck className="w-4 h-4 text-text-muted" aria-hidden="true" />
             <span>ParkEase Smart Parking System • Academic Database Project</span>
           </div>
-          <div className="flex items-center gap-6 font-medium">
+          <div className="flex flex-wrap items-center gap-5 font-medium">
+            <Link to="/features" className="hover:text-text transition-colors">Features</Link>
+            <Link to="/how-it-works" className="hover:text-text transition-colors">How It Works</Link>
+            <Link to="/about" className="hover:text-text transition-colors">About</Link>
             <Link to="/parking" className="hover:text-text transition-colors">Find Parking</Link>
-            <Link to="/login" className="hover:text-text transition-colors">Customer Portal</Link>
+            <Link to="/login" className="hover:text-text transition-colors">Sign In</Link>
             <Link to="/admin" className="hover:text-text transition-colors">Admin Console</Link>
           </div>
         </div>

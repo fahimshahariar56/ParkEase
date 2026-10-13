@@ -12,6 +12,9 @@ import { AdminLayout } from './layouts/AdminLayout';
 
 // Pages
 import { LandingPage } from './pages/LandingPage';
+import { FeaturesPage } from './pages/FeaturesPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { AboutPage } from './pages/AboutPage';
 import { LoginPage } from './pages/LoginPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -41,6 +44,9 @@ export default function App() {
               {/* Public Customer / Landing Routes */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/features" element={<FeaturesPage />} />
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/about" element={<AboutPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
               </Route>

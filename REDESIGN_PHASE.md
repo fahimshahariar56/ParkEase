@@ -190,8 +190,7 @@ validation; wait for approval before Phase 5.
 ## Phase 5 --- Public Information Pages
 
 **Scope** - `/features` - `/how-it-works` - `/about` - Route
-registration and page-specific components, if approved by `PRD.md` and
-`ARCHITECTURE.md`
+registration and page-specific components
 
 **Tasks** - Confirm route names and expected content against project
 documentation. - Describe implemented capabilities accurately; label
