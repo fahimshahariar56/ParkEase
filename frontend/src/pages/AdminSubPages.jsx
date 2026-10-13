@@ -5,29 +5,7 @@ import { Plus, Building2, Grid3X3, CalendarCheck, ArrowRightLeft, Users, DollarS
 export { AdminLotsPage } from './AdminLotsPage';
 export { AdminSlotsPage } from './AdminSlotsPage';
 export { AdminReservationsPage } from './AdminReservationsPage';
-
-export const AdminSessionsPage = () => (
-  <div className="space-y-6 font-mono">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Vehicle Entry & Exit</h1>
-        <p className="text-xs text-text-muted mt-1">Record physical arrival, departure, and fee calculation.</p>
-      </div>
-      <Button variant="primary" size="sm" icon={ArrowRightLeft}>Record Entry</Button>
-    </div>
-    <Card title="Active Parking Sessions" subtitle="Currently parked vehicles">
-      <div className="text-xs space-y-3">
-        <div className="flex items-center justify-between p-3 rounded-input bg-surface-raised border border-border">
-          <div>
-            <div className="font-bold text-text">DHK-METRO-GA-1122</div>
-            <div className="text-text-muted text-[11px]">Slot #A-102 • Entry: 14:15 (Duration: 1h 12m)</div>
-          </div>
-          <Button variant="secondary" size="sm">Record Exit</Button>
-        </div>
-      </div>
-    </Card>
-  </div>
-);
+export { AdminSessionsPage } from './AdminSessionsPage';
 
 export const AdminCustomersPage = () => (
   <div className="space-y-6 font-mono">
@@ -79,7 +57,7 @@ export const AdminReportsPage = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card title="Occupancy Analysis" subtitle="Daily utilization rate">
         <div className="text-xs text-text-muted space-y-2">
-          <p>Peak Hours: 09:00 - 11:30 & 16:30 - 19:00</p>
+          <p>Peak Hours: 09:00 - 11:30 &amp; 16:30 - 19:00</p>
           <p>Average Daily Utilization: 81.4%</p>
         </div>
       </Card>

@@ -275,6 +275,31 @@ export const reservationsApi = {
     }, token),
 };
 
+// ─── Parking Sessions (Day 20) ───────────────────────────────────────────────
+
+export const sessionsApi = {
+  getSessions: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/sessions${query}`, { method: 'GET' }, token);
+  },
+
+  getSessionById: (id, token) =>
+    request(`/sessions/${id}`, { method: 'GET' }, token),
+
+  recordEntry: (payload, token) =>
+    request('/sessions/entry', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  recordExit: (id, payload = {}, token) =>
+    request(`/sessions/${id}/exit`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }, token),
+};
+
 
 
 

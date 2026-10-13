@@ -5,6 +5,7 @@ import { usersRouter } from '../modules/users/users.routes.js';
 import { vehiclesRouter } from '../modules/vehicles/vehicles.routes.js';
 import { parkingRouter } from '../modules/parking/parking.routes.js';
 import { reservationsRouter } from '../modules/reservations/reservations.routes.js';
+import { sessionsRouter } from '../modules/sessions/sessions.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -34,6 +35,10 @@ rootRouter.use('/parking', parkingRouter);
 // Reservations Module routes (Booking creation & cancellation)
 rootRouter.use('/api/v1/reservations', reservationsRouter);
 rootRouter.use('/reservations', reservationsRouter);
+
+// Sessions Module routes (Parking Entry/Exit sessions)
+rootRouter.use('/api/v1/sessions', sessionsRouter);
+rootRouter.use('/sessions', sessionsRouter);
 
 
 // Protected Verification Routes (RBAC & Ownership verification)
@@ -118,6 +123,12 @@ rootRouter.get('/', (req, res) => {
         create: 'POST /api/v1/reservations',
         cancel: 'PATCH /api/v1/reservations/:id/cancel',
         updateStatus: 'PATCH /api/v1/reservations/:id/status',
+      },
+      sessions: {
+        list: 'GET /api/v1/sessions',
+        get: 'GET /api/v1/sessions/:id',
+        recordEntry: 'POST /api/v1/sessions/entry',
+        recordExit: 'PATCH /api/v1/sessions/:id/exit',
       },
     },
   });
