@@ -177,3 +177,65 @@ export async function deleteSlot(req, res, next) {
     next(err);
   }
 }
+
+// ─── Day 12: Availability Controllers ─────────────────────────────────────────
+
+/**
+ * GET /api/v1/parking/slots/availability
+ * (also aliased under /api/v1/parking/availability)
+ * Search available parking slots for a given time range [startTime, endTime)
+ * with lot, slot type, and vehicle compatibility filters.
+ */
+export async function getAvailableSlots(req, res, next) {
+  try {
+    const { startTime, endTime, lotId, vehicleType, slotType } = req.query;
+    const slots = await parkingService.getAvailableSlots({
+      startTime,
+      endTime,
+      lotId,
+      vehicleType,
+      slotType,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: slots.length,
+      interval: {
+        startTime,
+        endTime,
+      },
+      filters: {
+        lotId: lotId || null,
+        vehicleType: vehicleType || null,
+        slotType: slotType || null,
+      },
+      data: { slots },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/parking/slots/:id/availability
+ * Verify availability status for a single slot for [startTime, endTime).
+ */
+export async function checkSlotAvailability(req, res, next) {
+  try {
+    const { startTime, endTime, vehicleType } = req.query;
+    const result = await parkingService.checkSlotAvailability(req.params.id, {
+      startTime,
+      endTime,
+      vehicleType,
+    });
+
+    const statusCode = result.available ? 200 : 409;
+    res.status(statusCode).json({
+      success: result.available,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

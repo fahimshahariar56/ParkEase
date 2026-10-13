@@ -97,6 +97,8 @@ rootRouter.get('/', (req, res) => {
         slots: {
           list: 'GET /api/v1/parking/slots',
           get: 'GET /api/v1/parking/slots/:id',
+          availability: 'GET /api/v1/parking/slots/availability?startTime=&endTime=&lotId=&vehicleType=&slotType=',
+          slotAvailability: 'GET /api/v1/parking/slots/:id/availability?startTime=&endTime=',
           create: 'POST /api/v1/parking/slots',
           update: 'PATCH /api/v1/parking/slots/:id',
           delete: 'DELETE /api/v1/parking/slots/:id',

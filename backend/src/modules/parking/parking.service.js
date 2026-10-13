@@ -481,3 +481,329 @@ export async function deleteSlot(slotId) {
     deleted: true,
   };
 }
+
+// ─── Day 12: Availability Logic & Compatibility ──────────────────────────────
+
+/**
+ * Slot to Vehicle Compatibility Hierarchy
+ * A slot can accommodate a vehicle if the slot's physical dimensions >= vehicle class.
+ */
+export const COMPATIBILITY_MAP = {
+  MOTORCYCLE: ['MOTORCYCLE', 'STANDARD_CAR', 'SUV', 'VAN', 'TRUCK'],
+  STANDARD_CAR: ['STANDARD_CAR', 'SUV', 'VAN', 'TRUCK'],
+  SUV: ['SUV', 'VAN', 'TRUCK'],
+  VAN: ['VAN', 'TRUCK'],
+  TRUCK: ['TRUCK'],
+};
+
+/**
+ * Returns slot types capable of accommodating a given vehicle type.
+ */
+export function getCompatibleSlotTypes(vehicleType) {
+  if (!vehicleType) return null;
+  const normalized = String(vehicleType).toUpperCase().trim();
+  return COMPATIBILITY_MAP[normalized] || [normalized];
+}
+
+/**
+ * Returns true if a slot type can accommodate a vehicle type.
+ */
+export function isSlotCompatible(slotType, vehicleType) {
+  if (!slotType || !vehicleType) return false;
+  const compatible = getCompatibleSlotTypes(vehicleType);
+  return compatible ? compatible.includes(slotType.toUpperCase().trim()) : false;
+}
+
+/**
+ * Pure helper to verify if two half-open intervals [startA, endA) and [startB, endB) overlap.
+ * Formula: startA < endB AND endA > startB
+ */
+export function isIntervalOverlapping(startA, endA, startB, endB) {
+  const aStart = new Date(startA).getTime();
+  const aEnd = new Date(endA).getTime();
+  const bStart = new Date(startB).getTime();
+  const bEnd = new Date(endB).getTime();
+  return aStart < bEnd && aEnd > bStart;
+}
+
+/**
+ * Filter slots by availability for a requested time range [startTime, endTime).
+ * Accounts for:
+ * 1. Lot operational status (must be ACTIVE).
+ * 2. Slot operational status (must be AVAILABLE).
+ * 3. Vehicle compatibility hierarchy (if vehicleType provided) or exact slotType.
+ * 4. Existing overlapping reservations (status in PENDING, CONFIRMED, ACTIVE).
+ * 5. Active ongoing parking sessions.
+ */
+export async function getAvailableSlots(filters = {}) {
+  const { lotId, startTime, endTime, vehicleType, slotType } = filters;
+
+  const whereClauses = [
+    "l.status = 'ACTIVE'",
+    "s.status = 'AVAILABLE'",
+  ];
+  const params = [];
+
+  if (lotId) {
+    whereClauses.push('s.lot_id = ?');
+    params.push(lotId);
+  }
+
+  // Compatibility filtering
+  if (vehicleType) {
+    const compatibleSlotTypes = getCompatibleSlotTypes(vehicleType);
+    if (compatibleSlotTypes && compatibleSlotTypes.length > 0) {
+      const placeholders = compatibleSlotTypes.map(() => '?').join(', ');
+      whereClauses.push(`s.slot_type IN (${placeholders})`);
+      params.push(...compatibleSlotTypes);
+    }
+  } else if (slotType) {
+    whereClauses.push('s.slot_type = ?');
+    params.push(slotType.toUpperCase());
+  }
+
+  // Reservation overlap exclusion subquery (interval: existing.start < reqEnd AND existing.end > reqStart)
+  let checkReservations = true;
+  let checkSessions = true;
+
+  // Pre-test if reservations table exists
+  try {
+    await pool.execute('SELECT 1 FROM reservations LIMIT 0');
+  } catch (err) {
+    if (err.errno === 1146 || err.code === 'ER_NO_SUCH_TABLE') {
+      checkReservations = false;
+    }
+  }
+
+  // Pre-test if parking_sessions table exists
+  try {
+    await pool.execute('SELECT 1 FROM parking_sessions LIMIT 0');
+  } catch (err) {
+    if (err.errno === 1146 || err.code === 'ER_NO_SUCH_TABLE') {
+      checkSessions = false;
+    }
+  }
+
+  if (checkReservations && startTime && endTime) {
+    whereClauses.push(`
+      s.id NOT IN (
+        SELECT r.slot_id FROM reservations r
+        WHERE r.status IN ('PENDING', 'CONFIRMED', 'ACTIVE')
+          AND r.start_time < ?
+          AND r.end_time > ?
+      )
+    `);
+    params.push(endTime, startTime);
+  }
+
+  if (checkSessions && startTime && endTime) {
+    whereClauses.push(`
+      s.id NOT IN (
+        SELECT ps.slot_id FROM parking_sessions ps
+        WHERE ps.status = 'ACTIVE'
+          AND (
+            ps.exit_time IS NULL 
+            OR (ps.entry_time < ? AND ps.exit_time > ?)
+          )
+      )
+    `);
+    params.push(endTime, startTime);
+  }
+
+  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  const sql = `
+    SELECT 
+      s.id, 
+      s.lot_id, 
+      s.slot_number, 
+      s.slot_type, 
+      s.status, 
+      s.created_at, 
+      s.updated_at,
+      l.name AS lot_name,
+      l.address AS lot_address,
+      l.status AS lot_status
+    FROM parking_slots s
+    JOIN parking_lots l ON s.lot_id = l.id
+    ${whereSql}
+    ORDER BY s.lot_id ASC, s.slot_number ASC
+  `;
+
+  const [rows] = await pool.execute(sql, params);
+  return rows.map((row) => ({
+    ...formatSlot(row),
+    lotName: row.lot_name,
+    lotAddress: row.lot_address,
+    lotStatus: row.lot_status,
+  }));
+}
+
+/**
+ * Check if a single specific slot is available for an interval [startTime, endTime).
+ * Returns detailed availability status with conflict details if blocked.
+ */
+export async function checkSlotAvailability(slotId, { startTime, endTime, vehicleType }) {
+  // 1. Fetch slot with parent lot info
+  const sql = `
+    SELECT 
+      s.id, 
+      s.lot_id, 
+      s.slot_number, 
+      s.slot_type, 
+      s.status AS slot_status, 
+      l.name AS lot_name,
+      l.status AS lot_status
+    FROM parking_slots s
+    JOIN parking_lots l ON s.lot_id = l.id
+    WHERE s.id = ?
+    LIMIT 1
+  `;
+  const [rows] = await pool.execute(sql, [slotId]);
+
+  if (!rows || rows.length === 0) {
+    const err = new Error(`Parking slot with ID ${slotId} not found.`);
+    err.status = 404;
+    throw err;
+  }
+
+  const slot = rows[0];
+
+  // 2. Check operational states
+  if (slot.slot_status !== 'AVAILABLE') {
+    return {
+      available: false,
+      code: 'SLOT_NOT_OPERATIONAL',
+      reason: `Slot ${slot.slot_number} is currently marked as ${slot.slot_status}.`,
+      slot: {
+        id: slot.id,
+        slotNumber: slot.slot_number,
+        slotType: slot.slot_type,
+        status: slot.slot_status,
+        lotId: slot.lot_id,
+        lotName: slot.lot_name,
+      },
+    };
+  }
+
+  if (slot.lot_status !== 'ACTIVE') {
+    return {
+      available: false,
+      code: 'LOT_NOT_ACTIVE',
+      reason: `Parking lot '${slot.lot_name}' is currently ${slot.lot_status}.`,
+      slot: {
+        id: slot.id,
+        slotNumber: slot.slot_number,
+        slotType: slot.slot_type,
+        lotId: slot.lot_id,
+        lotName: slot.lot_name,
+      },
+    };
+  }
+
+  // 3. Check vehicle compatibility
+  if (vehicleType && !isSlotCompatible(slot.slot_type, vehicleType)) {
+    return {
+      available: false,
+      code: 'INCOMPATIBLE_VEHICLE_TYPE',
+      reason: `Slot type '${slot.slot_type}' cannot accommodate vehicle type '${vehicleType}'.`,
+      slot: {
+        id: slot.id,
+        slotNumber: slot.slot_number,
+        slotType: slot.slot_type,
+      },
+    };
+  }
+
+  // 4. Check for overlapping reservations
+  try {
+    const [conflictRows] = await pool.execute(
+      `SELECT id, start_time, end_time, status 
+       FROM reservations 
+       WHERE slot_id = ? 
+         AND status IN ('PENDING', 'CONFIRMED', 'ACTIVE')
+         AND start_time < ? 
+         AND end_time > ?
+       LIMIT 1`,
+      [slotId, endTime, startTime]
+    );
+
+    if (conflictRows && conflictRows.length > 0) {
+      const conflict = conflictRows[0];
+      return {
+        available: false,
+        code: 'RESERVATION_CONFLICT',
+        reason: 'Slot is already booked for an overlapping time window.',
+        conflictingReservation: {
+          id: conflict.id,
+          startTime: conflict.start_time,
+          endTime: conflict.end_time,
+          status: conflict.status,
+        },
+        slot: {
+          id: slot.id,
+          slotNumber: slot.slot_number,
+          slotType: slot.slot_type,
+        },
+      };
+    }
+  } catch (err) {
+    if (err.errno !== 1146 && err.code !== 'ER_NO_SUCH_TABLE') throw err;
+  }
+
+  // 5. Check for active ongoing parking sessions
+  try {
+    const [sessionRows] = await pool.execute(
+      `SELECT id, entry_time, exit_time, status 
+       FROM parking_sessions 
+       WHERE slot_id = ? 
+         AND status = 'ACTIVE'
+       LIMIT 1`,
+      [slotId]
+    );
+
+    if (sessionRows && sessionRows.length > 0) {
+      const session = sessionRows[0];
+      // If ongoing without exit time or overlapping requested start
+      const reqStartMs = new Date(startTime).getTime();
+      const nowMs = Date.now();
+      if (!session.exit_time || reqStartMs <= nowMs) {
+        return {
+          available: false,
+          code: 'ACTIVE_SESSION_OCCUPIED',
+          reason: 'A vehicle is currently occupying this slot in an ongoing parking session.',
+          conflictingSession: {
+            id: session.id,
+            entryTime: session.entry_time,
+            status: session.status,
+          },
+          slot: {
+            id: slot.id,
+            slotNumber: slot.slot_number,
+            slotType: slot.slot_type,
+          },
+        };
+      }
+    }
+  } catch (err) {
+    if (err.errno !== 1146 && err.code !== 'ER_NO_SUCH_TABLE') throw err;
+  }
+
+  return {
+    available: true,
+    message: 'Slot is available for the requested time window.',
+    slot: {
+      id: slot.id,
+      lotId: slot.lot_id,
+      lotName: slot.lot_name,
+      slotNumber: slot.slot_number,
+      slotType: slot.slot_type,
+      status: slot.slot_status,
+    },
+    requestedInterval: {
+      startTime,
+      endTime,
+    },
+  };
+}
+

@@ -307,3 +307,113 @@ export function validateUpdateSlot(req, res, next) {
 
   next();
 }
+
+/**
+ * Validate Parking Availability Query Parameters
+ * Supports GET /slots/availability?lotId=&startTime=&endTime=&vehicleType=&slotType=
+ */
+export function validateAvailabilityQuery(req, res, next) {
+  const { startTime, endTime, lotId, slotType, vehicleType } = req.query;
+
+  if (!startTime) {
+    return res.status(400).json({
+      success: false,
+      message: 'Query parameter startTime is required (ISO 8601 string).',
+    });
+  }
+
+  if (!endTime) {
+    return res.status(400).json({
+      success: false,
+      message: 'Query parameter endTime is required (ISO 8601 string).',
+    });
+  }
+
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  if (Number.isNaN(start.getTime())) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid startTime format. Provide a valid ISO timestamp (e.g. 2026-10-15T10:00:00Z).',
+    });
+  }
+
+  if (Number.isNaN(end.getTime())) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid endTime format. Provide a valid ISO timestamp (e.g. 2026-10-15T12:00:00Z).',
+    });
+  }
+
+  if (start.getTime() >= end.getTime()) {
+    return res.status(400).json({
+      success: false,
+      message: 'endTime must be strictly after startTime.',
+    });
+  }
+
+  // Minimum duration: 15 minutes
+  const durationMs = end.getTime() - start.getTime();
+  if (durationMs < 15 * 60 * 1000) {
+    return res.status(400).json({
+      success: false,
+      message: 'Requested reservation interval must be at least 15 minutes.',
+    });
+  }
+
+  // Maximum duration: 7 days
+  if (durationMs > 7 * 24 * 60 * 60 * 1000) {
+    return res.status(400).json({
+      success: false,
+      message: 'Requested reservation interval cannot exceed 7 days.',
+    });
+  }
+
+  // Prevent intervals completely in the past (allowing 10 min grace period for clock skew)
+  const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+  if (end.getTime() < tenMinutesAgo) {
+    return res.status(400).json({
+      success: false,
+      message: 'Requested reservation interval cannot be entirely in the past.',
+    });
+  }
+
+  if (lotId !== undefined && lotId !== '') {
+    const parsedLotId = Number(lotId);
+    if (!Number.isInteger(parsedLotId) || parsedLotId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lotId filter. Must be a positive integer.',
+      });
+    }
+    req.query.lotId = parsedLotId;
+  }
+
+  if (slotType !== undefined && slotType !== '') {
+    const normalizedSlotType = String(slotType).trim().toUpperCase();
+    if (!ALLOWED_SLOT_TYPES.includes(normalizedSlotType)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid slotType '${slotType}'. Allowed: ${ALLOWED_SLOT_TYPES.join(', ')}.`,
+      });
+    }
+    req.query.slotType = normalizedSlotType;
+  }
+
+  if (vehicleType !== undefined && vehicleType !== '') {
+    const normalizedVehicleType = String(vehicleType).trim().toUpperCase();
+    if (!ALLOWED_SLOT_TYPES.includes(normalizedVehicleType)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid vehicleType '${vehicleType}'. Allowed: ${ALLOWED_SLOT_TYPES.join(', ')}.`,
+      });
+    }
+    req.query.vehicleType = normalizedVehicleType;
+  }
+
+  req.query.startTime = start.toISOString();
+  req.query.endTime = end.toISOString();
+  next();
+}
+

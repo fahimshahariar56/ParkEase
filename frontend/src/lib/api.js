@@ -207,6 +207,20 @@ export const parkingApi = {
 
   deleteSlot: (slotId, token) =>
     request(`/parking/slots/${slotId}`, { method: 'DELETE' }, token),
+
+  // Day 12: Availability Queries
+  getAvailableSlots: (params = {}, token = null) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/parking/slots/availability${query}`, { method: 'GET' }, token);
+  },
+
+  checkSlotAvailability: (slotId, params = {}, token = null) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/parking/slots/${slotId}/availability${query}`, { method: 'GET' }, token);
+  },
 };
+
 
 

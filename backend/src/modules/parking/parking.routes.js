@@ -5,13 +5,35 @@ import {
   validateUpdateLot,
   validateCreateSlot,
   validateUpdateSlot,
+  validateAvailabilityQuery,
 } from './parking.validation.js';
 import { authenticate } from '../../middleware/authenticate.js';
 import { authorizeRoles } from '../../middleware/authorizeRole.js';
 
 export const parkingRouter = Router();
 
+// ─── Day 12: Availability Endpoints ───────────────────────────────────────────
+// Placed before :id param routes to prevent shadowing
+parkingRouter.get(
+  '/availability',
+  validateAvailabilityQuery,
+  parkingController.getAvailableSlots
+);
+
+parkingRouter.get(
+  '/slots/availability',
+  validateAvailabilityQuery,
+  parkingController.getAvailableSlots
+);
+
+parkingRouter.get(
+  '/slots/:id/availability',
+  validateAvailabilityQuery,
+  parkingController.checkSlotAvailability
+);
+
 // ─── Parking Lots Endpoints ───────────────────────────────────────────────────
+
 
 // Public / Customer / Admin read endpoints
 parkingRouter.get('/lots', parkingController.getAllLots);
