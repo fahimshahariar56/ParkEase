@@ -2,53 +2,8 @@ import React from 'react';
 import { Card, Badge, Button, Input } from '../components/ui';
 import { Plus, Building2, Grid3X3, CalendarCheck, ArrowRightLeft, Users, DollarSign, BarChart3 } from 'lucide-react';
 
-export const AdminLotsPage = () => (
-  <div className="space-y-6 font-mono">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Parking Lots Management</h1>
-        <p className="text-xs text-text-muted mt-1">Configure physical lots, location capacity, and status.</p>
-      </div>
-      <Button variant="primary" size="sm" icon={Plus}>Add Lot</Button>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card title="Central Plaza Parking" subtitle="102 Downtown Avenue" headerAction={<Badge variant="available">Active</Badge>}>
-        <div className="text-xs space-y-1 text-text-muted">
-          <p>Total Capacity: <span className="font-bold text-text">60 Slots</span></p>
-          <p>Floors: Ground, Level 1, Level 2</p>
-        </div>
-      </Card>
-      <Card title="North Terminal Lot" subtitle="Terminal Blvd North" headerAction={<Badge variant="available">Active</Badge>}>
-        <div className="text-xs space-y-1 text-text-muted">
-          <p>Total Capacity: <span className="font-bold text-text">40 Slots</span></p>
-          <p>Floors: Ground, Rooftop</p>
-        </div>
-      </Card>
-    </div>
-  </div>
-);
-
-export const AdminSlotsPage = () => (
-  <div className="space-y-6 font-mono">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Parking Slots Inventory</h1>
-        <p className="text-xs text-text-muted mt-1">View slot occupancy and toggle maintenance flags.</p>
-      </div>
-      <Button variant="primary" size="sm" icon={Plus}>Add Slot</Button>
-    </div>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {['A-101', 'A-102', 'A-103', 'A-104', 'B-201', 'B-202', 'B-203', 'B-204'].map((slot, i) => {
-        const status = i === 1 ? 'occupied' : i === 2 ? 'pending' : i === 5 ? 'maintenance' : 'available';
-        return (
-          <Card key={slot} title={`Slot #${slot}`} subtitle="Standard Car" headerAction={<Badge variant={status}>{status}</Badge>}>
-            <div className="text-[11px] text-text-muted">Floor Level {slot[0]}</div>
-          </Card>
-        );
-      })}
-    </div>
-  </div>
-);
+export { AdminLotsPage } from './AdminLotsPage';
+export { AdminSlotsPage } from './AdminSlotsPage';
 
 export const AdminReservationsPage = () => (
   <div className="space-y-6 font-mono">
