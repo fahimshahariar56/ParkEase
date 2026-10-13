@@ -13,6 +13,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 // Pages
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FindParkingPage } from './pages/FindParkingPage';
 import { CustomerProfilePage } from './pages/CustomerProfilePage';
@@ -35,12 +36,15 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              {/* Public Routes */}
+              {/* Public Customer / Landing Routes */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
               </Route>
+
+              {/* Dedicated Public Admin Login Route */}
+              <Route path="/admin/login" element={<AdminLoginPage />} />
 
               {/* Protected Customer Routes */}
               <Route

@@ -18,7 +18,9 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
 
   // 1. Unauthenticated check
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const isAdminRoute = location.pathname.startsWith('/admin') || (allowedRoles?.includes('ADMIN') && !allowedRoles?.includes('CUSTOMER'));
+    const redirectTarget = isAdminRoute ? '/admin/login' : '/login';
+    return <Navigate to={redirectTarget} state={{ from: location }} replace />;
   }
 
   // 2. Role authorization check

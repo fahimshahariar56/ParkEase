@@ -67,6 +67,26 @@ export const authApi = {
     }),
 
   /**
+   * POST /auth/customer/login
+   * @returns {Promise<{ success, data: { user, token } }>}
+   */
+  loginCustomer: (payload) =>
+    request('/auth/customer/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  /**
+   * POST /auth/admin/login
+   * @returns {Promise<{ success, data: { user, token } }>}
+   */
+  loginAdmin: (payload) =>
+    request('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  /**
    * GET /auth/me  (requires Bearer token)
    * @returns {Promise<{ success, data: { user } }>}
    */

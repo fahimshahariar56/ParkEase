@@ -28,7 +28,7 @@ export const AdminLayout = () => {
 
   const handleSignOut = () => {
     logout();
-    navigate('/login');
+    navigate('/admin/login');
   };
 
   const adminNav = [

@@ -51,7 +51,7 @@ export const LoginPage = () => {
     try {
       const { user } = await apiLogin({ email: email.trim().toLowerCase(), password });
       toast({ type: 'success', title: 'Welcome back!', message: `Signed in as ${user.fullName}.` });
-      const dest = redirectPath || (user.role === 'ADMIN' ? '/admin' : '/parking');
+      const dest = redirectPath || '/parking';
       navigate(dest, { replace: true });
     } catch (err) {
       setServerError(err.message || 'Sign-in failed. Please try again.');
@@ -123,9 +123,12 @@ export const LoginPage = () => {
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-text">Sign in</h1>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand/10 text-brand border border-brand/20 mb-1">
+              Customer Portal
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-text">Sign In</h1>
             <p className="text-xs text-text-muted">
-              Access your customer account or admin console.
+              Access your account to book parking slots and manage reservations.
             </p>
           </div>
 
@@ -229,6 +232,13 @@ export const LoginPage = () => {
               <span>Don&apos;t have an account? </span>
               <Link to="/register" className="text-brand hover:underline font-bold">
                 Create a customer account
+              </Link>
+            </div>
+
+            <div className="pt-2 text-center text-[11px] text-text-muted">
+              <span>System Administrator? </span>
+              <Link to="/admin/login" className="text-amber-500 hover:underline font-bold">
+                Admin Console Login →
               </Link>
             </div>
           </Card>

@@ -79,17 +79,22 @@ export async function registerCustomer({ fullName, email, password, phone }) {
 }
 
 /**
- * Authentication / Login Service
+ * Shared internal user authentication with strict role enforcement.
+ * Ensures customer credentials cannot authenticate through admin portal,
+ * and admin credentials cannot authenticate through customer portal.
  */
-export async function loginUser({ email, password }) {
+export async function authenticateWithRole({ email, password, requiredRole, errorMessage }) {
   // 1. Find user by email
   const [rows] = await pool.execute(
     'SELECT id, full_name, email, password_hash, role, phone, created_at FROM users WHERE email = ? LIMIT 1',
     [email]
   );
 
+  const defaultError = requiredRole === 'ADMIN' ? 'Invalid admin credentials.' : 'Invalid email or password.';
+  const finalError = errorMessage || defaultError;
+
   if (!rows || rows.length === 0) {
-    const error = new Error('Invalid email or password.');
+    const error = new Error(finalError);
     error.status = 401;
     throw error;
   }
@@ -99,18 +104,56 @@ export async function loginUser({ email, password }) {
   // 2. Compare password hash using bcrypt
   const isMatch = await bcrypt.compare(password, user.password_hash);
   if (!isMatch) {
-    const error = new Error('Invalid email or password.');
+    const error = new Error(finalError);
     error.status = 401;
     throw error;
   }
 
-  // 3. Issue token
+  // 3. Strict database role enforcement
+  if (user.role !== requiredRole) {
+    const error = new Error(finalError);
+    error.status = 401;
+    throw error;
+  }
+
+  // 4. Issue token with verified database role
   const token = generateToken(user);
 
   return {
     user: sanitizeUser(user),
     token,
   };
+}
+
+/**
+ * Customer Authentication Service (Strictly requires CUSTOMER role)
+ */
+export async function loginCustomer({ email, password }) {
+  return authenticateWithRole({
+    email,
+    password,
+    requiredRole: 'CUSTOMER',
+    errorMessage: 'Invalid email or password.',
+  });
+}
+
+/**
+ * Admin Authentication Service (Strictly requires ADMIN role)
+ */
+export async function loginAdmin({ email, password }) {
+  return authenticateWithRole({
+    email,
+    password,
+    requiredRole: 'ADMIN',
+    errorMessage: 'Invalid admin credentials.',
+  });
+}
+
+/**
+ * Authentication / Login Service (Backward compatibility alias for customers)
+ */
+export async function loginUser({ email, password }) {
+  return loginCustomer({ email, password });
 }
 
 /**

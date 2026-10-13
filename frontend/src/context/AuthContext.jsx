@@ -42,13 +42,41 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Real API Login — calls POST /api/v1/auth/login.
+   * Real API Login (Customer Default) — calls POST /api/v1/auth/customer/login.
    * Throws on failure so callers can surface the server error message.
    */
   const apiLogin = useCallback(async ({ email, password }) => {
     setIsLoading(true);
     try {
-      const res = await authApi.login({ email, password });
+      const res = await authApi.loginCustomer({ email, password });
+      _persistSession(res.data.token, res.data.user);
+      return res.data;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [_persistSession]);
+
+  /**
+   * Customer-specific API Login — calls POST /api/v1/auth/customer/login.
+   */
+  const apiLoginCustomer = useCallback(async ({ email, password }) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.loginCustomer({ email, password });
+      _persistSession(res.data.token, res.data.user);
+      return res.data;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [_persistSession]);
+
+  /**
+   * Admin-specific API Login — calls POST /api/v1/auth/admin/login.
+   */
+  const apiLoginAdmin = useCallback(async ({ email, password }) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.loginAdmin({ email, password });
       _persistSession(res.data.token, res.data.user);
       return res.data;
     } finally {
@@ -116,6 +144,8 @@ export const AuthProvider = ({ children }) => {
     isCustomer: user?.role === 'CUSTOMER',
     // API-wired actions
     apiLogin,
+    apiLoginCustomer,
+    apiLoginAdmin,
     apiRegister,
     // Direct session helpers
     login,

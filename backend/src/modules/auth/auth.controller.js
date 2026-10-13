@@ -18,11 +18,41 @@ export async function register(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
-    const result = await authService.loginUser({ email, password });
+    const result = await authService.loginCustomer({ email, password });
 
     res.status(200).json({
       success: true,
       message: 'Signed in successfully.',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function loginCustomer(req, res, next) {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.loginCustomer({ email, password });
+
+    res.status(200).json({
+      success: true,
+      message: 'Customer signed in successfully.',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function loginAdmin(req, res, next) {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.loginAdmin({ email, password });
+
+    res.status(200).json({
+      success: true,
+      message: 'Admin authenticated successfully.',
       data: result,
     });
   } catch (err) {

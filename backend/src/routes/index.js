@@ -45,7 +45,7 @@ rootRouter.get('/api/v1/admin/protected-ping', authenticate, authorizeRoles('ADM
   });
 });
 
-rootRouter.get('/api/v1/customer/protected-ping', authenticate, authorizeRoles('CUSTOMER', 'ADMIN'), (req, res) => {
+rootRouter.get('/api/v1/customer/protected-ping', authenticate, authorizeRoles('CUSTOMER'), (req, res) => {
   res.json({
     success: true,
     message: 'Customer access granted.',
@@ -72,6 +72,8 @@ rootRouter.get('/', (req, res) => {
       auth: {
         register: 'POST /api/v1/auth/register',
         login: 'POST /api/v1/auth/login',
+        customerLogin: 'POST /api/v1/auth/customer/login',
+        adminLogin: 'POST /api/v1/auth/admin/login',
         me: 'GET /api/v1/auth/me',
       },
       rbac: {
