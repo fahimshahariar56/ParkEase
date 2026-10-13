@@ -4,29 +4,7 @@ import { Plus, Building2, Grid3X3, CalendarCheck, ArrowRightLeft, Users, DollarS
 
 export { AdminLotsPage } from './AdminLotsPage';
 export { AdminSlotsPage } from './AdminSlotsPage';
-
-export const AdminReservationsPage = () => (
-  <div className="space-y-6 font-mono">
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight">Reservation Management</h1>
-      <p className="text-xs text-text-muted mt-1">Review active bookings, cancel requests, and check-in status.</p>
-    </div>
-    <div className="park-card p-4 space-y-3">
-      {[
-        { id: 'RES-8801', customer: 'Shahariar Fahim', slot: 'A-102', time: '10:00 - 12:00', status: 'pending' },
-        { id: 'RES-8802', customer: 'Sarah Jenkins', slot: 'B-201', time: '14:00 - 16:00', status: 'available' },
-      ].map((res) => (
-        <div key={res.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-input bg-surface-raised border border-border/60 text-xs gap-2">
-          <div>
-            <span className="font-bold text-text">{res.id}</span> • {res.customer} ({res.slot})
-            <div className="text-text-muted text-[11px]">{res.time}</div>
-          </div>
-          <Badge variant={res.status}>{res.status === 'pending' ? 'Confirmed' : 'Completed'}</Badge>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+export { AdminReservationsPage } from './AdminReservationsPage';
 
 export const AdminSessionsPage = () => (
   <div className="space-y-6 font-mono">
