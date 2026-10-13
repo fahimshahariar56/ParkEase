@@ -73,3 +73,82 @@ export const authApi = {
   getMe: (token) =>
     request('/auth/me', { method: 'GET' }, token),
 };
+
+// ─── Users & Profile ──────────────────────────────────────────────────────────
+
+export const usersApi = {
+  /**
+   * GET /users/me  (requires Bearer token)
+   * @returns {Promise<{ success, data: { user } }>}
+   */
+  getMyProfile: (token) =>
+    request('/users/me', { method: 'GET' }, token),
+
+  /**
+   * PATCH /users/me  (requires Bearer token)
+   * @param {object} payload - { fullName?: string, phone?: string }
+   * @returns {Promise<{ success, message, data: { user } }>}
+   */
+  updateMyProfile: (payload, token) =>
+    request('/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }, token),
+
+  /**
+   * GET /users/:id  (requires Bearer token)
+   * @returns {Promise<{ success, data: { user } }>}
+   */
+  getUserById: (id, token) =>
+    request(`/users/${id}`, { method: 'GET' }, token),
+};
+
+// ─── Vehicles ────────────────────────────────────────────────────────────────
+
+export const vehiclesApi = {
+  /**
+   * GET /vehicles  (requires Bearer token)
+   * @returns {Promise<{ success, count, data: { vehicles } }>}
+   */
+  getMyVehicles: (token) =>
+    request('/vehicles', { method: 'GET' }, token),
+
+  /**
+   * GET /vehicles/:id  (requires Bearer token)
+   * @returns {Promise<{ success, data: { vehicle } }>}
+   */
+  getVehicleById: (id, token) =>
+    request(`/vehicles/${id}`, { method: 'GET' }, token),
+
+  /**
+   * POST /vehicles  (requires Bearer token)
+   * @param {object} payload - { plateNumber: string, vehicleType: string, makeModel?: string }
+   * @returns {Promise<{ success, message, data: { vehicle } }>}
+   */
+  createVehicle: (payload, token) =>
+    request('/vehicles', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  /**
+   * PATCH /vehicles/:id  (requires Bearer token)
+   * @param {string|number} id
+   * @param {object} payload - { plateNumber?: string, vehicleType?: string, makeModel?: string }
+   * @returns {Promise<{ success, message, data: { vehicle } }>}
+   */
+  updateVehicle: (id, payload, token) =>
+    request(`/vehicles/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }, token),
+
+  /**
+   * DELETE /vehicles/:id  (requires Bearer token)
+   * @param {string|number} id
+   * @returns {Promise<{ success, message, data }>}
+   */
+  deleteVehicle: (id, token) =>
+    request(`/vehicles/${id}`, { method: 'DELETE' }, token),
+};
+

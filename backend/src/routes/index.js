@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { healthRouter } from './health.routes.js';
 import { authRouter } from '../modules/auth/auth.routes.js';
+import { usersRouter } from '../modules/users/users.routes.js';
+import { vehiclesRouter } from '../modules/vehicles/vehicles.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -14,6 +16,14 @@ rootRouter.use('/api/v1', healthRouter);
 // Authentication Module routes
 rootRouter.use('/api/v1/auth', authRouter);
 rootRouter.use('/auth', authRouter);
+
+// Users Module routes (Profile & account management)
+rootRouter.use('/api/v1/users', usersRouter);
+rootRouter.use('/users', usersRouter);
+
+// Vehicles Module routes (Customer vehicle management)
+rootRouter.use('/api/v1/vehicles', vehiclesRouter);
+rootRouter.use('/vehicles', vehiclesRouter);
 
 // Protected Verification Routes (RBAC & Ownership verification)
 rootRouter.get('/api/v1/admin/protected-ping', authenticate, authorizeRoles('ADMIN'), (req, res) => {
@@ -57,6 +67,18 @@ rootRouter.get('/', (req, res) => {
         adminPing: 'GET /api/v1/admin/protected-ping',
         customerPing: 'GET /api/v1/customer/protected-ping',
         ownership: 'GET /api/v1/users/:userId/protected-ownership',
+      },
+      users: {
+        me: 'GET /api/v1/users/me',
+        updateProfile: 'PATCH /api/v1/users/me',
+        getById: 'GET /api/v1/users/:id',
+      },
+      vehicles: {
+        list: 'GET /api/v1/vehicles',
+        create: 'POST /api/v1/vehicles',
+        get: 'GET /api/v1/vehicles/:id',
+        update: 'PATCH /api/v1/vehicles/:id',
+        delete: 'DELETE /api/v1/vehicles/:id',
       },
     },
   });
