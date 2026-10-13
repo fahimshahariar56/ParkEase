@@ -24,10 +24,12 @@ import {
   AdminSlotsPage,
   AdminReservationsPage,
   AdminSessionsPage,
+  AdminPaymentsPage,
   AdminCustomersPage,
   AdminPricingPage,
   AdminReportsPage,
 } from './pages/AdminSubPages';
+
 
 export default function App() {
   return (
@@ -73,9 +75,11 @@ export default function App() {
                 <Route path="slots" element={<AdminSlotsPage />} />
                 <Route path="reservations" element={<AdminReservationsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
+                <Route path="payments" element={<AdminPaymentsPage />} />
                 <Route path="customers" element={<AdminCustomersPage />} />
                 <Route path="pricing" element={<AdminPricingPage />} />
                 <Route path="reports" element={<AdminReportsPage />} />
+
               </Route>
 
               {/* 404 / Fallback */}

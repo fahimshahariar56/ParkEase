@@ -6,6 +6,7 @@ import { vehiclesRouter } from '../modules/vehicles/vehicles.routes.js';
 import { parkingRouter } from '../modules/parking/parking.routes.js';
 import { reservationsRouter } from '../modules/reservations/reservations.routes.js';
 import { sessionsRouter } from '../modules/sessions/sessions.routes.js';
+import { paymentsRouter } from '../modules/payments/payments.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -39,6 +40,10 @@ rootRouter.use('/reservations', reservationsRouter);
 // Sessions Module routes (Parking Entry/Exit sessions)
 rootRouter.use('/api/v1/sessions', sessionsRouter);
 rootRouter.use('/sessions', sessionsRouter);
+
+// Payments Module routes (Demo Payment Flow — Day 21)
+rootRouter.use('/api/v1/payments', paymentsRouter);
+rootRouter.use('/payments', paymentsRouter);
 
 
 // Protected Verification Routes (RBAC & Ownership verification)

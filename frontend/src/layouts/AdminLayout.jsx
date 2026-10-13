@@ -7,6 +7,7 @@ import {
   Grid3X3,
   CalendarCheck,
   ArrowRightLeft,
+  CreditCard,
   Users,
   DollarSign,
   BarChart3,
@@ -16,6 +17,7 @@ import {
   ShieldAlert,
   Car,
 } from 'lucide-react';
+
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
@@ -37,10 +39,12 @@ export const AdminLayout = () => {
     { label: 'Parking Slots', path: '/admin/slots', icon: Grid3X3 },
     { label: 'Reservations', path: '/admin/reservations', icon: CalendarCheck },
     { label: 'Entry / Exit', path: '/admin/sessions', icon: ArrowRightLeft },
+    { label: 'Payments', path: '/admin/payments', icon: CreditCard },
     { label: 'Customers', path: '/admin/customers', icon: Users },
     { label: 'Pricing Rules', path: '/admin/pricing', icon: DollarSign },
     { label: 'Reports', path: '/admin/reports', icon: BarChart3 },
   ];
+
 
   return (
     <div className="min-h-screen bg-bg text-text flex font-mono selection:bg-brand/20 selection:text-brand">

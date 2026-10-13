@@ -300,6 +300,29 @@ export const sessionsApi = {
     }, token),
 };
 
+// ─── Payments — Demo Payment Flow (Day 21) ───────────────────────────────────
+// IMPORTANT: All payments are SIMULATED. No real financial transaction occurs.
+
+export const paymentsApi = {
+  getPayments: (params = {}, token) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/payments${query}`, { method: 'GET' }, token);
+  },
+
+  getPaymentById: (id, token) =>
+    request(`/payments/${id}`, { method: 'GET' }, token),
+
+  getPaymentBySession: (sessionId, token) =>
+    request(`/payments/session/${sessionId}`, { method: 'GET' }, token),
+
+  createPayment: (payload, token) =>
+    request('/payments', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+};
+
 
 
 

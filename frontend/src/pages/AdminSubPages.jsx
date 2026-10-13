@@ -6,6 +6,8 @@ export { AdminLotsPage } from './AdminLotsPage';
 export { AdminSlotsPage } from './AdminSlotsPage';
 export { AdminReservationsPage } from './AdminReservationsPage';
 export { AdminSessionsPage } from './AdminSessionsPage';
+export { AdminPaymentsPage } from './AdminPaymentsPage';
+
 
 export const AdminCustomersPage = () => (
   <div className="space-y-6 font-mono">
