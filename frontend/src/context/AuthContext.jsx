@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authApi } from '../lib/api';
 
 const AuthContext = createContext(null);
 
@@ -9,20 +10,15 @@ export const AuthProvider = ({ children }) => {
     if (savedUser) {
       try {
         return JSON.parse(savedUser);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
-    // Default demo customer profile for initial seamless preview
-    return {
-      id: 1,
-      fullName: 'Shahariar Ahammad Fahim',
-      email: 'customer@parkease.io',
-      role: 'CUSTOMER',
-    };
+    return null;
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  // Persist token & user to localStorage whenever they change
   useEffect(() => {
     if (token) {
       localStorage.setItem('parkease_token', token);
@@ -37,40 +33,78 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, user]);
 
-  const login = (authToken, authUser) => {
+  /**
+   * Persist authenticated session data received from the API.
+   */
+  const _persistSession = useCallback((authToken, authUser) => {
     setToken(authToken);
     setUser(authUser);
-  };
+  }, []);
 
-  const logout = () => {
+  /**
+   * Real API Login — calls POST /api/v1/auth/login.
+   * Throws on failure so callers can surface the server error message.
+   */
+  const apiLogin = useCallback(async ({ email, password }) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.login({ email, password });
+      _persistSession(res.data.token, res.data.user);
+      return res.data;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [_persistSession]);
+
+  /**
+   * Real API Register — calls POST /api/v1/auth/register.
+   * Throws on failure so callers can surface the server error message.
+   */
+  const apiRegister = useCallback(async ({ fullName, email, password, phone }) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.register({ fullName, email, password, phone });
+      _persistSession(res.data.token, res.data.user);
+      return res.data;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [_persistSession]);
+
+  /**
+   * Direct session setter — used by demo switcher and ProtectedRoute logic.
+   */
+  const login = useCallback((authToken, authUser) => {
+    _persistSession(authToken, authUser);
+  }, [_persistSession]);
+
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('parkease_token');
     localStorage.removeItem('parkease_user');
-  };
+  }, []);
 
   /**
-   * Helper for demo switching between Customer and Admin roles
+   * Demo role switcher — quick preview of route guards without a real backend call.
    */
-  const setDemoRole = (role) => {
+  const setDemoRole = useCallback((role) => {
     if (role === 'ADMIN') {
-      setUser({
+      _persistSession('demo_admin_jwt_token', {
         id: 99,
         fullName: 'Admin Supervisor',
         email: 'admin@parkease.io',
         role: 'ADMIN',
       });
-      setToken('demo_admin_jwt_token');
     } else {
-      setUser({
+      _persistSession('demo_customer_jwt_token', {
         id: 1,
-        fullName: 'Shahariar Ahammad Fahim',
+        fullName: 'Demo Customer',
         email: 'customer@parkease.io',
         role: 'CUSTOMER',
       });
-      setToken('demo_customer_jwt_token');
     }
-  };
+  }, [_persistSession]);
 
   const value = {
     user,
@@ -80,6 +114,10 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: Boolean(user),
     isAdmin: user?.role === 'ADMIN',
     isCustomer: user?.role === 'CUSTOMER',
+    // API-wired actions
+    apiLogin,
+    apiRegister,
+    // Direct session helpers
     login,
     logout,
     setDemoRole,
