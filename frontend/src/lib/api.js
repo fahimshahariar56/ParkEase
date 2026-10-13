@@ -152,3 +152,61 @@ export const vehiclesApi = {
     request(`/vehicles/${id}`, { method: 'DELETE' }, token),
 };
 
+// ─── Parking Lots & Slots ────────────────────────────────────────────────────
+
+export const parkingApi = {
+  // Lots
+  getLots: (params = {}, token = null) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/parking/lots${query}`, { method: 'GET' }, token);
+  },
+
+  getLotById: (lotId, token = null) =>
+    request(`/parking/lots/${lotId}`, { method: 'GET' }, token),
+
+  getSlotsInLot: (lotId, token = null) =>
+    request(`/parking/lots/${lotId}/slots`, { method: 'GET' }, token),
+
+  createLot: (payload, token) =>
+    request('/parking/lots', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  updateLot: (lotId, payload, token) =>
+    request(`/parking/lots/${lotId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }, token),
+
+  deleteLot: (lotId, token) =>
+    request(`/parking/lots/${lotId}`, { method: 'DELETE' }, token),
+
+  // Slots
+  getSlots: (params = {}, token = null) => {
+    const searchParams = new URLSearchParams(params).toString();
+    const query = searchParams ? `?${searchParams}` : '';
+    return request(`/parking/slots${query}`, { method: 'GET' }, token);
+  },
+
+  getSlotById: (slotId, token = null) =>
+    request(`/parking/slots/${slotId}`, { method: 'GET' }, token),
+
+  createSlot: (payload, token) =>
+    request('/parking/slots', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, token),
+
+  updateSlot: (slotId, payload, token) =>
+    request(`/parking/slots/${slotId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }, token),
+
+  deleteSlot: (slotId, token) =>
+    request(`/parking/slots/${slotId}`, { method: 'DELETE' }, token),
+};
+
+

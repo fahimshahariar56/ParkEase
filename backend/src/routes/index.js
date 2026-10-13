@@ -3,6 +3,7 @@ import { healthRouter } from './health.routes.js';
 import { authRouter } from '../modules/auth/auth.routes.js';
 import { usersRouter } from '../modules/users/users.routes.js';
 import { vehiclesRouter } from '../modules/vehicles/vehicles.routes.js';
+import { parkingRouter } from '../modules/parking/parking.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeRoles, enforceUserOwnership } from '../middleware/authorizeRole.js';
 
@@ -24,6 +25,10 @@ rootRouter.use('/users', usersRouter);
 // Vehicles Module routes (Customer vehicle management)
 rootRouter.use('/api/v1/vehicles', vehiclesRouter);
 rootRouter.use('/vehicles', vehiclesRouter);
+
+// Parking Module routes (Lots & slots management)
+rootRouter.use('/api/v1/parking', parkingRouter);
+rootRouter.use('/parking', parkingRouter);
 
 // Protected Verification Routes (RBAC & Ownership verification)
 rootRouter.get('/api/v1/admin/protected-ping', authenticate, authorizeRoles('ADMIN'), (req, res) => {
@@ -79,6 +84,23 @@ rootRouter.get('/', (req, res) => {
         get: 'GET /api/v1/vehicles/:id',
         update: 'PATCH /api/v1/vehicles/:id',
         delete: 'DELETE /api/v1/vehicles/:id',
+      },
+      parking: {
+        lots: {
+          list: 'GET /api/v1/parking/lots',
+          get: 'GET /api/v1/parking/lots/:id',
+          create: 'POST /api/v1/parking/lots',
+          update: 'PATCH /api/v1/parking/lots/:id',
+          delete: 'DELETE /api/v1/parking/lots/:id',
+          slotsInLot: 'GET /api/v1/parking/lots/:lotId/slots',
+        },
+        slots: {
+          list: 'GET /api/v1/parking/slots',
+          get: 'GET /api/v1/parking/slots/:id',
+          create: 'POST /api/v1/parking/slots',
+          update: 'PATCH /api/v1/parking/slots/:id',
+          delete: 'DELETE /api/v1/parking/slots/:id',
+        },
       },
     },
   });

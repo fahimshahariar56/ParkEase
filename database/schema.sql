@@ -37,3 +37,34 @@ CREATE TABLE IF NOT EXISTS vehicles (
     FOREIGN KEY (user_id) REFERENCES users (id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Parking Lots table
+CREATE TABLE IF NOT EXISTS parking_lots (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  total_capacity INT NOT NULL DEFAULT 0,
+  status ENUM('ACTIVE', 'INACTIVE', 'MAINTENANCE') NOT NULL DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_parking_lots_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Parking Slots table
+CREATE TABLE IF NOT EXISTS parking_slots (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  lot_id INT NOT NULL,
+  slot_number VARCHAR(20) NOT NULL,
+  slot_type ENUM('MOTORCYCLE', 'STANDARD_CAR', 'SUV', 'VAN', 'TRUCK') NOT NULL DEFAULT 'STANDARD_CAR',
+  status ENUM('AVAILABLE', 'MAINTENANCE', 'INACTIVE') NOT NULL DEFAULT 'AVAILABLE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_lot_slot_number (lot_id, slot_number),
+  INDEX idx_parking_slots_lot_id (lot_id),
+  INDEX idx_parking_slots_type (slot_type),
+  INDEX idx_parking_slots_status (status),
+  CONSTRAINT fk_slots_lot
+    FOREIGN KEY (lot_id) REFERENCES parking_lots (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
