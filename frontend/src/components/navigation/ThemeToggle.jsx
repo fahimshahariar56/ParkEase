@@ -1,8 +1,13 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
+/**
+ * ThemeToggle — animated sun/moon switch (DESIGN.md §13)
+ * Neutral monochrome styling — no brand/green color.
+ * Motion for React handles icon transition.
+ */
 export const ThemeToggle = ({ className = '' }) => {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
@@ -11,30 +16,35 @@ export const ThemeToggle = ({ className = '' }) => {
     <motion.button
       type="button"
       onClick={toggleTheme}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ duration: 0.1 }}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      className={`
-        relative p-2 rounded-input border border-border bg-surface-raised hover:bg-surface
-        text-text hover:border-brand/40 transition-colors shadow-subtle flex items-center justify-center
-        focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2
-        ${className}
-      `}
+      aria-pressed={isDark}
+      className={[
+        'relative w-8 h-8 flex items-center justify-center',
+        'rounded-btn border border-border bg-surface-raised',
+        'text-text-muted hover:text-text hover:border-text/20 hover:bg-surface-raised',
+        'transition-colors duration-150',
+        'focus-visible:outline-2 focus-visible:outline-offset-2',
+        className,
+      ].join(' ')}
     >
-      <motion.div
-        key={theme}
-        initial={{ rotate: -30, opacity: 0, scale: 0.8 }}
-        animate={{ rotate: 0, opacity: 1, scale: 1 }}
-        exit={{ rotate: 30, opacity: 0, scale: 0.8 }}
-        transition={{ duration: 0.2 }}
-        className="flex items-center justify-center"
-      >
-        {isDark ? (
-          <Sun className="w-4 h-4 text-brand" />
-        ) : (
-          <Moon className="w-4 h-4 text-brand" />
-        )}
-      </motion.div>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={theme}
+          initial={{ rotate: -15, opacity: 0, scale: 0.85 }}
+          animate={{ rotate: 0, opacity: 1, scale: 1 }}
+          exit={{ rotate: 15, opacity: 0, scale: 0.85 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center justify-center"
+        >
+          {isDark ? (
+            <Sun className="w-4 h-4" aria-hidden="true" />
+          ) : (
+            <Moon className="w-4 h-4" aria-hidden="true" />
+          )}
+        </motion.span>
+      </AnimatePresence>
     </motion.button>
   );
 };

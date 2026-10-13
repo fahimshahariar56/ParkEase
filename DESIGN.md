@@ -8,11 +8,14 @@
 
 ## 1. Product Vision
 
-Design ParkEase as a premium, modern smart-parking SaaS product. The experience should combine a cinematic, scroll-driven landing page with a practical, data-rich admin dashboard and a simple customer parking flow.
+Design ParkEase as a carefully art-directed, premium automotive-tech SaaS product. The visual identity is primarily **black, white, charcoal, and cool neutral gray**, with a restrained dark mood, refined contrast, tactile surfaces, and purposeful motion. The product should feel as considered as a high-quality developer tool or modern mobility brand—not like a generic AI-generated landing page.
 
-**Design keywords:** premium, minimal, futuristic, trustworthy, precise, smooth, accessible, responsive.
+**Design keywords:** monochrome, premium, minimal, editorial, precise, tactile, quietly cinematic, trustworthy, accessible, responsive.
 
-**Avoid:** generic dashboard templates, excessive glassmorphism, random gradients, neon overload, cluttered layouts, unnecessary animation, fake data presented as live data, and inconsistent components.
+**Avoid:** generic dashboard templates, excessive glassmorphism, random gradients, neon overload, cluttered layouts, pill-shaped controls everywhere, redundant cards, fake data presented as live data, and animation without a functional purpose.
+
+### Design-direction precedence
+This updated specification supersedes earlier conflicting color, typography, button-shape, and visual-texture guidance in this document. Keep existing product functionality and architecture. Use the actual repository and current `PHASE.md` as the source of truth for functional scope.
 
 ### Core user journeys
 
@@ -41,14 +44,16 @@ Use shared components and layouts. Keep Admin and Customer navigation clearly se
 
 ### Global navigation
 
-**Public landing navigation**
+**Public navigation**
 - ParkEase logo
-- Features
-- How It Works
-- About / Benefits
+- Features → dedicated `/features` page
+- How It Works → dedicated `/how-it-works` page
+- About → dedicated `/about` page
 - Theme toggle
-- Sign In
-- Primary CTA: **Find Parking**
+- Sign In → `/login`
+- Primary CTA: **Find Parking** → `/parking` or the existing intended auth-aware route
+
+Every visible navigation link must lead to a real, intentional destination. If a link is presented as a page link, implement a dedicated route and meaningful page content. Do not leave dead anchors, `href="#"`, or multiple links pointing to the same generic page just to appear complete. Audit the current router before adding routes, reuse shared layouts, and preserve existing route behavior. For routes that require authentication, redirect to the appropriate login page and preserve a safe return path where supported.
 
 **Customer navigation**
 - Overview
@@ -76,72 +81,84 @@ Navigation should remain easy to understand on desktop and collapse into an acce
 
 ## 3. Visual Identity and Color System
 
-### Primary palette
+### Art direction: monochrome first
 
-Use **Midnight Navy + Emerald + Cool Neutrals** as the signature ParkEase identity. The palette should feel calm, high-end, technical, and trustworthy. Emerald is an accent, not a background for every component.
+Build the core visual system from white, black, charcoal, and neutral gray. The dark theme is the signature mood; the light theme is a crisp white-and-black counterpart, not a simple inversion. Use brand color only for meaningful status, selected states, and a small number of primary actions. Keep the UI mostly monochrome.
 
 | Token | Hex | Usage |
 |---|---|---|
-| `color.bg.dark` | `#0B1220` | Main dark-theme background |
-| `color.surface.dark` | `#111C2E` | Cards, sidebar, panels |
-| `color.surface.raised` | `#172338` | Elevated cards, hover surfaces |
-| `color.border.dark` | `#263449` | Subtle dark-theme borders |
-| `color.text.dark` | `#F8FAFC` | Primary text on dark backgrounds |
-| `color.text.muted.dark` | `#A3B1C6` | Secondary text on dark backgrounds |
-| `color.brand` | `#10B981` | Primary action and brand accent |
-| `color.brand.hover` | `#059669` | Hover/pressed accent |
-| `color.brand.soft` | `#D1FAE5` | Soft highlight / selected state |
-| `color.bg.light` | `#F8FAFC` | Main light-theme background |
-| `color.surface.light` | `#FFFFFF` | Cards, forms, panels |
-| `color.surface.subtle` | `#F1F5F9` | Secondary light-theme surfaces |
-| `color.border.light` | `#E2E8F0` | Light-theme borders |
-| `color.text.light` | `#0F172A` | Main light-theme text |
-| `color.text.muted.light` | `#64748B` | Secondary light-theme text |
-| `color.warning` | `#F59E0B` | Pending / attention |
-| `color.error` | `#EF4444` | Errors / occupied state if product rules define it |
-| `color.info` | `#3B82F6` | Informational states |
+| `color.bg.dark` | `#08090B` | Main dark-theme background |
+| `color.surface.dark` | `#101114` | Cards, navigation, panels |
+| `color.surface.raised.dark` | `#17191D` | Raised surfaces and active hover states |
+| `color.border.dark` | `#292B30` | Low-contrast borders and separators |
+| `color.text.dark` | `#F5F5F5` | Primary text on dark backgrounds |
+| `color.text.muted.dark` | `#A1A1AA` | Secondary text on dark backgrounds |
+| `color.bg.light` | `#FAFAFA` | Main light-theme background |
+| `color.surface.light` | `#FFFFFF` | Forms, cards, panels |
+| `color.surface.subtle.light` | `#F1F1F2` | Secondary light surfaces |
+| `color.border.light` | `#E4E4E7` | Light-theme borders |
+| `color.text.light` | `#111113` | Main text on light backgrounds |
+| `color.text.muted.light` | `#62626B` | Secondary text on light backgrounds |
+| `color.accent` | `#D4FF4F` | Optional restrained acid-lime accent, only if it fits existing brand assets; do not spread it across the UI |
+| `color.success` | `#16A34A` | Positive state, paired with a readable label |
+| `color.warning` | `#D97706` | Pending / attention |
+| `color.error` | `#DC2626` | Errors / unavailable state |
+| `color.info` | `#2563EB` | Informational state |
+
+If existing project assets or established semantic tokens require a different accent, preserve them and explain the decision. Do not introduce an accent merely for decoration. Emerald may remain as a semantic success color, but must not dominate the overall brand palette.
 
 ### Semantic status colors
 
 Status must always include a readable label or icon—not color alone.
+- Available: subtle green/success indicator and text label
+- Reserved / Pending: restrained amber indicator
+- Occupied / Unavailable: muted red or neutral disabled treatment
+- Maintenance: gray/slate
+- Confirmed / Completed: green/success
+- Cancelled / Failed: red/error
+- Informational: blue/info
 
-- **Available:** emerald / green
-- **Reserved / Pending:** amber
-- **Occupied / Unavailable:** red or muted red
-- **Maintenance:** slate / gray
-- **Confirmed / Completed:** emerald or blue-green
-- **Cancelled / Failed:** red
-- **Informational:** blue
+### Vercel-inspired background texture
 
-Do not use the same status color for different meanings. If an occupied slot should not imply an error, use a restrained red/muted-red treatment.
+Use a subtle, monochrome, developer-tool-inspired background texture: fine dot grid, micro-grid, faint radial light, or low-contrast noise. Keep it understated so text and product UI remain the focus.
+
+- Add a pointer-reactive **wave/ripple or gentle displacement effect** over the texture on capable desktop devices. The effect should follow cursor movement with a soft trailing response, not produce a large spotlight or distracting neon trail.
+- Prefer a lightweight CSS/SVG/canvas implementation or a proven existing dependency. Do not add a heavy WebGL background just to create a texture.
+- The texture must sit behind content and never intercept clicks, focus, selection, or navigation (`pointer-events: none` for purely decorative layers).
+- Limit redraws, debounce/animate efficiently, and disable or simplify the effect on touch devices, reduced-motion preferences, and low-power contexts.
+- Keep the texture visible but subtle in both themes; ensure text contrast remains high.
+- No full-screen cursor-following blur blobs, intense glow, or excessive particle effects.
 
 ### Color rules
-
-- Use emerald for primary CTAs, selected controls, focus accents, active navigation, and positive states.
-- Use neutral surfaces for most UI. Reserve gradients and glow for the hero and a few meaningful highlights.
-- Maintain readable contrast in both themes.
-- Do not make every card green or add glow to every button.
-- Use subtle borders and restrained shadows instead of heavy outlines.
-- Both themes must be intentionally designed. Do not simply invert colors.
+- Black/white/gray should dominate the design.
+- Accent colors are for meaning and focus—not decoration.
+- Use thin borders, tonal surfaces, and restrained shadows instead of heavy outlines.
+- Design dark and light modes intentionally and check contrast in both.
+- Avoid large gradient backgrounds, bright neon, and glowing edges on every component.
 
 ---
 
 ## 4. Typography
 
-**Primary font: JetBrains Mono.**
+Use a **purposeful mixed-font system**, selected with the UI/UX Pro Max skill and verified against the actual project dependencies and font-loading setup. Do not force one monospace font across all content.
 
-Use JetBrains Mono consistently for headings, navigation, buttons, labels, data tables, and body text as requested. Load the font locally or through the project's approved font-loading approach, and provide a sensible monospace fallback.
+Preferred direction, subject to the existing codebase and skill recommendations:
+- **Primary UI / body / navigation:** Geist Sans or Inter, chosen consistently—not mixed randomly.
+- **Display / editorial headings:** the same primary sans family with carefully controlled weights, tracking, and line-height; an additional display face is allowed only if UI/UX Pro Max recommends it and it improves hierarchy.
+- **Technical data / slot IDs / timestamps / code-like metadata:** Geist Mono or JetBrains Mono.
+
+If UI/UX Pro Max recommends a better pairing for the existing product, follow its recommendation and document the selected pair. Avoid loading several similar font families. Prefer local/project-approved font loading or a reliable existing font setup; provide fallback stacks.
 
 Suggested hierarchy:
-- Display / hero heading: 48–72px desktop; 36–44px mobile, bold, tight line-height
+- Display / hero heading: 52–76px desktop; 38–48px mobile, medium/semibold rather than automatically extra-bold
 - Page heading: 28–36px
-- Section heading: 20–24px
+- Section heading: 20–28px
 - Card heading: 16–18px
-- Body: 14–16px, line-height around 1.6
+- Body: 14–16px, line-height around 1.55–1.7
 - Labels / metadata: 12–13px
-- Dashboard KPI numbers: 28–36px with tabular numerals where available
+- Dashboard KPI numbers: 28–36px, tabular numerals where available
 
-Use a limited set of weights and maintain comfortable line lengths. Since monospace fonts can be harder to read in long paragraphs, avoid overly small body text, keep paragraphs short, and use generous line-height.
+Keep line lengths comfortable, avoid overly tight tracking on body text, and use weight/size/spacing—not color alone—to establish hierarchy.
 
 ---
 
@@ -150,29 +167,41 @@ Use a limited set of weights and maintain comfortable line lengths. Since monosp
 Use a consistent spacing scale based on 4px: `4, 8, 12, 16, 24, 32, 48, 64, 80, 96`.
 
 - Main content max width: approximately 1200–1440px where appropriate.
-- Desktop dashboard sidebar: approximately 240–264px.
+- Desktop dashboard sidebar: approximately 232–256px.
 - Page content padding: 24–32px desktop; 16–20px mobile.
-- Card radius: 16–20px.
-- Button and input radius: 10–12px.
-- Pill radius: fully rounded only for badges, tags, or intentionally pill-shaped controls.
-- Use consistent icon sizes, alignment, and vertical rhythm.
-- Avoid excessive nested cards and too many dividers.
-- Use Lucide React icons with consistent stroke weight.
+- Use a clear grid and consistent alignment; do not wrap every section in a card.
+- Prefer square or subtly rounded geometry over pill-shaped UI.
+- Cards and panels: 8–14px radius where needed; some large editorial panels may use 16px if the design calls for it.
+- Buttons and inputs: compact rectangular shape, typically 6–9px radius. Avoid fully rounded pill buttons except for small status badges or where an existing component convention is necessary.
+- Tables and dashboard surfaces should use crisp edges, thin borders, subtle tonal changes, and restrained shadowing.
+- Use consistent icon sizes and Lucide React icons if already installed or compatible.
+
+### Premium square button system
+
+Create a consistent set of rectangular buttons with clear hierarchy: primary, secondary, outline, ghost, danger, and icon-only. Buttons should feel tactile and deliberate.
+
+- Default: high-contrast solid or outlined surface, precise border, clear label.
+- Hover: short color/surface transition, slight border contrast shift, optional subtle 1–2px lift or icon movement; no large bounce or glow.
+- Active: subtle pressed state with no layout shift.
+- Focus: obvious keyboard focus ring with sufficient contrast.
+- Disabled/loading: visibly distinct and non-interactive; preserve layout width to avoid jitter.
+- Keep animation fast (roughly 140–220ms for most controls) and honor reduced-motion preferences.
+- Never change a button's dimensions on hover.
 
 ### Core component library
 
-Build reusable components for:
-- Primary, secondary, outline, ghost, danger, and icon buttons
+Build/reuse consistent components for:
+- Rectangular primary, secondary, outline, ghost, danger, and icon buttons
 - Inputs, password fields, selects, checkboxes, radio controls, and search
-- Cards, metric cards, badges, tooltips, tabs, and breadcrumbs
+- Cards/panels, badges, tooltips, tabs, breadcrumbs, and section headers
 - Dialogs, dropdown menus, popovers, and toasts
-- Data tables, table filters, pagination, and empty states
+- Data tables, filters, pagination, and empty states
 - Sidebar, top navigation, mobile navigation, and theme toggle
 - Parking-slot cards and slot-status indicators
 - Reservation summary and simulated-payment status
 - Skeleton loaders, error states, and confirmation panels
 
-Every interactive control must have default, hover, focus-visible, active, disabled, loading, and error states where relevant.
+Every interactive control must have appropriate default, hover, focus-visible, active, disabled, loading, and error states.
 
 ---
 
@@ -188,7 +217,7 @@ Create a high-impact, premium first impression and guide users to **Find Parking
 - Feature links in the center or right
 - Animated dark/light theme toggle
 - Sign In as a secondary action
-- **Find Parking** as the primary emerald CTA
+- **Find Parking** as the primary high-contrast monochrome CTA; use accent color only if the established design system requires it
 - Transparent or subtly blurred background at the top; use a readable solid/raised surface after scrolling if needed
 - Responsive mobile menu with keyboard support
 
@@ -230,9 +259,14 @@ Animation characteristics:
 3. Feature cards: Find Slots, Easy Reservations, Manage Vehicles, Track Sessions
 4. How It Works: Discover → Select → Reserve → Park
 5. Parking experience / slot-state preview
-6. Benefits section
-7. Final CTA: **Find Your Parking Spot**
-8. Footer with relevant links and project information
+6. Benefits / product principles section
+7. Parking slot preview: show only real API-backed data when available. If a public preview is needed before authentication, use clearly identified sample/demo preview data that cannot be mistaken for live availability. Show a small set of slots and a **Show more** action; when unauthenticated users click it, route them to `/login` with a safe return path. Do not imply a reservation can be completed without authentication.
+8. Final CTA: **Find Your Parking Spot**
+9. Footer with relevant links and project information
+
+### Standalone marketing pages
+
+Create dedicated pages for each public navigation item that is currently shown as a link but has no meaningful destination. At minimum, if those links are present in the actual design, provide `/features`, `/how-it-works`, and `/about`. Use the same shared public shell, typography, texture, and motion language. Keep the content accurate to existing functionality; do not invent integrations, customer counts, testimonials, availability, or unsupported features. If the existing router already has equivalent routes, improve and reuse them instead of duplicating.
 
 Use GSAP + ScrollTrigger for the scroll-linked 3D choreography. Use Motion for React for buttons, menus, theme toggle, cards, and lightweight UI transitions. Avoid having both animation libraries control the same element.
 
@@ -381,6 +415,21 @@ Provide a clean, secure place to manage customer details, vehicles, and parking 
 
 Never expose another customer's personal information or reservations. Customer-facing API requests must be authorized on the backend.
 
+
+### Profile route stability and layout-jump prevention
+
+The existing customer profile page has been reported to visibly jump/shift when opened. Treat this as a functional UX defect and diagnose the cause instead of masking it with animation.
+
+- Inspect route transitions, nested layouts, React keys, conditional layout rendering, authentication/profile loading states, data-fetch effects, and scroll restoration.
+- Keep the shared customer shell/sidebar/header mounted when navigating between customer routes where the current architecture supports it.
+- Avoid remounting the whole application or changing layout dimensions after profile data loads.
+- Reserve space for avatars, loading placeholders, and asynchronously loaded profile/vehicle sections to reduce cumulative layout shift.
+- Keep loading, error, and loaded states structurally consistent; use skeletons that match the final geometry.
+- Check for duplicate effects, unstable keys, content-driven sidebar resizing, late font swaps, and transitions that animate the page container itself.
+- Preserve the intended route scroll position; do not force scroll-to-top on every nested customer navigation unless the route design requires it.
+- Do not apply arbitrary `position: fixed`, fixed heights, or CSS hacks without identifying the cause.
+- Verify direct navigation, internal navigation, refresh, and slow API response behavior on `/profile` and adjacent customer routes.
+
 ---
 
 ## 10. Page 5 — Login
@@ -505,6 +554,8 @@ Use for:
 - Avoid scroll hijacking, excessive parallax, and unnecessary cursor-following effects.
 - Respect reduced-motion preferences.
 - Ensure buttons and forms remain usable if animations fail or are disabled.
+- Cursor-reactive background texture must be subtle, throttled/efficient, decorative only, and disabled or reduced for touch devices and `prefers-reduced-motion`.
+- Do not let pointer effects follow the cursor over form controls in a way that harms readability or interaction.
 
 ---
 
@@ -526,7 +577,7 @@ Use for:
 - Full-width primary actions where useful
 - Touch-friendly controls and slot cards
 - Forms must fit the viewport without horizontal scrolling
-- Simplify or disable expensive 3D effects
+- Simplify or disable expensive 3D effects and cursor-reactive texture
 - Ensure the theme toggle, forms, tables, and dialogs remain usable
 
 Design and test at narrow mobile, standard mobile, tablet, and wide desktop sizes.
@@ -620,8 +671,12 @@ Before considering the design complete, verify:
 - [ ] Landing page has a clear **Find Parking** CTA.
 - [ ] The 3D car responds smoothly to scroll and has a reduced-motion/mobile fallback.
 - [ ] Dark and light themes both look intentionally designed.
-- [ ] JetBrains Mono is used as the requested primary font.
-- [ ] Buttons and UI interactions have polished but restrained animation.
+- [ ] Typography uses a deliberate modern sans-serif + mono pairing selected with UI/UX Pro Max guidance.
+- [ ] Rectangular buttons and UI interactions have polished, restrained hover/active animation without layout shifts.
+- [ ] The black/white visual system and subtle cursor-reactive texture work without reducing readability.
+- [ ] Public navigation links lead to real dedicated pages.
+- [ ] The landing slot preview has a clear auth gate for Show more.
+- [ ] The customer profile route has been checked for and does not exhibit avoidable layout jumping.
 - [ ] Admin and customer navigation are clearly separated.
 - [ ] Slot states and reservation conflicts are understandable.
 - [ ] Customer profile shows only that customer's own data.
@@ -638,14 +693,23 @@ Before considering the design complete, verify:
 ## 20. Final Art Direction
 
 The final ParkEase experience should combine:
-- A cinematic landing page with one memorable scroll-linked 3D car.
-- A clean, efficient premium admin dashboard.
-- A customer-first parking reservation journey.
-- A consistent Midnight Navy / Emerald visual identity.
-- JetBrains Mono typography.
-- Elegant Motion for React micro-interactions.
-- Smooth GSAP + ScrollTrigger storytelling.
-- A useful, lightweight Three.js scene.
-- Fully designed dark and light themes.
+- A premium monochrome identity built from black, white, charcoal, and cool neutrals.
+- A dark, developer-tool-inspired mood with a subtle Vercel-like background texture and restrained pointer-reactive wave/ripple.
+- A landing page with meaningful product content, dedicated pages for visible public navigation links, and an auth-gated parking-slot preview.
+- Rectangular premium buttons with precise animated hover/active states and no layout jitter.
+- A mixed typography system chosen through UI/UX Pro Max guidance: a readable modern sans-serif for most content and a mono face reserved for technical details.
+- A consistent, polished Admin UI as well as customer-facing pages.
+- A stable customer profile route without visible page jumping or layout shift.
+- A cinematic but lightweight 3D car scene and scroll-linked story when authorized by the current project scope.
+- Accessible Motion for React micro-interactions and GSAP + ScrollTrigger choreography without transform conflicts.
+- Fully considered dark and light themes.
 
-**Priority order:** usability and consistency first, visual polish second, cinematic effects third. Every effect must support the product instead of distracting from it.
+**Priority order:** functional clarity and layout stability first, design consistency second, visual polish third, cinematic effects fourth. Every effect must support the product rather than compete with it.
+
+### Tool and component discovery policy
+
+- Inspect whether UI/UX Pro Max is actually available to the current coding agent. Read its installed skill instructions and use its design-system/search guidance where available. Do not claim it was used if it could not be accessed or executed.
+- Verify the actual 21st.dev CLI package, installed version, login status, and supported component workflow. Search for suitable components before creating complex ones from scratch. Do not assume skills installed for Claude/Cursor/Codex automatically work in Antigravity.
+- Reuse compatible, accessible components from 21st.dev only when they fit the design and project stack; audit code, dependencies, and accessibility before integration. Do not copy components blindly or add unnecessary dependencies.
+- If either tool is unavailable, use a safe, compatible fallback and clearly report the limitation.
+- Use the existing repository, current `PHASE.md`, and `RULES.md` as the source of truth. A UI redesign authorization does not authorize unrelated backend/database changes or future-day functional work. If a proposed 3D/GSAP task is outside the currently authorized phase, present the implementation plan and wait for approval unless the user explicitly authorizes that visual scope.

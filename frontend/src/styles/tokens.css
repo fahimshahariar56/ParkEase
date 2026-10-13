@@ -1,69 +1,96 @@
-/* ParkEase Design Tokens — Source of Truth: DESIGN.md */
+/* ParkEase Design Tokens — Source of Truth: DESIGN.md §3 */
+/* Visual direction: monochrome-first, premium minimal, developer-tool aesthetic */
 
 :root {
-  /* Default: Dark Theme (Midnight Navy Signature) */
-  --color-bg: #0B1220;
-  --color-bg-subtle: #080D17;
-  --color-surface: #111C2E;
-  --color-surface-raised: #172338;
-  --color-surface-subtle: #0E1624;
-  --color-border: #263449;
-  --color-border-subtle: #1C283B;
-  --color-text: #F8FAFC;
-  --color-text-muted: #A3B1C6;
+  /* ─── Dark Theme (default) ─── */
+  --color-bg:              #08090B;
+  --color-bg-subtle:       #0D0E11;
+  --color-surface:         #101114;
+  --color-surface-raised:  #17191D;
+  --color-surface-subtle:  #0D0F12;
+  --color-border:          #292B30;
+  --color-border-subtle:   #1F2125;
+  --color-text:            #F5F5F5;
+  --color-text-muted:      #A1A1AA;
 
-  /* Brand / Emerald Accent */
-  --color-brand: #10B981;
-  --color-brand-hover: #059669;
-  --color-brand-soft: rgba(16, 185, 129, 0.15);
-  --color-brand-soft-text: #6EE7B7;
+  /* ─── Backward-compat brand token (for existing pages pending Phase 2 redesign) ───
+   * Brand is now neutral, not emerald. Mapped to text color so existing
+   * text-brand / bg-brand usages render as neutral monochrome rather than green.
+   * These will be removed page-by-page in Phase 2.
+   */
+  --color-brand:        #F5F5F5;  /* maps to text color in dark theme */
+  --color-brand-hover:  #E4E4E7;
+  --color-brand-soft:   rgba(245, 245, 245, 0.08);
 
-  /* Status Colors */
-  --color-status-available: #10B981;
-  --color-status-pending: #F59E0B;
-  --color-status-occupied: #EF4444;
-  --color-status-maintenance: #64748B;
-  --color-status-info: #3B82F6;
+  /* Semantic status colors (meaning only — not brand decoration) */
+  --color-success:         #16A34A;
+  --color-warning:         #D97706;
+  --color-error:           #DC2626;
+  --color-info:            #2563EB;
 
-  /* Shadows */
-  --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
-  --shadow-raised: 0 10px 30px -4px rgba(0, 0, 0, 0.6);
+  /* Optional restrained accent — acid-lime, used sparingly */
+  --color-accent:          #D4FF4F;
+  --color-accent-fg:       #08090B;
 
-  /* Spacing Scale (4px base) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
+  /* Status aliases (used by Badge, slot states, etc.) */
+  --color-status-available:    #16A34A;
+  --color-status-pending:      #D97706;
+  --color-status-occupied:     #DC2626;
+  --color-status-maintenance:  #52525B;
+  --color-status-info:         #2563EB;
+  --color-status-confirmed:    #16A34A;
+  --color-status-cancelled:    #DC2626;
+
+  /* Shadows — tight and dark, no colored glow */
+  --shadow-subtle: 0 1px 3px 0 rgba(0,0,0,0.5), 0 1px 2px -1px rgba(0,0,0,0.4);
+  --shadow-raised: 0 4px 16px -2px rgba(0,0,0,0.7), 0 2px 6px -2px rgba(0,0,0,0.5);
+
+  /* Spacing Scale — 4px base (DESIGN.md §5) */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
   --space-12: 48px;
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Radii */
-  --radius-card: 18px;
-  --radius-input: 11px;
-  --radius-pill: 9999px;
+  /* Border Radii — rectangular language (DESIGN.md §5) */
+  --radius-btn:   7px;   /* buttons */
+  --radius-input: 6px;   /* inputs, selects */
+  --radius-card:  10px;  /* cards / panels */
+  --radius-sm:    4px;   /* tags, chips */
+  --radius-pill:  9999px; /* status badges only */
+
+  /* Typography scale helpers */
+  --font-sans:  'Inter', 'ui-sans-serif', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'ui-monospace', SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Transition */
+  --transition-base: 150ms ease;
+  --transition-motion: 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light Theme (Cool Neutrals + Emerald) */
-.light, [data-theme='light'] {
-  --color-bg: #F8FAFC;
-  --color-bg-subtle: #F1F5F9;
-  --color-surface: #FFFFFF;
-  --color-surface-raised: #FFFFFF;
-  --color-surface-subtle: #F1F5F9;
-  --color-border: #E2E8F0;
-  --color-border-subtle: #CBD5E1;
-  --color-text: #0F172A;
-  --color-text-muted: #64748B;
+/* ─── Light Theme ─── */
+.light,
+[data-theme='light'] {
+  --color-bg:              #FAFAFA;
+  --color-bg-subtle:       #F4F4F5;
+  --color-surface:         #FFFFFF;
+  --color-surface-raised:  #FFFFFF;
+  --color-surface-subtle:  #F1F1F2;
+  --color-border:          #E4E4E7;
+  --color-border-subtle:   #D4D4D8;
+  --color-text:            #111113;
+  --color-text-muted:      #62626B;
 
-  --color-brand: #10B981;
-  --color-brand-hover: #059669;
-  --color-brand-soft: #D1FAE5;
-  --color-brand-soft-text: #065F46;
+  /* Brand backward-compat mapping for light theme */
+  --color-brand:        #111113;
+  --color-brand-hover:  #27272A;
+  --color-brand-soft:   rgba(17, 17, 19, 0.06);
 
-  --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  --shadow-raised: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-subtle: 0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.05);
+  --shadow-raised: 0 4px 16px -2px rgba(0,0,0,0.10), 0 2px 6px -2px rgba(0,0,0,0.07);
 }

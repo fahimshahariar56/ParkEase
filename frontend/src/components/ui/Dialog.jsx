@@ -1,9 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 
+/**
+ * Dialog — modal overlay (DESIGN.md §5)
+ * Rectangular panel, neutral colors, accessible keyboard trap.
+ * API is backward-compatible.
+ */
 export const Dialog = ({
   isOpen,
+  open,
   onClose,
   title,
   description,
@@ -11,31 +17,38 @@ export const Dialog = ({
   footer,
   maxWidth = 'max-w-lg',
 }) => {
+  const isDialogOpen = Boolean(isOpen ?? open);
+  const closeRef = useRef(null);
+
   useEffect(() => {
+    if (!isDialogOpen) return;
+
+    // Focus the close button when dialog opens for keyboard accessibility
+    const frame = requestAnimationFrame(() => closeRef.current?.focus());
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose?.();
     };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = '';
-    }
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      cancelAnimationFrame(frame);
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isDialogOpen, onClose]);
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isDialogOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
+          aria-labelledby={title ? 'dialog-title' : undefined}
+          aria-describedby={description ? 'dialog-description' : undefined}
         >
           {/* Backdrop */}
           <motion.div
@@ -44,44 +57,66 @@ export const Dialog = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/70 backdrop-blur-[2px]"
+            aria-hidden="true"
           />
 
-          {/* Dialog Card */}
+          {/* Dialog panel */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className={`
-              relative w-full ${maxWidth} bg-surface-raised border border-border
-              rounded-card shadow-raised z-10 font-mono overflow-hidden
-            `}
+            initial={{ opacity: 0, y: 10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className={[
+              'relative w-full font-sans',
+              maxWidth,
+              'bg-surface-raised border border-border',
+              'rounded-card shadow-raised z-10',
+              'overflow-hidden flex flex-col max-h-[90vh]',
+            ].join(' ')}
           >
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 p-5 md:p-6 border-b border-border/60">
-              <div>
-                {title && <h2 className="text-lg md:text-xl font-bold text-text tracking-tight">{title}</h2>}
-                {description && <p className="text-xs text-text-muted mt-1">{description}</p>}
+            <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-border flex-shrink-0">
+              <div className="min-w-0">
+                {title && (
+                  <h2
+                    id="dialog-title"
+                    className="text-base font-semibold text-text tracking-tight"
+                  >
+                    {title}
+                  </h2>
+                )}
+                {description && (
+                  <p id="dialog-description" className="text-xs text-text-muted mt-0.5">
+                    {description}
+                  </p>
+                )}
               </div>
               <button
+                ref={closeRef}
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
-                className="p-1 rounded-input text-text-muted hover:text-text hover:bg-surface border border-transparent hover:border-border transition-colors"
+                className={[
+                  'flex-shrink-0 p-1.5 rounded-sm',
+                  'text-text-muted hover:text-text',
+                  'hover:bg-surface border border-transparent hover:border-border',
+                  'transition-colors duration-150',
+                  'focus-visible:outline-2 focus-visible:outline-offset-1',
+                ].join(' ')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
-            {/* Content Body */}
-            <div className="p-5 md:p-6 max-h-[70vh] overflow-y-auto">
+            {/* Content */}
+            <div className="px-5 py-5 overflow-y-auto flex-1">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="p-4 md:px-6 md:py-4 border-t border-border/60 bg-surface/50 flex items-center justify-end gap-3">
+              <div className="px-5 py-3 border-t border-border bg-surface/60 flex items-center justify-end gap-2.5 flex-shrink-0">
                 {footer}
               </div>
             )}

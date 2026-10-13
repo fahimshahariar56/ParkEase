@@ -1,51 +1,115 @@
 @import './tokens.css';
+/* Inter: primary UI / body / navigation (DESIGN.md §4) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     border-color: var(--color-border);
+    box-sizing: border-box;
   }
 
   html {
     color-scheme: dark light;
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--font-sans);
     background-color: var(--color-bg);
     color: var(--color-text);
+    /* Subtle dot-grid background texture (DESIGN.md §3 — Vercel-inspired) */
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.06) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Light theme: darker dots on white */
+  html.light,
+  html[data-theme='light'] {
+    background-image: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.06) 1px,
+      transparent 1px
+    );
   }
 
   body {
-    min-height: 100vh;
-    background-color: var(--color-bg);
+    min-height: 100svh;
+    background-color: transparent; /* inherits from html for texture continuity */
     color: var(--color-text);
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--font-sans);
+    font-size: 15px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
-  /* Accessibility: Visible, high-contrast focus rings */
-  :focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
+  /* Headings: tighter tracking, heavier weight */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--color-text);
   }
 
-  /* Reduced motion preference */
+  /* Monospace only for technical data — slot IDs, timestamps, KPIs */
+  code, kbd, samp, pre,
+  [data-mono],
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  /* ─── Focus: high-contrast neutral ring (not green) ─── */
+  :focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Light theme: dark ring */
+  .light :focus-visible,
+  [data-theme='light'] :focus-visible {
+    outline-color: var(--color-text);
+  }
+
+  /* ─── Reduced motion ─── */
   @media (prefers-reduced-motion: reduce) {
-    *, ::before, ::after {
+    *,
+    ::before,
+    ::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
+
+  /* ─── Scrollbar: minimal, monochrome ─── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+  }
 }
 
 @layer components {
-  /* Reusable ParkEase Foundation Classes */
+  /* ─── Card system ─── */
   .park-card {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -60,14 +124,81 @@
     box-shadow: var(--shadow-raised);
   }
 
+  /* ─── Section dividers ─── */
+  .park-divider {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ─── Status badges (pill is permitted for badges per DESIGN.md §5) ─── */
   .park-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.6875rem;
     font-weight: 500;
+    letter-spacing: 0.01em;
     border-radius: var(--radius-pill);
     border: 1px solid transparent;
+    font-family: var(--font-sans);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* ─── Table utilities ─── */
+  .park-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+  }
+
+  .park-table th {
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .park-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+    color: var(--color-text);
+    vertical-align: middle;
+  }
+
+  .park-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .park-table tbody tr {
+    transition: background-color var(--transition-base);
+  }
+
+  .park-table tbody tr:hover {
+    background-color: var(--color-surface-raised);
+  }
+
+  /* ─── Mono data class — for technical values ─── */
+  .data-mono {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+  }
+
+  /* ─── KPI number display ─── */
+  .kpi-number {
+    font-family: var(--font-mono);
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
   }
 }
