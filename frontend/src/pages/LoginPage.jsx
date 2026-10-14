@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Mail,
   Lock,
@@ -37,6 +37,7 @@ const SYSTEM_BENEFITS = [
 ];
 
 export const LoginPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -106,9 +107,9 @@ export const LoginPage = () => {
       <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* ── Left: Value Overview (Desktop) ──────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, x: -16 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
           className="hidden lg:flex lg:col-span-5 flex-col justify-center space-y-8 pr-4"
         >
           <div className="space-y-3">
@@ -152,9 +153,9 @@ export const LoginPage = () => {
 
         {/* ── Right: Authentication Card ──────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
           className="lg:col-span-7 w-full max-w-md mx-auto"
         >
           {/* Mobile Header */}
@@ -179,7 +180,7 @@ export const LoginPage = () => {
             {/* Server-level error feedback banner */}
             {serverError && (
               <motion.div
-                initial={{ opacity: 0, y: -6 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-input bg-status-occupied/10 border border-status-occupied/30 p-3.5 text-xs text-status-occupied flex items-start gap-2.5"
                 role="alert"

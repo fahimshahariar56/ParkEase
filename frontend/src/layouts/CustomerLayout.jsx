@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Car, MapPin, User, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button, Badge } from '../components/ui';
@@ -9,6 +9,7 @@ import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const CustomerLayout = () => {
   const location = useLocation();
+  const shouldReduceMotion = useReducedMotion();
   const [mobileMenu, setMobileMenu] = useState({ pathname: location.pathname, open: false });
   const mobileMenuOpen = mobileMenu.open && mobileMenu.pathname === location.pathname;
   const setMobileMenuOpen = useCallback(
@@ -111,9 +112,9 @@ export const CustomerLayout = () => {
         {/* Mobile Nav Drawer */}
         {mobileMenuOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
+            initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
             id="customer-mobile-menu"
             className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-2 overflow-hidden"
           >

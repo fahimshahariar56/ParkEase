@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   CreditCard,
   Search,
@@ -377,6 +377,7 @@ const PaymentDetailModal = ({ payment, open, onClose }) => {
 // ─── Main AdminPaymentsPage ──────────────────────────────────────────────────
 
 export const AdminPaymentsPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
 
@@ -563,10 +564,10 @@ export const AdminPaymentsPage = () => {
               return (
                 <motion.div
                   key={payment.id}
-                  initial={{ opacity: 0, y: 4 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                   className="park-card p-4 sm:p-5 hover:border-brand/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   {/* Left: Payment Details */}

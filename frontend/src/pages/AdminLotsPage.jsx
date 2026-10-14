@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   Building2,
   Plus,
@@ -29,6 +29,7 @@ const LOT_STATUS_VARIANTS = {
 };
 
 export const AdminLotsPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -313,9 +314,9 @@ export const AdminLotsPage = () => {
             return (
               <motion.div
                 key={lot.id}
-                initial={{ opacity: 0, y: 8 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
                 className="park-card flex flex-col justify-between hover:border-brand/40 transition-colors group"
               >
                 <div className="p-5 space-y-3">

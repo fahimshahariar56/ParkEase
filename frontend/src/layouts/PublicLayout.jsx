@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Car, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
@@ -9,6 +9,7 @@ import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const PublicLayout = () => {
   const location = useLocation();
+  const shouldReduceMotion = useReducedMotion();
   const [mobileMenu, setMobileMenu] = useState(() => ({ pathname: location.pathname, open: false }));
   const mobileMenuOpen = mobileMenu.open && mobileMenu.pathname === location.pathname;
   const setMobileMenuOpen = React.useCallback(
@@ -140,16 +141,16 @@ export const PublicLayout = () => {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
             className="fixed inset-0 z-50 flex md:hidden"
           >
               <motion.button
                 type="button"
-                initial={{ opacity: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 onClick={() => setMobileMenuOpen(false)}
                 className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
                 aria-label="Close navigation menu"
@@ -160,9 +161,9 @@ export const PublicLayout = () => {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Public navigation"
-                initial={{ x: -320 }}
+                initial={shouldReduceMotion ? false : { x: -320 }}
                 animate={{ x: 0 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
                 className="relative z-10 flex h-full w-[min(20rem,85vw)] flex-col border-r border-border bg-surface font-sans shadow-raised"
               >
                 <div className="flex h-16 items-center justify-between border-b border-border px-5">

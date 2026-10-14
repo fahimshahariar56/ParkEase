@@ -283,6 +283,12 @@ Create dedicated pages for each public navigation item that is currently shown a
 
 Use GSAP + ScrollTrigger for the scroll-linked 3D choreography. Use Motion for React for buttons, menus, theme toggle, cards, and lightweight UI transitions. Avoid having both animation libraries control the same element.
 
+### Implemented motion baseline
+
+The landing hero uses a lazy-loaded, procedural low-poly car and parking bay built with Three.js; it has no external model or texture dependencies. A static SVG illustration remains visible while the scene loads and is the permanent presentation for `prefers-reduced-motion` users. WebGL initialization failures keep the static illustration and report a console warning. The scene is responsive, caps device pixel ratio more aggressively on small screens, renders only when resized or advanced by its scoped ScrollTrigger, and disposes its renderer, geometry, materials, observer, and GSAP context on unmount.
+
+ScrollTrigger also reveals only the facility preview, feature, how-it-works, and final CTA sections using a short opacity and 12px vertical transition; it does not pin or hijack scrolling. The public, customer, and admin mobile navigation drawers, authentication entrances, and admin list/report transitions skip their non-essential movement when reduced motion is requested. The landing illustration and all of its copy remain available without WebGL.
+
 ---
 
 ## 7. Page 2 — Admin Dashboard

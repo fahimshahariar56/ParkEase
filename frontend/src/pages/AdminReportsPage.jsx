@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   BarChart3,
   CalendarCheck,
@@ -83,6 +83,7 @@ const PRESETS = [
 ];
 
 export const AdminReportsPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
 
@@ -476,10 +477,10 @@ export const AdminReportsPage = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 6 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.18 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
             className="space-y-6"
           >
             {activeTab === 'overview' && (

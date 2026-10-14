@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   CalendarCheck,
   Search,
@@ -43,6 +43,7 @@ const PERMITTED_NEXT_STATUSES = {
 };
 
 export const AdminReservationsPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
 
@@ -350,9 +351,9 @@ export const AdminReservationsPage = () => {
             return (
               <motion.div
                 key={res.id}
-                initial={{ opacity: 0, y: 4 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="park-card p-4 sm:p-5 hover:border-brand/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 {/* Left: ID & Customer & Slot Info */}

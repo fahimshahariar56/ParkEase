@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   ShieldCheck,
   Lock,
@@ -20,6 +20,7 @@ import { useToast } from '../components/ui/Toast';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 
 export const AdminLoginPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -140,9 +141,9 @@ export const AdminLoginPage = () => {
       {/* Main Container */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-6 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
           className="w-full max-w-md"
         >
           {/* Admin Header Shield */}
@@ -169,7 +170,7 @@ export const AdminLoginPage = () => {
             {/* Server Error Message */}
             {serverError && (
               <motion.div
-                initial={{ opacity: 0, y: -6 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-input bg-status-occupied/10 border border-status-occupied/30 p-3.5 text-xs text-status-occupied flex items-start gap-2.5"
                 role="alert"

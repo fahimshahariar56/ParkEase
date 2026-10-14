@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   User,
   Mail,
@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 
 export const RegisterPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -99,9 +100,9 @@ export const RegisterPage = () => {
   return (
     <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans flex items-center justify-center">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
         className="w-full max-w-md space-y-6"
       >
         {/* Page Heading */}
@@ -121,7 +122,7 @@ export const RegisterPage = () => {
           {/* Server-level error feedback banner */}
           {serverError && (
             <motion.div
-              initial={{ opacity: 0, y: -6 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               className="rounded-input bg-status-occupied/10 border border-status-occupied/30 p-3.5 text-xs text-status-occupied flex items-start gap-2.5"
               role="alert"

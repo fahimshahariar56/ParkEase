@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
   Shield,
@@ -14,11 +15,17 @@ import {
 import { Button, Card, Badge, Skeleton, EmptyState } from '../components/ui';
 import { parkingApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { gsap } from '../lib/gsap';
+import { ParkingScenePoster } from '../components/scene/ParkingScenePoster';
+
+const ParkingScene = lazy(() => import('../components/scene/ParkingScene'));
 
 export const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const pageRef = useRef(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Real backend parking facility data state
   const [lots, setLots] = useState([]);
@@ -43,6 +50,32 @@ export const LandingPage = () => {
     fetchLots();
   }, []);
 
+  useLayoutEffect(() => {
+    if (shouldReduceMotion || !pageRef.current) return undefined;
+
+    const context = gsap.context(() => {
+      pageRef.current.querySelectorAll('[data-scroll-reveal]').forEach((element) => {
+        gsap.fromTo(
+          element,
+          { autoAlpha: 0, y: 12 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.48,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: element,
+              start: 'top 88%',
+              once: true,
+            },
+          },
+        );
+      });
+    }, pageRef);
+
+    return () => context.revert();
+  }, [shouldReduceMotion]);
+
   const handleShowMore = () => {
     const target = '/parking';
 
@@ -57,7 +90,7 @@ export const LandingPage = () => {
   };
 
   return (
-    <div className="space-y-24 py-10 md:py-16 font-sans">
+    <div ref={pageRef} className="space-y-24 py-10 md:py-16 font-sans">
       
       {/* ─── Hero Section ─────────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,57 +144,39 @@ export const LandingPage = () => {
             </div>
           </div>
 
-          {/* Static slot-layout illustration; it does not represent live availability. */}
+          {/* Illustrative scene; it does not represent live availability. */}
           <div className="lg:col-span-5 relative flex justify-center">
             <div
               className="w-full max-w-md park-card-raised p-5 sm:p-6 relative overflow-hidden"
-              aria-label="Illustrative parking slot layout"
             >
-              {/* Header Telemetry */}
               <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono font-semibold tracking-wider text-text uppercase">
-                    Slot layout · illustration
+                    Parking bay · illustration
                   </span>
                 </div>
-                <Badge variant="neutral" size="sm">Demo view</Badge>
+                <Badge variant="neutral" size="sm">Not live data</Badge>
               </div>
 
-              {/* Slot Grid Schematic */}
-              <div className="grid grid-cols-3 gap-2.5 my-4 font-mono text-center">
-                <div className="p-3 rounded-btn border border-status-available/30 bg-status-available/5 flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT A-01</span>
-                  <span className="text-xs font-bold text-status-available mt-1">AVAILABLE</span>
-                </div>
-                <div className="p-3 rounded-btn border border-border bg-surface flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT A-02</span>
-                  <span className="text-xs font-bold text-text-muted mt-1">OCCUPIED</span>
-                </div>
-                <div className="p-3 rounded-btn border border-status-pending/30 bg-status-pending/5 flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT A-03</span>
-                  <span className="text-xs font-bold text-status-pending mt-1">RESERVED</span>
-                </div>
-                <div className="p-3 rounded-btn border border-status-available/30 bg-status-available/5 flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT B-01</span>
-                  <span className="text-xs font-bold text-status-available mt-1">AVAILABLE</span>
-                </div>
-                <div className="p-3 rounded-btn border border-status-available/30 bg-status-available/5 flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT B-02</span>
-                  <span className="text-xs font-bold text-status-available mt-1">AVAILABLE</span>
-                </div>
-                <div className="p-3 rounded-btn border border-border bg-surface flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-text-muted">SLOT B-03</span>
-                  <span className="text-xs font-bold text-text-muted mt-1">OCCUPIED</span>
-                </div>
+              <div
+                className="relative h-[220px] w-full overflow-hidden sm:h-[260px]"
+                role="img"
+                aria-label="Illustrative car in a parking bay. This is not live availability."
+              >
+                {shouldReduceMotion ? (
+                  <ParkingScenePoster className="h-full" />
+                ) : (
+                  <Suspense fallback={<ParkingScenePoster className="h-full" />}>
+                    <ParkingScene />
+                  </Suspense>
+                )}
               </div>
-
-              {/* Active Verification Status */}
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <Car className="w-4 h-4 text-text-muted" aria-hidden="true" />
                   <span className="text-text font-medium">Availability checked on search</span>
                 </div>
-                <span className="text-text-muted font-mono text-[11px]">Server verified</span>
+                <span className="text-text-muted font-mono text-[11px]">Illustrative only</span>
               </div>
             </div>
           </div>
@@ -170,7 +185,7 @@ export const LandingPage = () => {
       </section>
 
       {/* ─── Real Parking Facilities Preview Section ────────────────────── */}
-      <section id="preview" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <section id="preview" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
@@ -271,7 +286,7 @@ export const LandingPage = () => {
       </section>
 
       {/* ─── Feature Architecture Strip ─────────────────────────────────── */}
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <section id="features" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text">
             Engineered for Concurrency & Precision
@@ -315,7 +330,7 @@ export const LandingPage = () => {
       </section>
 
       {/* ─── How It Works ────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-y border-border space-y-10">
+      <section id="how-it-works" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-y border-border space-y-10">
         <div className="text-center max-w-xl mx-auto space-y-2">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text">
             How It Works
@@ -364,7 +379,7 @@ export const LandingPage = () => {
       </section>
 
       {/* ─── Bottom CTA ─────────────────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-4 text-center space-y-6">
+      <section data-scroll-reveal className="max-w-4xl mx-auto px-4 text-center space-y-6">
         <div className="park-card bg-surface-raised border border-border p-8 sm:p-12 space-y-6 shadow-subtle">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-text">
             Ready to find and reserve your parking bay?

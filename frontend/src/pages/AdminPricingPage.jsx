@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   DollarSign,
   Plus,
@@ -201,6 +201,7 @@ const NewRateModal = ({ open, onClose, onSuccess, token, toast }) => {
 // ─── Main AdminPricingPage ───────────────────────────────────────────────────
 
 export const AdminPricingPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
 
@@ -416,10 +417,10 @@ export const AdminPricingPage = () => {
               return (
                 <motion.div
                   key={rule.id}
-                  initial={{ opacity: 0, y: 4 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                   className={`park-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors
                     ${rule.isActive ? 'hover:border-brand/40' : 'opacity-60 hover:opacity-80'}`}
                 >

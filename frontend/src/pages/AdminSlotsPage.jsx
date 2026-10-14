@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   Grid3X3,
   Plus,
@@ -32,6 +32,7 @@ const SLOT_STATUS_VARIANTS = {
 };
 
 export const AdminSlotsPage = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { token } = useAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -438,9 +439,9 @@ export const AdminSlotsPage = () => {
             return (
               <motion.div
                 key={slot.id}
-                initial={{ opacity: 0, scale: 0.98 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="park-card p-4 flex flex-col justify-between hover:border-brand/40 transition-colors group relative"
               >
                 {/* Slot Bay Header */}

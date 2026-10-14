@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   LayoutDashboard,
   Building2,
@@ -25,6 +25,7 @@ import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const AdminLayout = () => {
   const location = useLocation();
+  const shouldReduceMotion = useReducedMotion();
   const [sidebar, setSidebar] = useState({ pathname: location.pathname, open: false });
   const sidebarOpen = sidebar.open && sidebar.pathname === location.pathname;
   const setSidebarOpen = useCallback(
@@ -181,23 +182,23 @@ export const AdminLayout = () => {
       {/* Mobile Sidebar Overlay & Drawer */}
       {sidebarOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.18 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
           className="fixed inset-0 z-50 flex lg:hidden"
         >
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
               onClick={() => setSidebarOpen(false)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm"
               aria-hidden="true"
             />
             <motion.div
-              initial={{ x: -260 }}
+              initial={shouldReduceMotion ? false : { x: -260 }}
               animate={{ x: 0 }}
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
               className="relative w-64 bg-surface border-r border-border flex flex-col h-full z-10 font-sans shadow-raised"
             >
               <div className="h-16 flex items-center justify-between px-5 border-b border-border">
