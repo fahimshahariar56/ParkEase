@@ -148,8 +148,6 @@ export const LandingPage = () => {
 
               <div
                 className="relative h-[210px] w-full overflow-hidden sm:h-[260px] lg:h-[300px]"
-                role="img"
-                aria-label="Illustrative car in a parking bay. This is not live availability."
               >
                 {shouldReduceMotion ? (
                   <ParkingScenePoster className="h-full" />
