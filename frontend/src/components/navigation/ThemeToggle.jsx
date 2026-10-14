@@ -17,6 +17,7 @@ export const ThemeToggle = ({ className = '' }) => {
     <motion.button
       type="button"
       onClick={toggleTheme}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.04 }}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}

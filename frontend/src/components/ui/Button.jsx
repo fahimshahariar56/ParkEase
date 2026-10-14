@@ -109,7 +109,7 @@ export const Button = React.forwardRef((
       type={type}
       disabled={isDisabled}
       onClick={isDisabled ? undefined : onClick}
-      // Subtle press response — no scale-up on hover (prevents layout shift)
+      whileHover={isDisabled || prefersReducedMotion ? undefined : { scale: 1.015 }}
       whileTap={isDisabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
       className={[

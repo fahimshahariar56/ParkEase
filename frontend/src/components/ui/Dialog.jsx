@@ -122,10 +122,13 @@ export const Dialog = ({
                   </p>
                 )}
               </div>
-              <button
+              <motion.button
                 ref={closeRef}
                 type="button"
                 onClick={onClose}
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.04 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.14 }}
                 aria-label="Close dialog"
                 className={[
                   'flex-shrink-0 p-1.5 rounded-sm',
@@ -136,7 +139,7 @@ export const Dialog = ({
                 ].join(' ')}
               >
                 <X className="w-4 h-4" aria-hidden="true" />
-              </button>
+              </motion.button>
             </div>
 
             {/* Content */}

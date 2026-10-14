@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Search,
   MapPin,
@@ -301,13 +302,17 @@ const ReservationConfirmDialog = ({
 // ─── SlotCard ────────────────────────────────────────────────────────────────
 
 const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
+  const prefersReducedMotion = useReducedMotion();
   const isAvailable = slot.status === 'AVAILABLE';
   const badgeVariant = STATUS_BADGE_VARIANT[slot.status] || 'neutral';
   const statusLabel = STATUS_LABEL[slot.status] || slot.status;
   const slotTypeLabel = SLOT_TYPE_LABELS[slot.slotType] || slot.slotType;
 
   return (
-    <div
+    <motion.div
+      whileHover={isAvailable && !prefersReducedMotion ? { y: -2 } : undefined}
+      whileTap={isAvailable && !prefersReducedMotion ? { scale: 0.995 } : undefined}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.16 }}
       className={`
         relative rounded-card border font-mono transition-all duration-150
         ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}
@@ -321,9 +326,15 @@ const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
     >
       {/* Selected checkmark */}
       {isSelected && (
-        <div className="absolute top-3 right-3 text-brand" aria-hidden="true">
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.14 }}
+          className="absolute top-3 right-3 text-brand"
+          aria-hidden="true"
+        >
           <CheckCircle2 className="w-4 h-4" />
-        </div>
+        </motion.div>
       )}
 
       {/* Header */}
@@ -385,17 +396,22 @@ const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 // ─── SelectionSummary ─────────────────────────────────────────────────────────
 
 const SelectionSummary = ({ slot, filters, onClear, onReserve }) => {
+  const prefersReducedMotion = useReducedMotion();
   if (!slot) return null;
 
   return (
-    <div
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.16 }}
       className="park-card border-brand/40 bg-brand/5 p-4 md:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
       role="status"
       aria-live="polite"
@@ -430,7 +446,7 @@ const SelectionSummary = ({ slot, filters, onClear, onReserve }) => {
           Reserve
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -867,12 +883,17 @@ export const FindParkingPage = () => {
       />
 
       {/* Selection summary */}
-      <SelectionSummary
-        slot={selectedSlot}
-        filters={filters}
-        onClear={() => setSelectedSlot(null)}
-        onReserve={handleReserve}
-      />
+      <AnimatePresence initial={false}>
+        {selectedSlot && (
+          <SelectionSummary
+            key={selectedSlot.id}
+            slot={selectedSlot}
+            filters={filters}
+            onClear={() => setSelectedSlot(null)}
+            onReserve={handleReserve}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Results */}
       <section aria-label="Parking slot results" aria-live="polite" aria-busy={slotsLoading}>
