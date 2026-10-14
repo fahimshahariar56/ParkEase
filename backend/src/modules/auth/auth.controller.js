@@ -32,6 +32,7 @@ export async function login(req, res, next) {
 
 export async function loginCustomer(req, res, next) {
   try {
+    res.locals.operation = 'auth.loginCustomer';
     const { email, password } = req.body;
     const result = await authService.loginCustomer({ email, password });
 

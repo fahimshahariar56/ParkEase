@@ -8,6 +8,7 @@ import * as parkingService from './parking.service.js';
  */
 export async function getAllLots(req, res, next) {
   try {
+    res.locals.operation = 'parking.getAllLots';
     const { status, search } = req.query;
     const lots = await parkingService.getAllLots({ status, search });
     res.status(200).json({
@@ -238,4 +239,3 @@ export async function checkSlotAvailability(req, res, next) {
     next(err);
   }
 }
-
