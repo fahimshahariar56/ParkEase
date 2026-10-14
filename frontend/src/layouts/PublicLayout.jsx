@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { Car, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Car, Menu, X, ArrowRight, ShieldCheck, Sparkles, Route, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
 import { HalftoneWordmarkFooter } from '../components/ui/halftone-wordmark-footer';
@@ -21,9 +21,9 @@ export const PublicLayout = () => {
   const drawerRef = useRef(null);
 
   const navLinks = [
-    { label: 'Features', path: '/features' },
-    { label: 'How It Works', path: '/how-it-works' },
-    { label: 'About', path: '/about' },
+    { label: 'Features', path: '/features', icon: Sparkles },
+    { label: 'How It Works', path: '/how-it-works', icon: Route },
+    { label: 'About', path: '/about', icon: Info },
   ];
 
   useEffect(() => {
@@ -129,113 +129,128 @@ export const PublicLayout = () => {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
-              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-label="Open navigation menu"
               aria-expanded={mobileMenuOpen}
               aria-controls="public-mobile-drawer"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <Menu className="w-4 h-4" />
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <motion.div
+      {/* Keep the fixed drawer outside the sticky, backdrop-filtered header. */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+          className="fixed inset-0 z-50 flex md:hidden"
+        >
+          <motion.button
+            type="button"
             initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
-            className="fixed inset-0 z-50 flex md:hidden"
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
+            aria-label="Close navigation menu"
+          />
+          <motion.aside
+            ref={drawerRef}
+            id="public-mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Public navigation"
+            initial={shouldReduceMotion ? false : { x: -260 }}
+            animate={{ x: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-surface font-sans shadow-raised"
           >
-              <motion.button
-                type="button"
-                initial={shouldReduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+            <div className="flex h-16 items-center justify-between border-b border-border px-5">
+              <Link
+                to="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
-                aria-label="Close navigation menu"
-              />
-              <motion.aside
-                ref={drawerRef}
-                id="public-mobile-drawer"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Public navigation"
-                initial={shouldReduceMotion ? false : { x: -320 }}
-                animate={{ x: 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 flex h-full w-[min(20rem,85vw)] flex-col border-r border-border bg-surface font-sans shadow-raised"
+                className="flex items-center gap-2.5"
               >
-                <div className="flex h-16 items-center justify-between border-b border-border px-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-btn border border-border bg-surface-raised text-text">
-                      <Car className="h-4 w-4" aria-hidden="true" />
-                    </div>
-                    <span className="text-sm font-semibold tracking-tight text-text">ParkEase</span>
-                  </div>
-                  <button
-                    ref={closeButtonRef}
-                    type="button"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-btn p-2 text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2"
-                    aria-label="Close navigation menu"
-                  >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                <div className="flex h-8 w-8 items-center justify-center rounded-btn border border-border bg-surface-raised text-text">
+                  <Car className="h-4 w-4" aria-hidden="true" />
                 </div>
+                <span className="text-sm font-semibold tracking-tight text-text">ParkEase</span>
+              </Link>
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-btn p-2 text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2"
+                aria-label="Close navigation menu"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
 
-                <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 text-sm font-medium" aria-label="Mobile Public Navigation">
-                  <p className="px-3 pb-2 text-[10px] font-mono uppercase tracking-[0.16em] text-text-muted">
-                    Explore ParkEase
-                  </p>
-                  {navLinks.map((link) => {
-                    const isActive = location.pathname === link.path;
-                    return (
-                      <Link
-                        key={link.label}
-                        to={link.path}
-                        onClick={() => setMobileMenuOpen(false)}
-                        aria-current={isActive ? 'page' : undefined}
-                        className={`block rounded-btn border px-3 py-2.5 transition-colors ${
-                          isActive
-                            ? 'border-border bg-surface-raised text-text'
-                            : 'border-transparent text-text-muted hover:bg-surface-raised hover:text-text'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    );
-                  })}
+            <nav
+              className="flex-1 space-y-1 overflow-y-auto px-3 py-4"
+              aria-label="Mobile Public Navigation"
+            >
+              <p className="px-3 pb-2 text-[10px] font-mono uppercase tracking-[0.16em] text-text-muted">
+                Explore ParkEase
+              </p>
+              {navLinks.map(({ label, path, icon: Icon }) => {
+                const isActive = location.pathname === path;
+                return (
                   <Link
-                    to="/admin/login"
+                    key={path}
+                    to={path}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-btn border border-transparent px-3 py-2.5 text-text-muted transition-colors hover:bg-surface-raised hover:text-text"
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex items-center gap-3 rounded-btn border px-3 py-2 text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'border-border bg-surface-raised text-text font-semibold'
+                        : 'border-transparent text-text-muted hover:bg-surface-raised/60 hover:text-text'
+                    }`}
                   >
-                    Admin Portal
+                    <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <span>{label}</span>
                   </Link>
-                </nav>
+                );
+              })}
+              <Link
+                to="/admin/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-btn border border-transparent px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:bg-surface-raised/60 hover:text-text"
+              >
+                <ShieldCheck className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <span>Admin Portal</span>
+              </Link>
+            </nav>
 
-                <div className="space-y-2 border-t border-border bg-surface-subtle/40 p-4">
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex h-8 w-full items-center justify-center rounded-btn border border-border bg-surface-raised px-3 py-1.5 text-xs font-medium tracking-tight text-text transition-colors hover:border-text/20 focus-visible:outline-2 focus-visible:outline-offset-2"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/parking"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex h-8 w-full items-center justify-center gap-1.5 rounded-btn border border-text bg-text px-3 py-1.5 text-xs font-medium tracking-tight text-bg transition-colors hover:bg-text/90 focus-visible:outline-2 focus-visible:outline-offset-2"
-                  >
-                    Find Parking
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </Link>
-                </div>
-              </motion.aside>
-          </motion.div>
-        )}
-      </header>
+            <div className="space-y-3 border-t border-border bg-surface-subtle/40 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-text-muted">Theme</span>
+                <ThemeToggle />
+              </div>
+              <div className="space-y-2 border-t border-border/60 pt-3">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex h-9 w-full items-center justify-center rounded-btn border border-border bg-surface-raised px-3 text-xs font-medium text-text transition-colors hover:border-text/20 focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/parking"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex h-9 w-full items-center justify-center gap-1.5 rounded-btn border border-text bg-text px-3 text-xs font-medium text-bg transition-colors hover:bg-text/90 focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Find Parking
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </motion.aside>
+        </motion.div>
+      )}
 
       {/* Page Content */}
       <main className="flex-1">
