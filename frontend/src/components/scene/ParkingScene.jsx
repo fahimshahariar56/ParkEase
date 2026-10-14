@@ -66,6 +66,8 @@ export default function ParkingScene() {
     let controls;
     let renderFrame = 0;
     let lastFrame = 0;
+    let lastStoryPosition;
+    let orbitInteractionStarted = false;
     let visible = !('IntersectionObserver' in window);
     let hovered = false;
     let handleVisibilityChange;
@@ -149,7 +151,7 @@ export default function ParkingScene() {
       scene.add(fillLight);
 
       const ground = makeMaterial('#202227', { roughness: 0.82, metalness: 0.08 });
-      const bayPaint = new THREE.MeshBasicMaterial({ color: '#f5f5f5', transparent: true, opacity: 0.74 });
+      const bayPaint = new THREE.MeshBasicMaterial({ color: '#f5f5f5', transparent: true, opacity: 0.36 });
       const bodyPaint = new THREE.MeshPhysicalMaterial({
         color: '#d9dce0',
         metalness: 0.04,
@@ -186,6 +188,7 @@ export default function ParkingScene() {
 
       const carRig = new THREE.Group();
       carRig.position.set(2.7, 0, 0.45);
+      lastStoryPosition = carRig.position.clone();
       scene.add(carRig);
 
       const car = new THREE.Group();
@@ -308,6 +311,7 @@ export default function ParkingScene() {
       carRig.add(car);
 
       const boostGroup = new THREE.Group();
+      boostGroup.scale.setScalar(0.72);
       const boostMaterial = new THREE.MeshBasicMaterial({
         color: '#aab8c8',
         transparent: true,
@@ -389,12 +393,14 @@ export default function ParkingScene() {
       };
       const handleControlStart = () => {
         canvas.classList.add('cursor-grabbing');
-        if (controls.target.x !== carRig.position.x) {
-          const shift = carRig.position.x - controls.target.x;
-          controls.target.x += shift;
-          camera.position.x += shift;
-          controls.update();
-        }
+        orbitInteractionStarted = true;
+        const shiftX = carRig.position.x - controls.target.x;
+        const shiftZ = carRig.position.z - controls.target.z;
+        controls.target.x += shiftX;
+        controls.target.z += shiftZ;
+        camera.position.x += shiftX;
+        camera.position.z += shiftZ;
+        controls.update();
         boostMaterial.opacity = 0.3;
         render();
       };
@@ -456,22 +462,76 @@ export default function ParkingScene() {
               trigger: root,
               start: 'top bottom',
               end: 'bottom top',
-              scrub: 0.55,
-              onUpdate: render,
+              scrub: 0.7,
+              invalidateOnRefresh: true,
+              onUpdate: () => {
+                if (orbitInteractionStarted) {
+                  const shiftX = carRig.position.x - lastStoryPosition.x;
+                  const shiftZ = carRig.position.z - lastStoryPosition.z;
+                  controls.target.x += shiftX;
+                  controls.target.z += shiftZ;
+                  camera.position.x += shiftX;
+                  camera.position.z += shiftZ;
+                }
+                lastStoryPosition.copy(carRig.position);
+                render();
+              },
             },
           });
+
+          story.addLabel('arrival', 0);
           story.fromTo(
             carRig.position,
             { x: 2.7, z: 0.45 },
-            { x: 0, z: 0, duration: 1, ease: 'none' },
-            0,
+            { x: 0.18, z: 0.04, duration: 0.58, ease: 'none' },
+            'arrival',
           );
           story.fromTo(
             carRig.rotation,
             { y: -0.16 },
-            { y: 0, duration: 1, ease: 'none' },
-            0,
+            { y: 0.015, duration: 0.72, ease: 'none' },
+            'arrival',
           );
+          story.fromTo(
+            carRig.scale,
+            { x: 0.93, y: 0.93, z: 0.93 },
+            { x: 1, y: 1, z: 1, duration: 0.66, ease: 'none' },
+            'arrival',
+          );
+
+          story.addLabel('align', 0.58);
+          story.to(bayPaint, {
+            opacity: 0.74,
+            duration: 0.16,
+            ease: 'none',
+          }, 'align');
+          story.to(boostGroup.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            duration: 0.2,
+            ease: 'power1.out',
+          }, 'align');
+
+          story.addLabel('parked', 0.82);
+          story.to(carRig.position, {
+            x: 0,
+            z: 0,
+            duration: 0.18,
+            ease: 'power1.out',
+          }, 'parked');
+          story.to(carRig.rotation, {
+            y: 0,
+            duration: 0.18,
+            ease: 'power1.out',
+          }, 'parked');
+          story.to(carRig.scale, {
+            x: 0.985,
+            y: 0.985,
+            z: 0.985,
+            duration: 0.18,
+            ease: 'power1.out',
+          }, 'parked');
         }, root);
         return () => context.revert();
       });
