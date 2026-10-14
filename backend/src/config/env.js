@@ -12,7 +12,7 @@
   export const env = {
     PORT: parseInt(process.env.PORT, 10) || 5000,
     NODE_ENV: process.env.NODE_ENV || 'development',
-    CLIENT_ORIGIN: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    CLIENT_ORIGIN: (process.env.CLIENT_ORIGIN || 'http://localhost:5173').replace(/\/+$/, ''),
     
     // Database settings
     DB_HOST: process.env.DB_HOST || 'localhost',

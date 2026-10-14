@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/features", "destination": "/index.html" },
+    { "source": "/how-it-works", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/admin/:path*", "destination": "/index.html" },
+    { "source": "/parking", "destination": "/index.html" },
+    { "source": "/reservations", "destination": "/index.html" },
+    { "source": "/profile", "destination": "/index.html" }
+  ]
+}
