@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
@@ -72,16 +72,17 @@ const TOAST_CONFIG = {
 };
 
 const ToastItem = ({ toast, onRemove }) => {
+  const prefersReducedMotion = useReducedMotion();
   const cfg = TOAST_CONFIG[toast.type] ?? TOAST_CONFIG.info;
 
   return (
     <motion.div
       role="status"
       aria-live="polite"
-      initial={{ opacity: 0, y: 12, scale: 0.96 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 12, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.12 } }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+      exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95, transition: { duration: 0.12 } }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={[
         'pointer-events-auto flex items-start gap-3 px-4 py-3',
         'rounded-card bg-surface-raised border font-sans text-sm text-text',

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { X } from 'lucide-react';
 
 /**
@@ -19,43 +19,73 @@ export const Dialog = ({
 }) => {
   const isDialogOpen = Boolean(isOpen ?? open);
   const closeRef = useRef(null);
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (!isDialogOpen) return;
 
-    // Focus the close button when dialog opens for keyboard accessibility
+    previousFocusRef.current = document.activeElement;
     const frame = requestAnimationFrame(() => closeRef.current?.focus());
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose?.();
-    };
-
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       cancelAnimationFrame(frame);
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      const previousFocus = previousFocusRef.current;
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+        previousFocus.focus();
+      }
     };
-  }, [isDialogOpen, onClose]);
+  }, [isDialogOpen]);
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onClose?.();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+
+    const focusable = Array.from(dialogRef.current?.querySelectorAll(
+      'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+    ) || []).filter((element) => element.getClientRects().length > 0);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!dialogRef.current.contains(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+    } else if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   return (
     <AnimatePresence>
       {isDialogOpen && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby={title ? 'dialog-title' : undefined}
           aria-describedby={description ? 'dialog-description' : undefined}
+          onKeyDown={handleKeyDown}
         >
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/70 backdrop-blur-[2px]"
             aria-hidden="true"
@@ -63,10 +93,10 @@ export const Dialog = ({
 
           {/* Dialog panel */}
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.97 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.97 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            exit={prefersReducedMotion ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 6, scale: 0.97 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
             className={[
               'relative w-full font-sans',
               maxWidth,

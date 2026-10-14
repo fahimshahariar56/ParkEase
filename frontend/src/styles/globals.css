@@ -1,6 +1,4 @@
 @import './tokens.css';
-/* Inter: primary UI / body / navigation (DESIGN.md §4) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,28 +13,28 @@
   }
 
   html {
-    color-scheme: dark light;
+    color-scheme: dark;
     font-family: var(--font-sans);
     background-color: var(--color-bg);
     color: var(--color-text);
-    /* Subtle dot-grid background texture (DESIGN.md §3 — Vercel-inspired) */
     background-image: radial-gradient(
       circle,
-      rgba(255, 255, 255, 0.06) 1px,
+      var(--color-texture-dot) 1px,
       transparent 1px
     );
-    background-size: 24px 24px;
+    background-size: var(--texture-grid-size) var(--texture-grid-size);
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Light theme: darker dots on white */
   html.light,
   html[data-theme='light'] {
+    color-scheme: light;
     background-image: radial-gradient(
       circle,
-      rgba(0, 0, 0, 0.06) 1px,
+      var(--color-texture-dot) 1px,
       transparent 1px
     );
+    background-size: var(--texture-grid-size) var(--texture-grid-size);
   }
 
   body {
@@ -200,5 +198,16 @@
     line-height: 1;
     color: var(--color-text);
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .bg-bg {
+    background-image: radial-gradient(
+      circle,
+      var(--color-texture-dot) 1px,
+      transparent 1px
+    );
+    background-size: var(--texture-grid-size) var(--texture-grid-size);
   }
 }

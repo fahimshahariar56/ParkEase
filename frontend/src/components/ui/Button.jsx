@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -26,12 +26,13 @@ export const Button = React.forwardRef((
   },
   ref,
 ) => {
-  // Base: rectangular shape, Inter font, smooth transitions, no layout shift on hover
+  const prefersReducedMotion = useReducedMotion();
+
   const base = [
     'inline-flex items-center justify-center gap-2',
     'font-sans font-medium tracking-tight',
     'rounded-btn border',
-    'transition-all duration-150 ease-in-out',
+    'transition-colors duration-150 ease-in-out',
     'select-none cursor-pointer',
     'focus-visible:outline-2 focus-visible:outline-offset-2',
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none',
@@ -79,6 +80,14 @@ export const Button = React.forwardRef((
       'active:bg-red-800',
       'focus-visible:outline-status-occupied',
     ].join(' '),
+
+    // Compact square action; callers should provide an accessible name.
+    icon: [
+      'bg-transparent text-text-muted border-transparent',
+      'hover:bg-surface-raised hover:text-text hover:border-border',
+      'active:bg-surface',
+      'focus-visible:outline-text',
+    ].join(' '),
   };
 
   const sizes = {
@@ -87,9 +96,11 @@ export const Button = React.forwardRef((
     lg: 'text-sm px-5 py-2.5 h-10',
   };
 
+  const iconOnlySizes = { sm: 'w-9 h-9 p-0', md: 'w-11 h-11 p-0', lg: 'w-12 h-12 p-0' };
   const iconSizes = { sm: 'w-3.5 h-3.5', md: 'w-4 h-4', lg: 'w-4 h-4' };
 
   const isDisabled = disabled || isLoading;
+  const isIconOnly = variant === 'icon';
   const iconCls = iconSizes[size] ?? iconSizes.md;
 
   return (
@@ -99,12 +110,12 @@ export const Button = React.forwardRef((
       disabled={isDisabled}
       onClick={isDisabled ? undefined : onClick}
       // Subtle press response — no scale-up on hover (prevents layout shift)
-      whileTap={isDisabled ? {} : { scale: 0.97 }}
-      transition={{ duration: 0.1 }}
+      whileTap={isDisabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
       className={[
         base,
         variants[variant] ?? variants.primary,
-        sizes[size] ?? sizes.md,
+        isIconOnly ? (iconOnlySizes[size] ?? iconOnlySizes.md) : (sizes[size] ?? sizes.md),
         fullWidth ? 'w-full' : '',
         className,
       ].join(' ')}

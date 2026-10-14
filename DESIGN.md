@@ -1,7 +1,7 @@
 # ParkEase — Premium UI/UX Design Specification
 
 > **Product:** ParkEase — Smart Parking Slot Management System  
-> **Document:** `design.md`  
+> **Document:** `DESIGN.md`
 > **Purpose:** Single source of truth for UI design, visual identity, layouts, interactions, responsive behavior, and motion implementation.
 
 ---
@@ -16,6 +16,12 @@ Design ParkEase as a carefully art-directed, premium automotive-tech SaaS produc
 
 ### Design-direction precedence
 This updated specification supersedes earlier conflicting color, typography, button-shape, and visual-texture guidance in this document. Keep existing product functionality and architecture. Use the actual repository and current `PHASE.md` as the source of truth for functional scope.
+
+### Part 1 shared foundation
+
+The current shared foundation is implemented in `frontend/src/styles/tokens.css`, `frontend/src/styles/globals.css`, and `frontend/src/components/ui/`. It uses semantic CSS variables with Tailwind mappings, a static low-contrast dot grid on page backgrounds, dark as the default theme with a saved light/dark choice, and reusable button, input, card, badge, dialog, toast, skeleton, empty, and error primitives. Motion-based shared interactions must honor `prefers-reduced-motion`.
+
+The grid is a CSS background, so it stays beneath content and cannot intercept input. A cursor-reactive effect is intentionally not part of this foundation; if added later, use a lightweight decorative CSS/SVG/canvas layer, throttle updates, set `pointer-events: none`, and disable it for touch and reduced-motion contexts.
 
 ### Core user journeys
 
@@ -93,12 +99,14 @@ Build the core visual system from white, black, charcoal, and neutral gray. The 
 | `color.border.dark` | `#292B30` | Low-contrast borders and separators |
 | `color.text.dark` | `#F5F5F5` | Primary text on dark backgrounds |
 | `color.text.muted.dark` | `#A1A1AA` | Secondary text on dark backgrounds |
+| `color.texture.dot.dark` | `rgba(245, 245, 245, 0.035)` | Low-contrast dark-theme dot grid |
 | `color.bg.light` | `#FAFAFA` | Main light-theme background |
 | `color.surface.light` | `#FFFFFF` | Forms, cards, panels |
 | `color.surface.subtle.light` | `#F1F1F2` | Secondary light surfaces |
 | `color.border.light` | `#E4E4E7` | Light-theme borders |
 | `color.text.light` | `#111113` | Main text on light backgrounds |
 | `color.text.muted.light` | `#62626B` | Secondary text on light backgrounds |
+| `color.texture.dot.light` | `rgba(17, 17, 19, 0.045)` | Low-contrast light-theme dot grid |
 | `color.accent` | `#D4FF4F` | Optional restrained acid-lime accent, only if it fits existing brand assets; do not spread it across the UI |
 | `color.success` | `#16A34A` | Positive state, paired with a readable label |
 | `color.warning` | `#D97706` | Pending / attention |
@@ -140,14 +148,10 @@ Use a subtle, monochrome, developer-tool-inspired background texture: fine dot g
 
 ## 4. Typography
 
-Use a **purposeful mixed-font system**, selected with the UI/UX Pro Max skill and verified against the actual project dependencies and font-loading setup. Do not force one monospace font across all content.
-
-Preferred direction, subject to the existing codebase and skill recommendations:
-- **Primary UI / body / navigation:** Geist Sans or Inter, chosen consistently—not mixed randomly.
-- **Display / editorial headings:** the same primary sans family with carefully controlled weights, tracking, and line-height; an additional display face is allowed only if UI/UX Pro Max recommends it and it improves hierarchy.
-- **Technical data / slot IDs / timestamps / code-like metadata:** Geist Mono or JetBrains Mono.
-
-If UI/UX Pro Max recommends a better pairing for the existing product, follow its recommendation and document the selected pair. Avoid loading several similar font families. Prefer local/project-approved font loading or a reliable existing font setup; provide fallback stacks.
+Use a purposeful two-font system:
+- **Inter** is the primary face for body copy, navigation, forms, buttons, and headings. UI/UX Pro Max's “Modern Dark Cinema” pairing identifies Inter as suitable for premium, technical, dark utility products; it also matches the existing Tailwind and CSS tokens.
+- **JetBrains Mono** is reserved for slot IDs, timestamps, reservation identifiers, code, and selected data labels. It is already part of the project and avoids turning the whole interface into monospace.
+- Load both families from the existing Google Fonts setup with `display=swap`, and retain the system fallbacks in `tokens.css`. Do not add a display face or font package without a concrete need.
 
 Suggested hierarchy:
 - Display / hero heading: 52–76px desktop; 38–48px mobile, medium/semibold rather than automatically extra-bold
@@ -178,7 +182,7 @@ Use a consistent spacing scale based on 4px: `4, 8, 12, 16, 24, 32, 48, 64, 80, 
 
 ### Premium square button system
 
-Create a consistent set of rectangular buttons with clear hierarchy: primary, secondary, outline, ghost, danger, and icon-only. Buttons should feel tactile and deliberate.
+Create a consistent set of rectangular buttons with clear hierarchy: primary, secondary, outline, ghost, danger, and icon-only. Buttons should feel tactile and deliberate. Icon-only controls require an accessible name.
 
 - Default: high-contrast solid or outlined surface, precise border, clear label.
 - Hover: short color/surface transition, slight border contrast shift, optional subtle 1–2px lift or icon movement; no large bounce or glow.
@@ -202,6 +206,12 @@ Build/reuse consistent components for:
 - Skeleton loaders, error states, and confirmation panels
 
 Every interactive control must have appropriate default, hover, focus-visible, active, disabled, loading, and error states.
+
+### Implemented shared primitives
+
+The existing UI exports `Button`, `Input`, `Card`, `Badge`, `Dialog`, `ToastProvider`, `Skeleton`, `CardSkeleton`, `Spinner`, `EmptyState`, and `ErrorState`. Buttons use 7px corners and include an icon-only variant; inputs use 6px corners; cards use a restrained 10px radius; pill geometry is reserved for status badges. Table styling is provided by the `.park-table` CSS utility. Native `<select>` controls remain the dropdown primitive; no separate custom menu component is currently implemented.
+
+The token layer defines dark/light surfaces, text, semantic status colors, spacing, radii, shadows, and transition timing. Tailwind utilities consume these variables. The focus ring is visible, and shared Motion components disable or collapse their animation when reduced motion is requested.
 
 ---
 
@@ -428,6 +438,8 @@ The existing customer profile page has been reported to visibly jump/shift when 
 - Check for duplicate effects, unstable keys, content-driven sidebar resizing, late font swaps, and transitions that animate the page container itself.
 - Preserve the intended route scroll position; do not force scroll-to-top on every nested customer navigation unless the route design requires it.
 - Do not apply arbitrary `position: fixed`, fixed heights, or CSS hacks without identifying the cause.
+
+Initial code audit: `CustomerLayout` is a shared parent route, so navigation between customer pages should retain the shell. `CustomerProfilePage` initializes profile data from cached auth state but starts profile loading as `false`; its first effect then replaces the profile content with a skeleton. The profile fetch also depends on `user` and updates that same auth context, which may retrigger the effect. These are investigation hypotheses, not a confirmed root cause. Verify with direct load, internal navigation, refresh, throttled profile API responses, and React Profiler before changing route or data behavior.
 - Verify direct navigation, internal navigation, refresh, and slow API response behavior on `/profile` and adjacent customer routes.
 
 ---
@@ -505,11 +517,11 @@ Do not request or store actual card numbers, CVV, PIN, OTP, or mobile banking cr
 Provide a polished animated sun/moon toggle in the public header and authenticated dashboard header.
 
 Requirements:
-- Smooth icon and thumb transition
+- Brief icon transition; disable it when reduced motion is requested
 - Theme changes all surfaces, typography, borders, charts, inputs, dialogs, and tables
-- No flash of the wrong theme on initial render if persistence is implemented
-- Persist preference using the project's approved theme mechanism
-- Respect system theme when no saved preference exists, if supported
+- Dark is the default; persist the selected `dark` or `light` value under `parkease-theme`
+- Apply the root `dark`/`light` class and `data-theme` before paint through the client theme provider
+- Set the matching browser `color-scheme` so native controls follow the selected theme
 - Ensure contrast and focus visibility in both modes
 - Avoid animating the entire page in a way that causes flashing
 

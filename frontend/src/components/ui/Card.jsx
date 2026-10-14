@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 /**
  * Card — rectangular panel (DESIGN.md §5)
@@ -17,6 +17,7 @@ export const Card = ({
   onClick,
   ...props
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const isInteractive = variant === 'interactive' || Boolean(onClick);
 
   const base = 'rounded-card border font-sans overflow-hidden';
@@ -30,7 +31,10 @@ export const Card = ({
 
   const Component = isInteractive ? motion.div : 'div';
   const motionProps = isInteractive
-    ? { whileTap: { scale: 0.995 }, transition: { duration: 0.1 } }
+    ? {
+      whileTap: prefersReducedMotion ? undefined : { scale: 0.995 },
+      transition: { duration: prefersReducedMotion ? 0 : 0.15 },
+    }
     : {};
 
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -10,14 +10,15 @@ import { useTheme } from '../../context/ThemeContext';
  */
 export const ThemeToggle = ({ className = '' }) => {
   const { theme, toggleTheme } = useTheme();
+  const prefersReducedMotion = useReducedMotion();
   const isDark = theme === 'dark';
 
   return (
     <motion.button
       type="button"
       onClick={toggleTheme}
-      whileTap={{ scale: 0.92 }}
-      transition={{ duration: 0.1 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       aria-pressed={isDark}
       className={[
@@ -32,10 +33,10 @@ export const ThemeToggle = ({ className = '' }) => {
       <AnimatePresence mode="wait">
         <motion.span
           key={theme}
-          initial={{ rotate: -15, opacity: 0, scale: 0.85 }}
+          initial={prefersReducedMotion ? false : { rotate: -15, opacity: 0, scale: 0.85 }}
           animate={{ rotate: 0, opacity: 1, scale: 1 }}
-          exit={{ rotate: 15, opacity: 0, scale: 0.85 }}
-          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          exit={prefersReducedMotion ? { opacity: 1 } : { rotate: 15, opacity: 0, scale: 0.85 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center justify-center"
         >
           {isDark ? (

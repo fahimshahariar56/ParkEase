@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
 
 const ThemeContext = createContext({
   theme: 'dark',
@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }) => {
     return 'dark'; // ParkEase default signature theme is dark
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
