@@ -17,6 +17,7 @@ export function errorHandler(err, req, res, next) {
       errorName: err.name,
       errorMessage: redactSensitive(err.message),
       sqlCode: err.code,
+      sqlState: err.sqlState,
       stack: redactSensitive(err.stack),
     }));
   }

@@ -28,6 +28,7 @@ describe('Error handler diagnostics', () => {
       errorHandler(
         Object.assign(new Error('Database password=private-value'), {
           code: 'ER_NO_SUCH_TABLE',
+          sqlState: '42S02',
           sql: 'SELECT * FROM users',
         }),
         {
@@ -45,6 +46,7 @@ describe('Error handler diagnostics', () => {
 
     assert.match(loggedMessage, /auth\.loginCustomer/);
     assert.match(loggedMessage, /ER_NO_SUCH_TABLE/);
+    assert.match(loggedMessage, /42S02/);
     assert.match(loggedMessage, /Database password=\[REDACTED\]/);
     assert.match(loggedMessage, /"route":"\/api\/v1\/auth\/customer\/login"/);
     assert.doesNotMatch(loggedMessage, /private-value|query-value|request-value|SELECT \* FROM users/);
