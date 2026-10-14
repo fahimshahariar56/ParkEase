@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
   ArrowRight,
@@ -15,9 +15,12 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, Skeleton, EmptyState } from '../components/ui';
 import { parkingApi } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   // Real backend parking facility data state
   const [lots, setLots] = useState([]);
@@ -55,6 +58,20 @@ export const LandingPage = () => {
 
   const handleMouseLeave = () => {
     setMousePos({ x: 0, y: 0 });
+  };
+
+  const handleShowMore = () => {
+    const target = '/parking';
+
+    if (!isAuthenticated) {
+      navigate('/login', {
+        replace: true,
+        state: { from: { pathname: target, search: location.search, hash: location.hash } },
+      });
+      return;
+    }
+
+    navigate(target, { replace: true });
   };
 
   return (
@@ -261,11 +278,15 @@ export const LandingPage = () => {
                     <span className="font-mono text-text-muted">
                       Total Capacity: <span className="font-semibold text-text">{lot.totalCapacity ?? '—'}</span>
                     </span>
-                    <Link to="/parking">
-                      <Button variant="ghost" size="sm" icon={ArrowRight} iconPosition="right">
-                        View Slots
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={ArrowRight}
+                      iconPosition="right"
+                      onClick={handleShowMore}
+                    >
+                      Show more
+                    </Button>
                   </div>
                 }
               >
