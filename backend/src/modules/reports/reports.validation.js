@@ -24,8 +24,15 @@ const VALID_PAYMENT_STATUSES = ['PAID', 'REFUNDED', 'FAILED'];
 
 function isValidDateString(dateStr) {
   if (typeof dateStr !== 'string' || !dateStr.trim()) return false;
-  const d = new Date(dateStr);
-  return !Number.isNaN(d.getTime());
+  const value = dateStr.trim();
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2}))?$/);
+  if (!match) return false;
+
+  const [, year, month, day] = match;
+  const datePart = `${year}-${month}-${day}`;
+  const parsedDate = new Date(`${datePart}T00:00:00Z`);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== datePart) return false;
+  return !Number.isNaN(new Date(value).getTime());
 }
 
 /**
@@ -34,12 +41,11 @@ function isValidDateString(dateStr) {
  */
 function normalizeDateBoundary(dateStr, isEnd = false) {
   const trimmed = dateStr.trim();
-  // Check if purely YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    return isEnd ? `${trimmed} 23:59:59` : `${trimmed} 00:00:00`;
+    const time = isEnd ? '23:59:59' : '00:00:00';
+    return new Date(`${trimmed}T${time}+06:00`).toISOString().slice(0, 19).replace('T', ' ');
   }
   const dateObj = new Date(trimmed);
-  // Return standard MySQL format 'YYYY-MM-DD HH:mm:ss' in UTC/local
   return dateObj.toISOString().slice(0, 19).replace('T', ' ');
 }
 
@@ -81,8 +87,8 @@ export function validateReportFilters(req, res, next) {
   }
 
   if (validated.startDate && validated.endDate) {
-    const startMs = new Date(validated.startDate).getTime();
-    const endMs = new Date(validated.endDate).getTime();
+    const startMs = new Date(`${validated.startDate}Z`).getTime();
+    const endMs = new Date(`${validated.endDate}Z`).getTime();
     if (startMs > endMs) {
       return res.status(400).json({
         success: false,

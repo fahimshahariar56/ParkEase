@@ -86,6 +86,7 @@ export async function getPaymentsReport(req, res, next) {
       filters: {
         startDate: filters.rawStartDate || null,
         endDate: filters.rawEndDate || null,
+        lotId: filters.lotId || null,
         demoMethod: filters.demoMethod || null,
         status: filters.status || null,
       },

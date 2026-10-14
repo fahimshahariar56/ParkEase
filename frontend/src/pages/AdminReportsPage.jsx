@@ -42,7 +42,27 @@ import { reportsApi, parkingApi } from '../lib/api';
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 function formatCurrency(amount) {
-  return `$${Number(amount || 0).toFixed(2)}`;
+  return `৳${Number(amount || 0).toLocaleString('en-BD', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function getDhakaDateString(date) {
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function addCalendarDays(dateString, days) {
+  const date = new Date(`${dateString}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 function formatPercent(pct) {
@@ -111,18 +131,16 @@ export const AdminReportsPage = () => {
 
   const computeDateRange = useCallback((preset) => {
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = getDhakaDateString(now);
 
     if (preset === 'today') {
       return { start: todayStr, end: todayStr };
     }
     if (preset === '7days') {
-      const past = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return { start: past.toISOString().split('T')[0], end: todayStr };
+      return { start: addCalendarDays(todayStr, -6), end: todayStr };
     }
     if (preset === '30days') {
-      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      return { start: past.toISOString().split('T')[0], end: todayStr };
+      return { start: addCalendarDays(todayStr, -29), end: todayStr };
     }
     return { start: '', end: '' };
   }, []);
@@ -975,8 +993,8 @@ function ReservationsTab({ data }) {
                       {formatDateTime(r.startTime)}
                       <span className="block text-[10px] text-text-muted">to {formatDateTime(r.endTime)}</span>
                     </td>
-                    <td className="p-3 font-mono text-text-muted">${r.hourlyRateSnapshot}/hr</td>
-                    <td className="p-3 font-mono font-bold text-text">${r.totalEstimatedFee}</td>
+                    <td className="p-3 font-mono text-text-muted">{formatCurrency(r.hourlyRateSnapshot)}/hr</td>
+                    <td className="p-3 font-mono font-bold text-text">{formatCurrency(r.totalEstimatedFee)}</td>
                     <td className="p-3">
                       <Badge
                         variant={
@@ -1085,9 +1103,9 @@ function SessionsTab({ data }) {
                       {s.exitTime ? formatDateTime(s.exitTime) : <span className="text-brand font-semibold">Active</span>}
                     </td>
                     <td className="p-3 text-text font-mono">{s.durationMinutes} mins</td>
-                    <td className="p-3 text-text-muted font-mono">${s.hourlyRateSnapshot}/hr</td>
+                    <td className="p-3 text-text-muted font-mono">{formatCurrency(s.hourlyRateSnapshot)}/hr</td>
                     <td className="p-3 font-mono font-bold text-text">
-                      {s.totalFee !== null ? `$${s.totalFee}` : '—'}
+                      {s.totalFee !== null ? formatCurrency(s.totalFee) : '—'}
                     </td>
                     <td className="p-3">
                       <Badge variant={s.status === 'ACTIVE' ? 'brand' : 'neutral'}>{s.status}</Badge>
@@ -1218,7 +1236,7 @@ function DemoPaymentsTab({ data }) {
                       <span className="text-text">{p.lotName}</span>
                       <span className="block text-[10px] text-text-muted">Slot #{p.slotNumber}</span>
                     </td>
-                    <td className="p-3 font-mono font-bold text-text">${p.amount}</td>
+                    <td className="p-3 font-mono font-bold text-text">{formatCurrency(p.amount)}</td>
                     <td className="p-3 text-[11px] text-text-muted">{p.demoMethod.replace(/_/g, ' ')}</td>
                     <td className="p-3">
                       <Badge variant={p.status === 'PAID' ? 'available' : p.status === 'FAILED' ? 'occupied' : 'brand'}>

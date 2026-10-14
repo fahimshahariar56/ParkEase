@@ -565,7 +565,7 @@ export async function getSessionsReport(filters = {}) {
 // ─── 4. Demo Payment Report ───────────────────────────────────────────────────
 
 export async function getDemoPaymentsReport(filters = {}) {
-  const { startDate, endDate, demoMethod, status, page = 1, limit = 50, offset = 0 } = filters;
+  const { startDate, endDate, lotId, demoMethod, status, page = 1, limit = 50, offset = 0 } = filters;
 
   const conditions = [];
   const params = [];
@@ -578,6 +578,10 @@ export async function getDemoPaymentsReport(filters = {}) {
     conditions.push('p.paid_at <= ?');
     params.push(endDate);
   }
+  if (lotId) {
+    conditions.push('pl.id = ?');
+    params.push(lotId);
+  }
   if (demoMethod) {
     conditions.push('p.demo_method = ?');
     params.push(demoMethod);
@@ -588,6 +592,12 @@ export async function getDemoPaymentsReport(filters = {}) {
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const reportFromClause = `
+    FROM payments p
+    JOIN parking_sessions s ON p.session_id = s.id
+    JOIN parking_slots ps ON s.slot_id = ps.id
+    JOIN parking_lots pl ON ps.lot_id = pl.id
+  `;
 
   // 1. Overview summary: excludes failed & refunded from successful simulated revenue!
   const summarySql = `
@@ -598,8 +608,7 @@ export async function getDemoPaymentsReport(filters = {}) {
       COALESCE(SUM(CASE WHEN p.status = 'FAILED' THEN 1 ELSE 0 END), 0) AS failed_count,
       COALESCE(SUM(CASE WHEN p.status = 'PAID' THEN p.amount ELSE 0 END), 0) AS successful_total_amount,
       COALESCE(AVG(CASE WHEN p.status = 'PAID' THEN p.amount END), 0) AS avg_successful_amount
-    FROM payments p
-    JOIN parking_sessions s ON p.session_id = s.id
+    ${reportFromClause}
     ${whereClause}
   `;
 
@@ -610,7 +619,7 @@ export async function getDemoPaymentsReport(filters = {}) {
       COUNT(p.id) AS transaction_count,
       COALESCE(SUM(CASE WHEN p.status = 'PAID' THEN 1 ELSE 0 END), 0) AS successful_count,
       COALESCE(SUM(CASE WHEN p.status = 'PAID' THEN p.amount ELSE 0 END), 0) AS successful_amount
-    FROM payments p
+    ${reportFromClause}
     ${whereClause}
     GROUP BY p.demo_method
     ORDER BY transaction_count DESC
@@ -623,7 +632,7 @@ export async function getDemoPaymentsReport(filters = {}) {
       COUNT(p.id) AS transaction_count,
       COALESCE(SUM(CASE WHEN p.status = 'PAID' THEN 1 ELSE 0 END), 0) AS successful_count,
       COALESCE(SUM(CASE WHEN p.status = 'PAID' THEN p.amount ELSE 0 END), 0) AS successful_amount
-    FROM payments p
+    ${reportFromClause}
     ${whereClause}
     GROUP BY DATE(p.paid_at)
     ORDER BY date_bucket DESC
@@ -647,12 +656,9 @@ export async function getDemoPaymentsReport(filters = {}) {
       u.email AS customer_email,
       pl.name AS lot_name,
       ps.slot_number
-    FROM payments p
-    JOIN parking_sessions s ON p.session_id = s.id
+    ${reportFromClause}
     JOIN vehicles v ON s.vehicle_id = v.id
     JOIN users u ON v.user_id = u.id
-    JOIN parking_slots ps ON s.slot_id = ps.id
-    JOIN parking_lots pl ON ps.lot_id = pl.id
     ${whereClause}
     ORDER BY p.paid_at DESC
     LIMIT ? OFFSET ?

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- ParkEase — Smart Parking Slot Management System
--- Day 22: Academic Database Demonstration & SQL Reporting Evidence
+-- Day 23: Reports and Database Demonstration
 -- Database: MySQL 8+ (InnoDB)
 -- =============================================================================
 -- This script provides structured SQL evidence demonstrating:
@@ -192,7 +192,7 @@ SELECT
   COUNT(ps.id) AS total_installed_slots,
   COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND sess.is_active = 1 THEN 1 ELSE 0 END), 0) AS occupied_slots,
   COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND (sess.is_active IS NULL OR sess.is_active = 0) THEN 1 ELSE 0 END), 0) AS available_slots,
-  ROUND((COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND sess.is_active = 1 THEN 1 ELSE 0 END), 0) / COUNT(ps.id)) * 100, 1) AS occupancy_rate_percent
+  ROUND((COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND sess.is_active = 1 THEN 1 ELSE 0 END), 0) / NULLIF(COUNT(ps.id), 0)) * 100, 1) AS occupancy_rate_percent
 FROM parking_lots pl
 INNER JOIN parking_slots ps ON pl.id = ps.lot_id
 LEFT JOIN (
@@ -219,7 +219,7 @@ SELECT
   COALESCE(SUM(CASE WHEN r.status = 'COMPLETED' THEN 1 ELSE 0 END), 0) AS completed_count,
   COALESCE(SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END), 0) AS cancelled_count,
   COALESCE(SUM(CASE WHEN r.status = 'NO_SHOW' THEN 1 ELSE 0 END), 0) AS no_show_count,
-  ROUND((COALESCE(SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END), 0) / COUNT(r.id)) * 100, 1) AS cancellation_rate_percent,
+  ROUND((COALESCE(SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END), 0) / NULLIF(COUNT(r.id), 0)) * 100, 1) AS cancellation_rate_percent,
   ROUND(COALESCE(SUM(r.total_estimated_fee), 0), 2) AS total_estimated_value
 FROM reservations r;
 
@@ -267,7 +267,7 @@ SELECT
   COALESCE(SUM(CASE WHEN ps.status = 'MAINTENANCE' THEN 1 ELSE 0 END), 0) AS maintenance_slots,
   COALESCE(SUM(CASE WHEN ps.status = 'INACTIVE' THEN 1 ELSE 0 END), 0) AS inactive_slots,
   ROUND(
-    (COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND (s.is_occupied = 1 OR r.is_reserved = 1) THEN 1 ELSE 0 END), 0) / COUNT(ps.id)) * 100,
+    (COALESCE(SUM(CASE WHEN ps.status = 'AVAILABLE' AND (s.is_occupied = 1 OR r.is_reserved = 1) THEN 1 ELSE 0 END), 0) / NULLIF(COUNT(ps.id), 0)) * 100,
     1
   ) AS total_utilization_percent
 FROM parking_lots pl
@@ -314,3 +314,41 @@ WHERE entry_time >= DATE_SUB(NOW(), INTERVAL 7 DAY);
 EXPLAIN SELECT id, amount, demo_method, status
 FROM payments
 WHERE paid_at >= DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- =============================================================================
+-- PART 9: INDEX, CONSTRAINT, VIEW, AND TRIGGER INVENTORY
+-- These read-only checks expose the database objects used by the reports.
+-- =============================================================================
+
+SELECT
+  TABLE_NAME,
+  INDEX_NAME,
+  COLUMN_NAME,
+  SEQ_IN_INDEX
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME IN ('parking_slots', 'reservations', 'parking_sessions', 'payments')
+ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX;
+
+SELECT
+  TABLE_NAME,
+  CONSTRAINT_NAME,
+  COLUMN_NAME,
+  REFERENCED_TABLE_NAME,
+  REFERENCED_COLUMN_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME IN ('vehicles', 'parking_slots', 'reservations', 'parking_sessions', 'payments')
+  AND REFERENCED_TABLE_NAME IS NOT NULL
+ORDER BY TABLE_NAME, CONSTRAINT_NAME, ORDINAL_POSITION;
+
+SELECT TABLE_NAME AS view_name
+FROM INFORMATION_SCHEMA.VIEWS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME IN ('vw_occupancy_by_lot', 'vw_demo_daily_revenue')
+ORDER BY TABLE_NAME;
+
+SELECT TRIGGER_NAME, EVENT_MANIPULATION, EVENT_OBJECT_TABLE
+FROM INFORMATION_SCHEMA.TRIGGERS
+WHERE TRIGGER_SCHEMA = DATABASE()
+ORDER BY EVENT_OBJECT_TABLE, TRIGGER_NAME;

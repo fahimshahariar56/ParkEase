@@ -115,8 +115,8 @@ describe('Day 22: Reports Validation & Metrics Tests', () => {
       assert.equal(calledNext, true);
       assert.equal(req.validatedQuery.lotId, 2);
       assert.equal(req.validatedQuery.demoMethod, 'SIMULATED_CARD');
-      assert.equal(req.validatedQuery.startDate, '2026-10-01 00:00:00');
-      assert.equal(req.validatedQuery.endDate, '2026-10-15 23:59:59');
+      assert.equal(req.validatedQuery.startDate, '2026-09-30 18:00:00');
+      assert.equal(req.validatedQuery.endDate, '2026-10-15 17:59:59');
       assert.equal(req.validatedQuery.page, 1);
       assert.equal(req.validatedQuery.limit, 50);
     });
