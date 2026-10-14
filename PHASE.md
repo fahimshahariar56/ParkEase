@@ -459,13 +459,14 @@ Do not claim photorealistic quality unless the actual model and rendered result 
 * Fix reproducible issues in scope.
 * **Deliverable:** Completed QA checklist and test results.
 
-### Day 31 — Documentation and Final Demonstration
+### Day 31 — Documentation and Final Demonstration and readme
 
 * Finalize setup instructions, environment example, API notes, ERD/schema scripts, demo workflow, and known limitations.
 * Document the separate admin and customer login flows.
 * Document admin account initialization/update steps without exposing actual credentials.
 * Verify build and available automated tests.
 * Prepare a concise presentation/demo checklist.
+* Update the README.md file to include all the information about the project and also update ANIMATION.md file to include all the animations and DESIGN.md file to include all    the design decisions and visual references.
 * **Deliverable:** Reproducible project handoff and demonstration-ready build.
 
 ---

@@ -9,6 +9,11 @@
   dotenv.config({ path: path.resolve(__dirname, '../../.env') });
   dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
+  const jwtSecret = process.env.JWT_SECRET?.trim();
+  if (!jwtSecret || Buffer.byteLength(jwtSecret, 'utf8') < 32) {
+    throw new Error('JWT_SECRET must be configured with a cryptographically random value of at least 32 characters.');
+  }
+
   export const env = {
     PORT: parseInt(process.env.PORT, 10) || 5000,
     NODE_ENV: process.env.NODE_ENV || 'development',
@@ -23,6 +28,6 @@
     DB_CONNECTION_LIMIT: parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 10,
 
     // JWT configuration
-    JWT_SECRET: process.env.JWT_SECRET || 'dev_jwt_secret_parkease_fallback_key',
+    JWT_SECRET: jwtSecret,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
   };

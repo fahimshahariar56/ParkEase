@@ -6,7 +6,7 @@ import * as sessionsService from './sessions.service.js';
  */
 export async function getSessions(req, res, next) {
   try {
-    const sessions = await sessionsService.getSessions(req.query);
+    const sessions = await sessionsService.getSessions(req.query, req.user);
     res.status(200).json({
       success: true,
       count: sessions.length,
@@ -23,7 +23,7 @@ export async function getSessions(req, res, next) {
  */
 export async function getSessionById(req, res, next) {
   try {
-    const session = await sessionsService.getSessionById(req.params.id);
+    const session = await sessionsService.getSessionById(req.params.id, req.user);
     res.status(200).json({
       success: true,
       data: { session },
@@ -47,7 +47,7 @@ export async function recordEntry(req, res, next) {
       entryTime,
     });
 
-    const session = await sessionsService.getSessionById(sessionId);
+    const session = await sessionsService.getSessionById(sessionId, req.user);
     res.status(201).json({
       success: true,
       message: 'Vehicle entry recorded and parking session started.',
@@ -65,7 +65,7 @@ export async function recordEntry(req, res, next) {
 export async function recordExit(req, res, next) {
   try {
     const { exitTime } = req.body;
-    const session = await sessionsService.recordExit(req.params.id, { exitTime });
+    const session = await sessionsService.recordExit(req.params.id, { exitTime }, req.user);
 
     res.status(200).json({
       success: true,

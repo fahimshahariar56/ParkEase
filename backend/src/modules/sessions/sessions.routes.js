@@ -12,9 +12,9 @@ export const sessionsRouter = Router();
 // All session endpoints require authentication
 sessionsRouter.use(authenticate);
 
-// List sessions (Customer/Admin)
-sessionsRouter.get('/', sessionsController.getSessions);
-sessionsRouter.get('/:id', sessionsController.getSessionById);
+// Customers can only access their own sessions; admins can access all sessions.
+sessionsRouter.get('/', authorizeRoles('ADMIN', 'CUSTOMER'), sessionsController.getSessions);
+sessionsRouter.get('/:id', authorizeRoles('ADMIN', 'CUSTOMER'), sessionsController.getSessionById);
 
 // Admin-only session write actions
 sessionsRouter.post(

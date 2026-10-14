@@ -395,6 +395,8 @@ Maintain `.env` locally and never commit it. Provide `.env.example` with safe pl
 - `DB_NAME`
 - `JWT_SECRET`
 
+`JWT_SECRET` must be set to a unique cryptographically random value of at least 32 characters. The backend fails at startup if it is missing or too short; it never uses a built-in fallback.
+
 Do not assume every variable is needed; keep the example aligned with actual code.
 
 ## 13. Testing Strategy

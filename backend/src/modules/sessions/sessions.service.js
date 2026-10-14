@@ -92,6 +92,26 @@ const BASE_SESSION_SELECT = `
   JOIN parking_lots l ON s.lot_id = l.id
 `;
 
+function appendSessionAccessFilter(user, whereClauses, params) {
+  if (!user) {
+    const err = new Error('Authentication required to access parking sessions.');
+    err.status = 401;
+    throw err;
+  }
+
+  const role = String(user.role || '').toUpperCase();
+  if (role === 'ADMIN') return;
+
+  if (role !== 'CUSTOMER' || user.id === undefined || user.id === null) {
+    const err = new Error('Access denied. Parking sessions are available only to their owner or an administrator.');
+    err.status = 403;
+    throw err;
+  }
+
+  whereClauses.push('v.user_id = ?');
+  params.push(user.id);
+}
+
 /**
  * Calculate session fee based on entry, exit, and hourly rate snapshot.
  * Minimum billable duration is 1 hour.
@@ -110,10 +130,12 @@ export function calculateSessionFee(entryTime, exitTime, hourlyRate) {
 /**
  * List all sessions with optional filtering and search.
  */
-export async function getSessions(filters = {}) {
+export async function getSessions(filters = {}, user) {
   const { status, lotId, slotId, vehicleId, search } = filters;
   const whereClauses = [];
   const params = [];
+
+  appendSessionAccessFilter(user, whereClauses, params);
 
   if (status && status !== 'ALL') {
     whereClauses.push('ps.status = ?');
@@ -151,9 +173,12 @@ export async function getSessions(filters = {}) {
 /**
  * Retrieve a specific session by ID.
  */
-export async function getSessionById(sessionId) {
-  const sql = `${BASE_SESSION_SELECT} WHERE ps.id = ? LIMIT 1`;
-  const [rows] = await pool.execute(sql, [sessionId]);
+export async function getSessionById(sessionId, user) {
+  const whereClauses = ['ps.id = ?'];
+  const params = [sessionId];
+  appendSessionAccessFilter(user, whereClauses, params);
+  const sql = `${BASE_SESSION_SELECT} WHERE ${whereClauses.join(' AND ')} LIMIT 1`;
+  const [rows] = await pool.execute(sql, params);
 
   if (!rows || rows.length === 0) {
     const err = new Error(`Parking session #${sessionId} not found.`);
@@ -293,7 +318,7 @@ export async function recordEntry({ slotId, vehicleId, reservationId, entryTime 
 /**
  * Record Vehicle Exit / Complete Session with server-side fee calculation
  */
-export async function recordExit(sessionId, { exitTime }) {
+export async function recordExit(sessionId, { exitTime }, user) {
   const conn = await pool.getConnection();
 
   try {
@@ -352,7 +377,7 @@ export async function recordExit(sessionId, { exitTime }) {
     }
 
     await conn.commit();
-    return getSessionById(sessionId);
+    return getSessionById(sessionId, user);
   } catch (err) {
     await conn.rollback();
     throw err;
