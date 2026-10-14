@@ -21,6 +21,7 @@ import {
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -164,7 +165,9 @@ export const AdminLayout = () => {
 
         {/* Page Content View */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <Outlet />
+          <RouteTransition transitionKey={location.pathname}>
+            <Outlet />
+          </RouteTransition>
         </main>
       </div>
 

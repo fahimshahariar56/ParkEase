@@ -5,6 +5,7 @@ import { Car, MapPin, User, CalendarCheck, LogOut, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const CustomerLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -147,7 +148,9 @@ export const CustomerLayout = () => {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <Outlet />
+        <RouteTransition transitionKey={location.pathname}>
+          <Outlet />
+        </RouteTransition>
       </main>
     </div>
   );

@@ -23,6 +23,8 @@ The current shared foundation is implemented in `frontend/src/styles/tokens.css`
 
 `ConstellationGrid` is mounted once beside the router and reads the active theme tokens. It draws a low-contrast particle grid and local neighbor connections on a DPR-aware canvas with a 30fps desktop animation cap. The landing page uses the highest density/intensity; authentication and admin routes use reduced settings. Its fixed canvas has `pointer-events: none` and `aria-hidden`, so it cannot block controls or keyboard use. Mouse movement gently repels and highlights nearby particles; fast movement adds a short, restrained ripple. Motion pauses when the document is hidden. Coarse-pointer and reduced-motion environments render a sparse static grid without cursor interaction. If canvas context creation is unavailable, the semantic page background remains usable.
 
+The landing footer's `PARKEASE` halftone is drawn within a responsive canvas inset: the fitted word uses at most 88% of the canvas width, with a reserved bottom baseline and additional footer-content padding so no outer glyphs are clipped. Route changes use Motion for React at the shared route-group and layout outlet levels, with a 240ms opacity/vertical transition; reduced-motion users receive no route movement or wait.
+
 ### Core user journeys
 
 1. Visitor lands on the website, understands the product, and clicks **Find Parking**.
@@ -58,6 +60,9 @@ Use shared components and layouts. Keep Admin and Customer navigation clearly se
 - Theme toggle
 - Sign In → `/login`
 - Primary CTA: **Find Parking** → `/parking` or the existing intended auth-aware route
+- On mobile, use a left-side overlay drawer consistent with the admin navigation pattern; trap focus, close on Escape/backdrop/navigation, and restore focus to the menu trigger.
+
+The landing page ends with a theme-aware halftone **PARKEASE** wordmark footer. It uses the existing Inter/JetBrains Mono stacks, monochrome theme tokens, accessible real route links, and a lightweight canvas that becomes static under reduced motion or coarse-pointer input.
 
 Every visible navigation link must lead to a real, intentional destination. If a link is presented as a page link, implement a dedicated route and meaningful page content. Do not leave dead anchors, `href="#"`, or multiple links pointing to the same generic page just to appear complete. Audit the current router before adding routes, reuse shared layouts, and preserve existing route behavior. For routes that require authentication, redirect to the appropriate login page and preserve a safe return path where supported.
 
@@ -584,6 +589,7 @@ Use for:
 ### Mobile
 - Single-column page layout
 - Mobile navigation menu
+- Public mobile navigation opens as an admin-style side drawer rather than an expanding header dropdown.
 - Full-width primary actions where useful
 - Touch-friendly controls and slot cards
 - Forms must fit the viewport without horizontal scrolling

@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/ui';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { ConstellationGrid } from './components/ui/constellation-grid';
+import { RouteTransition } from './components/ui/RouteTransition';
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout';
@@ -35,18 +36,26 @@ import {
 } from './pages/AdminSubPages';
 
 function AppRoutes() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const isLandingPage = pathname === '/';
   const isAdminPage = pathname.startsWith('/admin');
   const isAuthPage = ['/login', '/register', '/admin/login'].includes(pathname);
   const density = isLandingPage ? 0.9 : isAdminPage ? 0.42 : isAuthPage ? 0.5 : 0.65;
   const intensity = isLandingPage ? 0.8 : isAdminPage ? 0.32 : isAuthPage ? 0.38 : 0.52;
+  const routeGroup = pathname === '/admin/login'
+    ? 'admin-login'
+    : isAdminPage
+      ? 'admin'
+      : ['/parking', '/reservations', '/profile'].includes(pathname)
+        ? 'customer'
+        : 'public';
 
   return (
     <>
       <ConstellationGrid density={density} intensity={intensity} />
-      <div className="relative z-10 min-h-screen">
-        <Routes>
+      <RouteTransition transitionKey={routeGroup} className="relative z-10 min-h-screen">
+        <Routes location={location}>
           {/* Public Customer / Landing Routes */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
@@ -96,7 +105,7 @@ function AppRoutes() {
           {/* 404 / Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
+      </RouteTransition>
     </>
   );
 }

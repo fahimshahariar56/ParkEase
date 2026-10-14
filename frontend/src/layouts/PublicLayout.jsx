@@ -1,19 +1,66 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Car, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
+import { HalftoneWordmarkFooter } from '../components/ui/halftone-wordmark-footer';
+import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const PublicLayout = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const [mobileMenu, setMobileMenu] = useState(() => ({ pathname: location.pathname, open: false }));
+  const mobileMenuOpen = mobileMenu.open && mobileMenu.pathname === location.pathname;
+  const setMobileMenuOpen = React.useCallback(
+    (open) => setMobileMenu({ pathname: location.pathname, open }),
+    [location.pathname],
+  );
+  const menuButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const drawerRef = useRef(null);
 
   const navLinks = [
     { label: 'Features', path: '/features' },
     { label: 'How It Works', path: '/how-it-works' },
     { label: 'About', path: '/about' },
   ];
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+
+    const menuTrigger = menuButtonRef.current;
+    const openedPath = location.pathname;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setMobileMenu({ pathname: openedPath, open: false });
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = drawerRef.current?.querySelectorAll('a[href], button:not([disabled])');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+      menuTrigger?.focus();
+    };
+  }, [location.pathname, mobileMenuOpen, setMobileMenu]);
 
   return (
     <div className="min-h-screen bg-transparent text-text flex flex-col font-sans selection:bg-text/15 selection:text-text">
@@ -77,11 +124,13 @@ export const PublicLayout = () => {
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
-              aria-label="Toggle navigation menu"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={mobileMenuOpen}
+              aria-controls="public-mobile-drawer"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
@@ -91,73 +140,129 @@ export const PublicLayout = () => {
         {/* Mobile Navigation Drawer */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-3 overflow-hidden"
-            >
-              <div className="flex flex-col space-y-1 text-sm text-text-muted font-medium">
-                {navLinks.map((link) => {
-                  const isActive = location.pathname === link.path;
-                  return (
-                    <Link
-                      key={link.label}
-                      to={link.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={`
-                        py-2 px-3 rounded-btn transition-colors
-                        ${isActive
-                          ? 'bg-surface text-text font-semibold border border-border'
-                          : 'hover:bg-surface hover:text-text'}
-                      `}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="pt-3 border-t border-border flex flex-col gap-2">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="sm" fullWidth>
+            <div className="fixed inset-0 z-50 flex md:hidden">
+              <motion.button
+                type="button"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
+                aria-label="Close navigation menu"
+              />
+              <motion.aside
+                ref={drawerRef}
+                id="public-mobile-drawer"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Public navigation"
+                initial={{ x: -320 }}
+                animate={{ x: 0 }}
+                exit={{ x: -320 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 flex h-full w-[min(20rem,85vw)] flex-col border-r border-border bg-surface font-sans shadow-raised"
+              >
+                <div className="flex h-16 items-center justify-between border-b border-border px-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-btn border border-border bg-surface-raised text-text">
+                      <Car className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <span className="text-sm font-semibold tracking-tight text-text">ParkEase</span>
+                  </div>
+                  <button
+                    ref={closeButtonRef}
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-btn p-2 text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2"
+                    aria-label="Close navigation menu"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+
+                <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 text-sm font-medium" aria-label="Mobile Public Navigation">
+                  <p className="px-3 pb-2 text-[10px] font-mono uppercase tracking-[0.16em] text-text-muted">
+                    Explore ParkEase
+                  </p>
+                  {navLinks.map((link) => {
+                    const isActive = location.pathname === link.path;
+                    return (
+                      <Link
+                        key={link.label}
+                        to={link.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`block rounded-btn border px-3 py-2.5 transition-colors ${
+                          isActive
+                            ? 'border-border bg-surface-raised text-text'
+                            : 'border-transparent text-text-muted hover:bg-surface-raised hover:text-text'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-btn border border-transparent px-3 py-2.5 text-text-muted transition-colors hover:bg-surface-raised hover:text-text"
+                  >
+                    Admin Portal
+                  </Link>
+                </nav>
+
+                <div className="space-y-2 border-t border-border bg-surface-subtle/40 p-4">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex h-8 w-full items-center justify-center rounded-btn border border-border bg-surface-raised px-3 py-1.5 text-xs font-medium tracking-tight text-text transition-colors hover:border-text/20 focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
                     Sign In
-                  </Button>
-                </Link>
-                <Link to="/parking" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="primary" size="sm" fullWidth icon={ArrowRight} iconPosition="right">
+                  </Link>
+                  <Link
+                    to="/parking"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex h-8 w-full items-center justify-center gap-1.5 rounded-btn border border-text bg-text px-3 py-1.5 text-xs font-medium tracking-tight text-bg transition-colors hover:bg-text/90 focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
                     Find Parking
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+              </motion.aside>
+            </div>
           )}
         </AnimatePresence>
       </header>
 
       {/* Page Content */}
       <main className="flex-1">
-        <Outlet />
+        <RouteTransition transitionKey={location.pathname}>
+          <Outlet />
+        </RouteTransition>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-surface text-text-muted text-xs py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-text-muted" aria-hidden="true" />
-            <span>ParkEase Smart Parking System • Academic Database Project</span>
+      {location.pathname === '/' ? (
+        <HalftoneWordmarkFooter />
+      ) : (
+        <footer className="border-t border-border bg-surface text-text-muted text-xs py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-text-muted" aria-hidden="true" />
+              <span>ParkEase Smart Parking System • Academic Database Project</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-5 font-medium">
+              <Link to="/features" className="hover:text-text transition-colors">Features</Link>
+              <Link to="/how-it-works" className="hover:text-text transition-colors">How It Works</Link>
+              <Link to="/about" className="hover:text-text transition-colors">About</Link>
+              <Link to="/parking" className="hover:text-text transition-colors">Find Parking</Link>
+              <Link to="/login" className="hover:text-text transition-colors">Sign In</Link>
+              <Link to="/admin" className="hover:text-text transition-colors">Admin Console</Link>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-5 font-medium">
-            <Link to="/features" className="hover:text-text transition-colors">Features</Link>
-            <Link to="/how-it-works" className="hover:text-text transition-colors">How It Works</Link>
-            <Link to="/about" className="hover:text-text transition-colors">About</Link>
-            <Link to="/parking" className="hover:text-text transition-colors">Find Parking</Link>
-            <Link to="/login" className="hover:text-text transition-colors">Sign In</Link>
-            <Link to="/admin" className="hover:text-text transition-colors">Admin Console</Link>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };
