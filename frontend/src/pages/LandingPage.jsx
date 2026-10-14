@@ -6,11 +6,13 @@ import {
   Shield,
   Car,
   MapPin,
-  Clock,
   Sparkles,
   Building2,
   RefreshCw,
   Lock,
+  CalendarClock,
+  Search,
+  ClipboardCheck,
 } from 'lucide-react';
 import { Button, Card, Badge, Skeleton, EmptyState } from '../components/ui';
 import { parkingApi } from '../lib/api';
@@ -90,68 +92,54 @@ export const LandingPage = () => {
   };
 
   return (
-    <div ref={pageRef} className="space-y-24 py-10 md:py-16 font-sans">
+    <div ref={pageRef} className="space-y-16 py-8 font-sans sm:space-y-20 sm:py-12 lg:space-y-24 lg:py-16">
       
       {/* ─── Hero Section ─────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-10">
           
           {/* Hero Copy */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-pill bg-surface-raised border border-border text-xs text-text-muted font-medium">
-              <Sparkles className="w-3.5 h-3.5 text-text" aria-hidden="true" />
-              <span>Smart Parking Management Platform</span>
+          <div className="space-y-5 text-left lg:col-span-6 lg:space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-sm border border-border bg-surface-raised px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted">
+              <Sparkles className="h-3.5 w-3.5 text-text" aria-hidden="true" />
+              <span>Smart parking, made clear</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.055em] text-text leading-[1.03]">
-              Your Space. Your Time.{' '}
-              <span className="text-text-muted">Parking, planned.</span>
+            <h1 className="max-w-[13ch] text-display-lg font-semibold text-text">
+              Your space.
+              <span className="block">Your time.</span>
+              <span className="block text-text-muted">Smarter parking.</span>
             </h1>
 
-            <p className="text-text-muted text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="max-w-lg text-base leading-relaxed text-text-muted sm:text-lg">
               Find a facility, check slot availability for your time window, and manage reservations and vehicles in one considered workspace.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
-              <Link to="/parking">
-                <Button variant="primary" size="lg" icon={ArrowRight} iconPosition="right">
-                  Find Parking
-                </Button>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                to="/parking"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-btn border border-text bg-text px-5 text-sm font-medium tracking-tight text-bg transition-colors hover:border-text/90 hover:bg-text/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+              >
+                Find Parking
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
-              <Link to="/how-it-works">
-                <Button variant="secondary" size="lg">
-                  How it works
-                </Button>
-              </Link>
-            </div>
-
-            {/* Micro Architecture Badges */}
-            <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-text-muted font-mono">
-              <span className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-text" aria-hidden="true" />
-                Time-window checks
-              </span>
-              <span className="hidden sm:inline text-border">•</span>
-              <span className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-text" aria-hidden="true" />
-                Role-protected access
-              </span>
-              <span className="hidden sm:inline text-border">•</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-text" aria-hidden="true" />
-                Demo billing only
-              </span>
+              <Link
+                to="/how-it-works"
+                className="inline-flex h-11 items-center justify-center rounded-btn border border-border bg-surface-raised px-5 text-sm font-medium tracking-tight text-text transition-colors hover:border-text/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+                >
+                  Explore how it works
+                </Link>
             </div>
           </div>
 
           {/* Illustrative scene; it does not represent live availability. */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          <div className="relative flex justify-center lg:col-span-6">
             <div
-              className="w-full max-w-md park-card-raised p-5 sm:p-6 relative overflow-hidden"
+              className="relative w-full max-w-xl overflow-hidden park-card-raised p-4 sm:p-6"
             >
               <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-semibold tracking-wider text-text uppercase">
+                  <span className="text-[11px] font-mono font-semibold tracking-wider text-text uppercase">
                     Parking bay · illustration
                   </span>
                 </div>
@@ -159,7 +147,7 @@ export const LandingPage = () => {
               </div>
 
               <div
-                className="relative h-[220px] w-full overflow-hidden sm:h-[260px]"
+                className="relative h-[210px] w-full overflow-hidden sm:h-[260px] lg:h-[300px]"
                 role="img"
                 aria-label="Illustrative car in a parking bay. This is not live availability."
               >
@@ -184,8 +172,35 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* ─── Product Value Strip ────────────────────────────────────────── */}
+      <section aria-label="ParkEase approach" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 divide-y divide-border border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="flex items-center gap-3 py-4 sm:px-5 sm:first:pl-0">
+            <Search className="h-4 w-4 flex-shrink-0 text-text-muted" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium text-text">Search by your time</p>
+              <p className="text-xs text-text-muted">Availability is checked for your selected window.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 py-4 sm:px-5">
+            <Shield className="h-4 w-4 flex-shrink-0 text-text-muted" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium text-text">Reservations rechecked</p>
+              <p className="text-xs text-text-muted">The server validates slot conflicts before booking.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 py-4 sm:pl-5 sm:pr-0">
+            <Lock className="h-4 w-4 flex-shrink-0 text-text-muted" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium text-text">Clear account boundaries</p>
+              <p className="text-xs text-text-muted">Customer and admin tools stay role-protected.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Real Parking Facilities Preview Section ────────────────────── */}
-      <section id="preview" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <section id="preview" data-scroll-reveal className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
@@ -198,10 +213,12 @@ export const LandingPage = () => {
               Facilities returned by the ParkEase API. Slot availability is checked for your selected time window.
             </p>
           </div>
-          <Link to="/parking">
-            <Button variant="ghost" size="sm" icon={ArrowRight} iconPosition="right">
-              View All Facilities & Slots
-            </Button>
+          <Link
+            to="/parking"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-text transition-colors hover:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            View all facilities
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
 
@@ -285,118 +302,165 @@ export const LandingPage = () => {
         )}
       </section>
 
-      {/* ─── Feature Architecture Strip ─────────────────────────────────── */}
-      <section id="features" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text">
-            Engineered for Concurrency & Precision
+      {/* ─── Illustrative Slot States ───────────────────────────────────── */}
+      <section id="slot-preview" data-scroll-reveal className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8">
+        <div className="space-y-3 lg:col-span-5">
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-text-muted">A clearer parking view</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+            Know what each status means.
           </h2>
-          <p className="text-text-muted text-sm leading-relaxed">
-            A straightforward flow built around facility records, time-window search, and server-checked reservations.
+          <p className="max-w-lg text-sm leading-relaxed text-text-muted">
+            This example explains the kinds of slot states you may see. It is not live inventory; availability is checked for your chosen time.
           </p>
+          <Button variant="secondary" size="md" icon={ArrowRight} iconPosition="right" onClick={handleShowMore}>
+            Explore parking
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card
-            title="Reservation conflict checks"
-            subtitle="Server-validated requests"
-            headerAction={<Badge variant="neutral">Backend</Badge>}
-          >
-            <p className="text-xs text-text-muted leading-relaxed">
-              Reservation requests are checked against existing time windows by the backend before confirmation.
-            </p>
-          </Card>
-
-          <Card
-            title="Time-specific availability"
-            subtitle="Inventory status"
-            headerAction={<Badge variant="neutral">API-backed</Badge>}
-          >
-            <p className="text-xs text-text-muted leading-relaxed">
-              Slot records use explicit availability and maintenance states. Search results are evaluated against the requested time window and vehicle category.
-            </p>
-          </Card>
-
-          <Card
-            title="Separated Portal Controls"
-            subtitle="Role-Based System Access"
-            headerAction={<Badge variant="info">RBAC</Badge>}
-          >
-            <p className="text-xs text-text-muted leading-relaxed">
-              Dedicated interfaces separate Customer self-service booking from Admin operational monitoring, rate scheduling, and audit report generation.
-            </p>
-          </Card>
-        </div>
-      </section>
-
-      {/* ─── How It Works ────────────────────────────────────────────────── */}
-      <section id="how-it-works" data-scroll-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-y border-border space-y-10">
-        <div className="text-center max-w-xl mx-auto space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text">
-            How It Works
-          </h2>
-          <p className="text-text-muted text-sm">
-            Explore facilities, choose a suitable time, and submit a reservation request.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="space-y-3 rounded-card border border-border bg-surface-raised p-4 sm:p-5 lg:col-span-7">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-text">Example slot states</span>
+            <Badge variant="neutral" size="sm">Illustration · not live data</Badge>
+          </div>
           {[
-            {
-              step: '01',
-              title: 'Discover',
-              desc: 'Browse facilities and supported slot categories from the parking inventory.',
-            },
-            {
-              step: '02',
-              title: 'Schedule',
-              desc: 'Choose a start and end time for the availability search.',
-            },
-            {
-              step: '03',
-              title: 'Reserve',
-              desc: 'Submit your selection. The server rechecks availability before confirming a reservation.',
-            },
-            {
-              step: '04',
-              title: 'Arrive',
-              desc: 'Review your reservation in the customer portal. Admins can record entry and exit sessions.',
-            },
-          ].map((item) => (
-            <div key={item.step} className="park-card p-6 space-y-3 relative overflow-hidden">
-              <span className="text-3xl font-extrabold font-mono text-text/15">
-                {item.step}
-              </span>
-              <h3 className="font-semibold text-base text-text tracking-tight">
-                {item.title}
-              </h3>
-              <p className="text-xs text-text-muted leading-relaxed">
-                {item.desc}
-              </p>
+            { label: 'Available for selected time', variant: 'available', mark: 'A' },
+            { label: 'Reservation overlaps this time', variant: 'confirmed', mark: 'R' },
+            { label: 'Temporarily unavailable', variant: 'maintenance', mark: '—' },
+          ].map(({ label, variant, mark }) => (
+            <div key={label} className="flex min-h-12 items-center justify-between gap-3 border-b border-border/60 py-2 last:border-b-0">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-8 w-11 flex-shrink-0 items-center justify-center rounded-sm border border-border bg-bg-subtle font-mono text-xs text-text-muted" aria-hidden="true">
+                  {mark}
+                </span>
+                <span className="text-sm text-text">{label}</span>
+              </div>
+              <Badge variant={variant} size="sm" showDot={false}>Example</Badge>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── Bottom CTA ─────────────────────────────────────────────────── */}
-      <section data-scroll-reveal className="max-w-4xl mx-auto px-4 text-center space-y-6">
-        <div className="park-card bg-surface-raised border border-border p-8 sm:p-12 space-y-6 shadow-subtle">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-text">
-            Ready to find and reserve your parking bay?
+      {/* ─── Feature Architecture Strip ─────────────────────────────────── */}
+      <section id="features" data-scroll-reveal className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
+        <div className="max-w-2xl space-y-3">
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-text-muted">The ParkEase workflow</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+            The details that make parking easier
           </h2>
-          <p className="text-text-muted text-sm max-w-lg mx-auto leading-relaxed">
-            Start with a time-specific availability search and manage your booking from your customer account.
+          <p className="max-w-xl text-sm leading-relaxed text-text-muted">
+            One connected place to explore facilities, plan a visit, and keep track of your parking activity.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
-            <Link to="/parking">
-              <Button variant="primary" size="lg" icon={ArrowRight} iconPosition="right">
-                Find Your Parking Spot
-              </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-0 border-y border-border sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-border">
+          {[
+            {
+              icon: Search,
+              step: '01',
+              title: 'Find a facility',
+              description: 'Browse locations and review the parking inventory returned by the API.',
+            },
+            {
+              icon: CalendarClock,
+              step: '02',
+              title: 'Choose a time',
+              description: 'Check eligible slots for your selected date, time window, and vehicle type.',
+            },
+            {
+              icon: ClipboardCheck,
+              step: '03',
+              title: 'Request a reservation',
+              description: 'The server rechecks availability and overlapping bookings before confirmation.',
+            },
+            {
+              icon: Car,
+              step: '04',
+              title: 'Manage your visit',
+              description: 'Keep your vehicles, reservations, and parking activity together in your account.',
+            },
+          ].map(({ icon: Icon, step, title, description }) => (
+            <article key={step} className="flex gap-4 border-b border-border py-5 last:border-b-0 sm:px-5 first:sm:pl-0 lg:border-b-0 lg:py-6 lg:first:pl-0">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-btn border border-border bg-surface-raised">
+                <Icon className="h-4 w-4 text-text" aria-hidden="true" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-mono text-[11px] text-text-muted">{step}</p>
+                <h3 className="text-sm font-semibold text-text">{title}</h3>
+                <p className="text-xs leading-relaxed text-text-muted">{description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── How It Works ────────────────────────────────────────────────── */}
+      <section id="how-it-works" data-scroll-reveal className="border-y border-border bg-surface/60 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-xl space-y-3">
+            <p className="text-xs font-mono uppercase tracking-[0.14em] text-text-muted">A straightforward journey</p>
+            <h2 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+              From search to space
+            </h2>
+            <p className="text-sm leading-relaxed text-text-muted">
+              Plan the visit before you arrive. Your reservation and parking records stay connected to your account.
+            </p>
+          </div>
+
+          <ol className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                title: 'Explore',
+                desc: 'Start with facilities and parking options available in the directory.',
+              },
+              {
+                title: 'Set your window',
+                desc: 'Choose when you plan to park and the vehicle you will bring.',
+              },
+              {
+                title: 'Review and reserve',
+                desc: 'Review your selection; availability is checked again before the reservation is confirmed.',
+              },
+              {
+                title: 'Keep it organized',
+                desc: 'Return to your account for reservation details and parking activity.',
+              },
+            ].map((item, index) => (
+              <li key={item.title} className="relative border-t border-border py-5 sm:px-5 sm:first:pl-0 lg:border-t-0 lg:border-l lg:py-1 lg:first:border-l-0 lg:first:pl-0">
+                <span className="mb-4 inline-flex h-7 min-w-7 items-center justify-center rounded-sm border border-border px-1.5 font-mono text-[11px] text-text-muted">
+                  0{index + 1}
+                </span>
+                <h3 className="mb-2 text-sm font-semibold text-text">{item.title}</h3>
+                <p className="max-w-[28ch] text-xs leading-relaxed text-text-muted">{item.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ─── Bottom CTA ─────────────────────────────────────────────────── */}
+      <section data-scroll-reveal className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 border-y border-border py-8 sm:flex-row sm:items-center sm:justify-between sm:py-10">
+          <div className="max-w-2xl space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+              Make your next stop easier to plan.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-text-muted">
+              Explore parking options and choose a time that works for your visit.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/parking"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-btn border border-text bg-text px-5 text-sm font-medium tracking-tight text-bg transition-colors hover:border-text/90 hover:bg-text/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+            >
+              Find your parking spot
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-            <Link to="/login">
-              <Button variant="secondary" size="lg">
-                Sign In to Portal
-              </Button>
+            <Link
+              to="/login"
+              className="inline-flex h-11 items-center justify-center rounded-btn border border-border bg-surface-raised px-5 text-sm font-medium tracking-tight text-text transition-colors hover:border-text/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+            >
+              Sign in
             </Link>
           </div>
         </div>
