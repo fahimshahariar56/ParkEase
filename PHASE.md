@@ -366,7 +366,7 @@ Before implementation:
 
 1. Inspect the current repository structure.
 2. Locate the existing Day 25 3D car scene and its related components.
-3. Read `ANIMTION.md` and follow its applicable animation requirements.
+3. Read `ANIMATION.md` and follow its applicable animation requirements.
 4. Review `DESIGN.md` and the existing design tokens and approved visual references.
 5. Identify the current Three.js / React Three Fiber / Drei setup.
 6. Review existing camera controls, car assets, lighting, and animations.

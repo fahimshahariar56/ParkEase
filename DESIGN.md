@@ -560,9 +560,9 @@ Use for:
 - Section reveal sequences
 - Scroll-linked camera movement if compatible with the 3D implementation
 
-### Three.js / React Three Fiber
+### Three.js scene
 
-Use for:
+The current parking scene uses Three.js directly with `OrbitControls`; React Three Fiber and Drei are not used. For future scene work, preserve the existing renderer unless a concrete requirement justifies changing it. The intended use is:
 - Landing-page car and parking-garage visualization
 - Carefully controlled camera, lighting, and materials
 - Optional simplified parking-space scene
@@ -642,7 +642,7 @@ Recommended tools, subject to the existing project setup:
 - React Router
 - Motion for React
 - GSAP + ScrollTrigger
-- Three.js / React Three Fiber for the 3D hero
+- Three.js directly for the current 3D hero (React Three Fiber is not installed or used)
 - Lucide React
 - A suitable chart library if charts are needed
 - Existing API client and authentication context
@@ -735,3 +735,33 @@ The final ParkEase experience should combine:
 - Reuse compatible, accessible components from 21st.dev only when they fit the design and project stack; audit code, dependencies, and accessibility before integration. Do not copy components blindly or add unnecessary dependencies.
 - If either tool is unavailable, use a safe, compatible fallback and clearly report the limitation.
 - Use the existing repository, current `PHASE.md`, and `RULES.md` as the source of truth. A UI redesign authorization does not authorize unrelated backend/database changes or future-day functional work. If a proposed 3D/GSAP task is outside the currently authorized phase, present the implementation plan and wait for approval unless the user explicitly authorizes that visual scope.
+
+---
+
+## 21. Day 31 — Final Design Decisions and Visual References
+
+This section records the implemented handoff baseline. When an older proposal elsewhere in this document conflicts with the current interface or tokens, use the implemented values below and the source files as authority.
+
+### Decisions in the shipped interface
+
+- **Visual direction:** restrained automotive-tech, monochrome-first; dark theme is the default, with a deliberate light counterpart. Accent colors communicate status or actions, not decoration.
+- **Palette:** dark background `#08090B`, surfaces `#101114` / `#17191D`, border `#292B30`, and text `#F5F5F5`; light background `#FAFAFA`, white surface, border `#E4E4E7`, and text `#111113`. Semantic success, warning, error, and info colors are reserved for state.
+- **Typography:** Inter for interface content; JetBrains Mono for IDs, timestamps, slot numbers, and selected technical metadata.
+- **Geometry and spacing:** 4px spacing base; 7px buttons, 6px inputs, 10px cards, and pills only where a status badge calls for them. Borders and tonal changes carry hierarchy; shadows remain restrained.
+- **Interaction and accessibility:** visible keyboard focus, labelled controls, responsive layouts, keyboard-capable overlays, and `prefers-reduced-motion` support. Motion is brief and does not own the same transform as GSAP.
+- **Illustrative scene:** an original procedural Three.js parking/car illustration, not an imported or photorealistic vehicle model. It is not real-time parking availability.
+
+### Repository visual references
+
+| Reference | What it defines |
+|---|---|
+| `frontend/src/styles/tokens.css` | Actual dark/light color, semantic status, typography, radius, spacing, shadow, and timing tokens |
+| `frontend/src/styles/globals.css` | Global typography, focus treatment, reduced-motion CSS, and shared surface styles |
+| `frontend/src/components/ui/` | Implemented buttons, inputs, cards, badges, dialogs, notifications, skeletons, and states |
+| `frontend/src/layouts/PublicLayout.jsx`, `CustomerLayout.jsx`, `AdminLayout.jsx` | Public, customer, and admin navigation and responsive shell patterns |
+| `frontend/src/components/scene/ParkingScene.jsx` and `ParkingScenePoster.jsx` | Interactive scene composition and static illustration fallback |
+| `frontend/src/pages/LandingPage.jsx` | Hero, product sections, facility preview, and CTA composition |
+
+There is no `stitch-design/` asset directory in the current repository, so no exported Stitch screen is claimed as an available visual reference. The local implementation and this specification are the handoff references. No external vehicle model is included.
+
+The implementation-level animation inventory and motion ownership rules are maintained in `ANIMATION.md`.
