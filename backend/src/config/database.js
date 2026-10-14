@@ -17,6 +17,15 @@ export const pool = mysql.createPool({
   timezone: '+00:00',
 });
 
+pool.on('connection', (connection) => {
+  connection.query("SET SESSION time_zone = '+00:00'", (err) => {
+    if (err) {
+      console.error('Failed to set MySQL session time zone to UTC:', err);
+      connection.destroy();
+    }
+  });
+});
+
 /**
  * Checks MySQL connection health cleanly.
  * Returns { isConnected: boolean, message: string, code?: string }

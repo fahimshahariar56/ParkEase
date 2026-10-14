@@ -1,5 +1,6 @@
 import { pool } from '../../config/database.js';
 import { isSlotCompatible } from '../parking/parking.service.js';
+import { parseIsoDateTime, toMySqlDateTime } from '../../utils/dateTime.js';
 
 /**
  * Format raw database row to clean Reservation object
@@ -149,6 +150,15 @@ export async function getReservationById(reservationId, requestingUser) {
  * Create a reservation with strict database transaction, concurrency locks, and conflict re-checks.
  */
 export async function createReservation({ userId, vehicleId, slotId, startTime, endTime }) {
+  const startDate = parseIsoDateTime(startTime);
+  const endDate = parseIsoDateTime(endTime);
+  if (!startDate || !endDate || startDate.getTime() >= endDate.getTime()) {
+    const err = new Error('A valid reservation time range is required.');
+    err.status = 400;
+    throw err;
+  }
+  const mysqlStartTime = toMySqlDateTime(startDate);
+  const mysqlEndTime = toMySqlDateTime(endDate);
   const conn = await pool.getConnection();
 
   try {
@@ -216,7 +226,7 @@ export async function createReservation({ userId, vehicleId, slotId, startTime, 
          AND start_time < ?
          AND end_time > ?
        FOR UPDATE`,
-      [slotId, endTime, startTime]
+      [slotId, mysqlEndTime, mysqlStartTime]
     );
 
     if (conflictRows && conflictRows.length > 0) {
@@ -234,7 +244,7 @@ export async function createReservation({ userId, vehicleId, slotId, startTime, 
         [slotId]
       );
       if (sessRows && sessRows.length > 0) {
-        const reqStartMs = new Date(startTime).getTime();
+        const reqStartMs = startDate.getTime();
         if (reqStartMs <= Date.now()) {
           const err = new Error('Slot is currently occupied in an active parking session.');
           err.status = 409;
@@ -264,7 +274,7 @@ export async function createReservation({ userId, vehicleId, slotId, startTime, 
     // Calculate billable duration (in hours, minimum 1 hour)
     const durationHours = Math.max(
       1,
-      Math.ceil((new Date(endTime).getTime() - new Date(startTime).getTime()) / (1000 * 60 * 60))
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60))
     );
     const totalEstimatedFee = (hourlyRate * durationHours).toFixed(2);
 
@@ -273,7 +283,7 @@ export async function createReservation({ userId, vehicleId, slotId, startTime, 
       `INSERT INTO reservations 
          (user_id, vehicle_id, slot_id, start_time, end_time, hourly_rate_snapshot, total_estimated_fee, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED')`,
-      [userId, vehicleId, slotId, startTime, endTime, hourlyRate, totalEstimatedFee]
+      [userId, vehicleId, slotId, mysqlStartTime, mysqlEndTime, hourlyRate, totalEstimatedFee]
     );
 
     await conn.commit();

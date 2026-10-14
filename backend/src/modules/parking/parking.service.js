@@ -1,4 +1,5 @@
 import { pool } from '../../config/database.js';
+import { toMySqlDateTime } from '../../utils/dateTime.js';
 
 /**
  * Format database row to clean Parking Lot object
@@ -537,6 +538,8 @@ export function isIntervalOverlapping(startA, endA, startB, endB) {
  */
 export async function getAvailableSlots(filters = {}) {
   const { lotId, startTime, endTime, vehicleType, slotType } = filters;
+  const mysqlStartTime = startTime ? toMySqlDateTime(startTime) : null;
+  const mysqlEndTime = endTime ? toMySqlDateTime(endTime) : null;
 
   const whereClauses = [
     "l.status = 'ACTIVE'",
@@ -584,7 +587,7 @@ export async function getAvailableSlots(filters = {}) {
     }
   }
 
-  if (checkReservations && startTime && endTime) {
+  if (checkReservations && mysqlStartTime && mysqlEndTime) {
     whereClauses.push(`
       s.id NOT IN (
         SELECT r.slot_id FROM reservations r
@@ -593,10 +596,10 @@ export async function getAvailableSlots(filters = {}) {
           AND r.end_time > ?
       )
     `);
-    params.push(endTime, startTime);
+    params.push(mysqlEndTime, mysqlStartTime);
   }
 
-  if (checkSessions && startTime && endTime) {
+  if (checkSessions && mysqlStartTime && mysqlEndTime) {
     whereClauses.push(`
       s.id NOT IN (
         SELECT ps.slot_id FROM parking_sessions ps
@@ -607,7 +610,7 @@ export async function getAvailableSlots(filters = {}) {
           )
       )
     `);
-    params.push(endTime, startTime);
+    params.push(mysqlEndTime, mysqlStartTime);
   }
 
   const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
@@ -644,6 +647,8 @@ export async function getAvailableSlots(filters = {}) {
  * Returns detailed availability status with conflict details if blocked.
  */
 export async function checkSlotAvailability(slotId, { startTime, endTime, vehicleType }) {
+  const mysqlStartTime = startTime ? toMySqlDateTime(startTime) : null;
+  const mysqlEndTime = endTime ? toMySqlDateTime(endTime) : null;
   // 1. Fetch slot with parent lot info
   const sql = `
     SELECT 
@@ -725,7 +730,7 @@ export async function checkSlotAvailability(slotId, { startTime, endTime, vehicl
          AND start_time < ? 
          AND end_time > ?
        LIMIT 1`,
-      [slotId, endTime, startTime]
+      [slotId, mysqlEndTime, mysqlStartTime]
     );
 
     if (conflictRows && conflictRows.length > 0) {
@@ -806,4 +811,3 @@ export async function checkSlotAvailability(slotId, { startTime, endTime, vehicl
     },
   };
 }
-

@@ -241,6 +241,8 @@ Use MySQL 8+ and InnoDB. The core relational entities are:
 
 Use suitable `DECIMAL` columns for money, consistent timestamp handling, explicit foreign-key actions, indexes, and constraints. Never use floating-point types for monetary amounts.
 
+Reservation API timestamps represent instants and must include an explicit timezone. Convert them to UTC `YYYY-MM-DD HH:mm:ss` values for MySQL bindings, and keep MySQL pooled sessions in UTC so `TIMESTAMP` and `DATETIME` reservation columns use the same policy. Do not reinterpret API timestamps as Bangladesh-local wall-clock values.
+
 ## 6. Availability and Reservation Consistency
 
 Availability cannot be inferred only from `parking_slots.status`. It must consider:

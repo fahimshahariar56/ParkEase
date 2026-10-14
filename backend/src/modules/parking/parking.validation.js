@@ -1,6 +1,7 @@
 /**
  * Parking Lots & Slots Input Validation
  */
+import { parseIsoDateTime } from '../../utils/dateTime.js';
 
 export const ALLOWED_LOT_STATUSES = ['ACTIVE', 'INACTIVE', 'MAINTENANCE'];
 
@@ -329,17 +330,17 @@ export function validateAvailabilityQuery(req, res, next) {
     });
   }
 
-  const start = new Date(startTime);
-  const end = new Date(endTime);
+  const start = parseIsoDateTime(startTime);
+  const end = parseIsoDateTime(endTime);
 
-  if (Number.isNaN(start.getTime())) {
+  if (!start) {
     return res.status(400).json({
       success: false,
       message: 'Invalid startTime format. Provide a valid ISO timestamp (e.g. 2026-10-15T10:00:00Z).',
     });
   }
 
-  if (Number.isNaN(end.getTime())) {
+  if (!end) {
     return res.status(400).json({
       success: false,
       message: 'Invalid endTime format. Provide a valid ISO timestamp (e.g. 2026-10-15T12:00:00Z).',
@@ -416,4 +417,3 @@ export function validateAvailabilityQuery(req, res, next) {
   req.query.endTime = end.toISOString();
   next();
 }
-

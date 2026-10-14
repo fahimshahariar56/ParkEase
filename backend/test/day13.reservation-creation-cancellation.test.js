@@ -5,8 +5,10 @@ import {
   validateUpdateReservationStatus,
   ALLOWED_RESERVATION_STATUSES,
 } from '../src/modules/reservations/reservations.validation.js';
-import { formatReservation } from '../src/modules/reservations/reservations.service.js';
-import { isIntervalOverlapping } from '../src/modules/parking/parking.service.js';
+import { createReservation, formatReservation } from '../src/modules/reservations/reservations.service.js';
+import { getAvailableSlots, isIntervalOverlapping } from '../src/modules/parking/parking.service.js';
+import { pool } from '../src/config/database.js';
+import { toMySqlDateTime } from '../src/utils/dateTime.js';
 
 describe('Day 13: Reservation Creation & Cancellation Tests', () => {
 
@@ -168,6 +170,135 @@ describe('Day 13: Reservation Creation & Cancellation Tests', () => {
       assert.equal(req.body.slotId, 12);
       assert.equal(req.body.startTime, start.toISOString());
       assert.equal(req.body.endTime, end.toISOString());
+    });
+
+    it('1.8 Rejects invalid and timezone-less datetime inputs', () => {
+      let statusCode = null;
+      const req = {
+        body: {
+          vehicleId: 1,
+          slotId: 1,
+          startTime: '2026-02-30T09:00:00.000Z',
+          endTime: '2026-10-14T10:00:00',
+        },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return { json: () => {} };
+        },
+      };
+
+      validateCreateReservation(req, res, () => { assert.fail('next() should not be called'); });
+      assert.equal(statusCode, 400);
+      assert.throws(() => toMySqlDateTime('2026-10-14T10:00:00'), TypeError);
+    });
+
+    it('1.9 Normalizes Z timestamps to UTC MySQL datetime values without a timezone shift', () => {
+      assert.equal(toMySqlDateTime('2026-10-14T09:00:00.000Z'), '2026-10-14 09:00:00');
+      assert.equal(toMySqlDateTime('2026-10-14T15:00:00+06:00'), '2026-10-14 09:00:00');
+    });
+
+    it('1.10 Binds MySQL-compatible start and end values for conflict checks and insertion', async () => {
+      const originalGetConnection = pool.getConnection;
+      const queries = [];
+      const connection = {
+        beginTransaction: async () => {},
+        commit: async () => {},
+        rollback: async () => {},
+        release: () => {},
+        execute: async (sql, params) => {
+          queries.push({ sql, params });
+          if (sql.includes('FROM vehicles')) {
+            return [[{ id: 4, user_id: 7, vehicle_type: 'STANDARD_CAR' }], []];
+          }
+          if (sql.includes('FROM parking_slots s')) {
+            return [[{
+              id: 12,
+              slot_number: 'A-12',
+              slot_type: 'STANDARD_CAR',
+              slot_status: 'AVAILABLE',
+              lot_status: 'ACTIVE',
+            }], []];
+          }
+          if (sql.includes('SELECT id, start_time, end_time FROM reservations')) return [[], []];
+          if (sql.includes('FROM parking_sessions')) return [[], []];
+          if (sql.includes('FROM pricing_rules')) return [[], []];
+          if (sql.includes('INSERT INTO reservations')) return [{ insertId: 88 }, []];
+          assert.fail(`Unexpected SQL query: ${sql}`);
+        },
+      };
+      const startTime = '2026-10-14T09:00:00.000Z';
+      const endTime = '2026-10-14T10:00:00.000Z';
+
+      pool.getConnection = async () => connection;
+      try {
+        assert.equal(
+          await createReservation({ userId: 7, vehicleId: 4, slotId: 12, startTime, endTime }),
+          88
+        );
+      } finally {
+        pool.getConnection = originalGetConnection;
+      }
+
+      const conflictQuery = queries.find(({ sql }) => sql.includes('SELECT id, start_time, end_time FROM reservations'));
+      const insertQuery = queries.find(({ sql }) => sql.includes('INSERT INTO reservations'));
+      assert.deepEqual(conflictQuery.params, [12, '2026-10-14 10:00:00', '2026-10-14 09:00:00']);
+      assert.deepEqual(insertQuery.params.slice(3, 5), ['2026-10-14 09:00:00', '2026-10-14 10:00:00']);
+    });
+
+    it('1.11 Rejects invalid or reversed ranges before acquiring a database connection', async () => {
+      const originalGetConnection = pool.getConnection;
+      pool.getConnection = async () => { assert.fail('Database connection should not be acquired'); };
+      try {
+        await assert.rejects(
+          createReservation({
+            userId: 7,
+            vehicleId: 4,
+            slotId: 12,
+            startTime: '2026-10-14T10:00:00.000Z',
+            endTime: '2026-10-14T09:00:00.000Z',
+          }),
+          { status: 400 }
+        );
+        await assert.rejects(
+          createReservation({
+            userId: 7,
+            vehicleId: 4,
+            slotId: 12,
+            startTime: 'not-a-date',
+            endTime: '2026-10-14T11:00:00.000Z',
+          }),
+          { status: 400 }
+        );
+      } finally {
+        pool.getConnection = originalGetConnection;
+      }
+    });
+
+    it('1.12 Uses UTC MySQL datetime values in availability overlap queries', async () => {
+      const originalExecute = pool.execute;
+      let availabilityParams;
+      pool.execute = async (sql, params = []) => {
+        if (sql.includes('FROM parking_slots s')) availabilityParams = params;
+        return [[], []];
+      };
+
+      try {
+        await getAvailableSlots({
+          startTime: '2026-10-14T09:00:00.000Z',
+          endTime: '2026-10-14T10:00:00.000Z',
+        });
+      } finally {
+        pool.execute = originalExecute;
+      }
+
+      assert.deepEqual(availabilityParams, [
+        '2026-10-14 10:00:00',
+        '2026-10-14 09:00:00',
+        '2026-10-14 10:00:00',
+        '2026-10-14 09:00:00',
+      ]);
     });
   });
 
