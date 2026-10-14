@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   LayoutDashboard,
   Building2,
@@ -32,8 +32,51 @@ export const AdminLayout = () => {
     (open) => setSidebar({ pathname: location.pathname, open }),
     [location.pathname],
   );
+  const menuButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const drawerRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
+
+    const menuTrigger = menuButtonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSidebarOpen(false);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusableElements = drawerRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+      menuTrigger?.focus();
+    };
+  }, [setSidebarOpen, sidebarOpen]);
 
   const handleSignOut = () => {
     logout();
@@ -55,10 +98,10 @@ export const AdminLayout = () => {
   const currentNavItem = adminNav.find((item) => item.path === location.pathname);
 
   return (
-    <div className="min-h-screen bg-transparent text-text flex font-sans selection:bg-text/15 selection:text-text">
+    <div className="h-dvh overflow-hidden bg-transparent text-text flex font-sans selection:bg-text/15 selection:text-text">
       
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface flex-shrink-0 min-h-screen">
+      <aside className="hidden lg:flex h-full min-h-0 flex-col w-64 border-r border-border bg-surface flex-shrink-0">
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <Link to="/admin" className="flex items-center gap-2.5">
@@ -80,7 +123,7 @@ export const AdminLayout = () => {
         </div>
 
         {/* Sidebar Nav Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Admin Navigation">
+        <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain" aria-label="Admin Navigation">
           {adminNav.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -90,12 +133,20 @@ export const AdminLayout = () => {
                 to={item.path}
                 aria-current={isActive ? 'page' : undefined}
                 className={`
-                  flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-medium transition-colors
+                  relative flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-medium transition-colors
                   ${isActive
                     ? 'bg-surface-raised text-text font-semibold border border-border shadow-subtle'
                     : 'text-text-muted hover:text-text hover:bg-surface-raised/60 border border-transparent'}
                 `}
               >
+                {isActive && (
+                  <motion.span
+                    layoutId={shouldReduceMotion ? undefined : 'admin-active-route'}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+                    className="absolute inset-y-2 left-0 w-0.5 bg-text"
+                    aria-hidden="true"
+                  />
+                )}
                 <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                 <span>{item.label}</span>
               </Link>
@@ -134,12 +185,13 @@ export const AdminLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 min-h-0 flex flex-col min-w-0">
         
         {/* Top Navbar */}
         <header className="h-16 border-b border-border bg-surface/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -172,7 +224,7 @@ export const AdminLayout = () => {
         </header>
 
         {/* Page Content View */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto overscroll-contain">
           <RouteTransition transitionKey={location.pathname}>
             <Outlet />
           </RouteTransition>
@@ -180,26 +232,32 @@ export const AdminLayout = () => {
       </div>
 
       {/* Mobile Sidebar Overlay & Drawer */}
-      {sidebarOpen && (
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
-          className="fixed inset-0 z-50 flex lg:hidden"
-        >
-            <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+      <AnimatePresence initial={false}>
+        {sidebarOpen && (
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+            className="fixed inset-0 z-50 flex lg:hidden"
+          >
+            <button
+              type="button"
               onClick={() => setSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-              aria-hidden="true"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              aria-label="Close navigation menu"
             />
-            <motion.div
+            <motion.aside
+              ref={drawerRef}
+              id="admin-mobile-navigation"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Admin navigation"
               initial={shouldReduceMotion ? false : { x: -260 }}
               animate={{ x: 0 }}
+              exit={shouldReduceMotion ? undefined : { x: -260 }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-64 bg-surface border-r border-border flex flex-col h-full z-10 font-sans shadow-raised"
+              className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-surface font-sans shadow-raised"
             >
               <div className="h-16 flex items-center justify-between px-5 border-b border-border">
                 <div className="flex items-center gap-2">
@@ -211,6 +269,7 @@ export const AdminLayout = () => {
                   </span>
                 </div>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={() => setSidebarOpen(false)}
                   className="p-1.5 rounded-btn text-text-muted hover:text-text hover:bg-surface-raised focus-visible:outline-2"
@@ -220,7 +279,7 @@ export const AdminLayout = () => {
                 </button>
               </div>
 
-              <nav id="admin-mobile-navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Mobile Admin Navigation">
+              <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Mobile Admin Navigation">
                 {adminNav.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.path;
@@ -231,12 +290,20 @@ export const AdminLayout = () => {
                       onClick={() => setSidebarOpen(false)}
                       aria-current={isActive ? 'page' : undefined}
                       className={`
-                        flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-medium transition-colors
+                        relative flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-medium transition-colors
                         ${isActive
                           ? 'bg-surface-raised text-text font-semibold border border-border'
                           : 'text-text-muted hover:text-text hover:bg-surface-raised/60'}
                       `}
                     >
+                      {isActive && (
+                        <motion.span
+                          layoutId={shouldReduceMotion ? undefined : 'admin-mobile-active-route'}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+                          className="absolute inset-y-2 left-0 w-0.5 bg-text"
+                          aria-hidden="true"
+                        />
+                      )}
                       <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                       <span>{item.label}</span>
                     </Link>
@@ -249,9 +316,10 @@ export const AdminLayout = () => {
                   Sign Out
                 </Button>
               </div>
-            </motion.div>
-        </motion.div>
-      )}
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

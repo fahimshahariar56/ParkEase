@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Car, MapPin, User, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button, Badge } from '../components/ui';
@@ -16,8 +16,51 @@ export const CustomerLayout = () => {
     (open) => setMobileMenu({ pathname: location.pathname, open }),
     [location.pathname],
   );
+  const menuButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const drawerRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+
+    const menuTrigger = menuButtonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileMenuOpen(false);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusableElements = drawerRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+      menuTrigger?.focus();
+    };
+  }, [mobileMenuOpen, setMobileMenuOpen]);
 
   const handleSignOut = () => {
     logout();
@@ -62,12 +105,20 @@ export const CustomerLayout = () => {
                   to={item.path}
                   aria-current={isActive ? 'page' : undefined}
                   className={`
-                    flex items-center gap-2 px-3.5 py-2 rounded-btn text-xs font-medium transition-colors
+                    relative flex items-center gap-2 px-3.5 py-2 rounded-btn text-xs font-medium transition-colors
                     ${isActive
                       ? 'bg-surface-raised text-text border border-border shadow-subtle'
                       : 'text-text-muted hover:text-text hover:bg-surface-raised/60 border border-transparent'}
                   `}
                 >
+                  {isActive && (
+                    <motion.span
+                      layoutId={shouldReduceMotion ? undefined : 'customer-active-route'}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+                      className="absolute inset-y-2 left-0 w-0.5 bg-text"
+                      aria-hidden="true"
+                    />
+                  )}
                   <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
@@ -97,59 +148,121 @@ export const CustomerLayout = () => {
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
-              aria-label="Toggle mobile menu"
+              aria-label="Toggle customer navigation"
               aria-expanded={mobileMenuOpen}
-              aria-controls="customer-mobile-menu"
+              aria-controls="customer-mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Nav Drawer */}
+      </header>
+
+      {/* Keep the fixed drawer outside the sticky, backdrop-filtered header. */}
+      <AnimatePresence initial={false}>
         {mobileMenuOpen && (
           <motion.div
-            initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
-            id="customer-mobile-menu"
-            className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-2 overflow-hidden"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+            className="fixed inset-0 z-50 flex md:hidden"
           >
-              <div className="px-2 py-1 text-xs text-text-muted border-b border-border mb-2">
-                Signed in as <span className="text-text font-medium">{user?.fullName || user?.email}</span>
+            <motion.button
+              type="button"
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
+              aria-label="Close customer navigation"
+            />
+            <motion.aside
+              ref={drawerRef}
+              id="customer-mobile-navigation"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Customer navigation"
+              initial={shouldReduceMotion ? false : { x: -260 }}
+              animate={{ x: 0 }}
+              exit={shouldReduceMotion ? undefined : { x: -260 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-surface font-sans shadow-raised"
+            >
+              <div className="h-16 flex items-center justify-between px-5 border-b border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-btn bg-surface-raised border border-border flex items-center justify-center text-text">
+                    <Car className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm tracking-tight text-text leading-tight">
+                      ParkEase
+                    </span>
+                    <span className="text-[10px] text-text-muted leading-tight">Customer Portal</span>
+                  </div>
+                </div>
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-btn text-text-muted hover:text-text hover:bg-surface-raised focus-visible:outline-2"
+                  aria-label="Close customer navigation"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
               </div>
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`
-                      flex items-center gap-2.5 px-3 py-2 rounded-btn text-xs font-medium transition-colors
-                      ${isActive
-                        ? 'bg-surface text-text font-semibold border border-border'
-                        : 'text-text-muted hover:text-text hover:bg-surface/50'}
-                    `}
-                  >
-                    <Icon className="w-4 h-4" aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-              <div className="pt-3 border-t border-border">
+
+              <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Mobile Customer Navigation">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`
+                        relative flex items-center gap-3 px-3 py-2.5 rounded-btn text-[13px] font-medium transition-colors
+                        ${isActive
+                          ? 'bg-surface-raised text-text font-semibold border border-border'
+                          : 'text-text-muted hover:text-text hover:bg-surface-raised/60 border border-transparent'}
+                      `}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId={shouldReduceMotion ? undefined : 'customer-mobile-active-route'}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+                          className="absolute inset-y-2 left-0 w-0.5 bg-text"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="p-4 border-t border-border bg-surface-subtle/40">
+                <div className="mb-3 min-w-0 text-xs">
+                  <div className="font-semibold text-text truncate">{user?.fullName || 'Customer'}</div>
+                  <div className="text-[10px] font-mono text-text-muted truncate">{user?.email}</div>
+                </div>
                 <Button variant="outline" size="sm" fullWidth icon={LogOut} onClick={handleSignOut}>
                   Sign Out
                 </Button>
               </div>
+            </motion.aside>
           </motion.div>
         )}
-      </header>
+      </AnimatePresence>
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">

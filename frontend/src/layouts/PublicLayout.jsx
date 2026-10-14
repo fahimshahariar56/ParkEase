@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Car, Menu, X, ArrowRight, ShieldCheck, Sparkles, Route, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
@@ -94,13 +94,21 @@ export const PublicLayout = () => {
                   to={link.path}
                   aria-current={isActive ? 'page' : undefined}
                   className={`
-                    py-1 transition-colors
+                    relative py-2 transition-colors
                     ${isActive
-                      ? 'text-text font-semibold border-b-2 border-text'
-                      : 'text-text-muted hover:text-text border-b-2 border-transparent'}
+                      ? 'text-text font-semibold'
+                      : 'text-text-muted hover:text-text'}
                   `}
                 >
                   {link.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId={shouldReduceMotion ? undefined : 'public-active-route'}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+                      className="absolute inset-x-0 bottom-0 h-0.5 bg-text"
+                      aria-hidden="true"
+                    />
+                  )}
                 </Link>
               );
             })}
@@ -129,7 +137,7 @@ export const PublicLayout = () => {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
-              aria-label="Open navigation menu"
+              aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
               aria-controls="public-mobile-drawer"
             >
@@ -140,33 +148,37 @@ export const PublicLayout = () => {
       </header>
 
       {/* Keep the fixed drawer outside the sticky, backdrop-filtered header. */}
-      {mobileMenuOpen && (
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
-          className="fixed inset-0 z-50 flex md:hidden"
-        >
-          <motion.button
-            type="button"
+      <AnimatePresence initial={false}>
+        {mobileMenuOpen && (
+          <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
-            onClick={() => setMobileMenuOpen(false)}
-            className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
-            aria-label="Close navigation menu"
-          />
-          <motion.aside
-            ref={drawerRef}
-            id="public-mobile-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Public navigation"
-            initial={shouldReduceMotion ? false : { x: -260 }}
-            animate={{ x: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-surface font-sans shadow-raised"
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
+            className="fixed inset-0 z-50 flex md:hidden"
           >
+            <motion.button
+              type="button"
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
+              aria-label="Close navigation menu"
+            />
+            <motion.aside
+              ref={drawerRef}
+              id="public-mobile-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Public navigation"
+              initial={shouldReduceMotion ? false : { x: -260 }}
+              animate={{ x: 0 }}
+              exit={shouldReduceMotion ? undefined : { x: -260 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-surface font-sans shadow-raised"
+            >
             <div className="flex h-16 items-center justify-between border-b border-border px-5">
               <Link
                 to="/"
@@ -248,9 +260,10 @@ export const PublicLayout = () => {
                 </Link>
               </div>
             </div>
-          </motion.aside>
-        </motion.div>
-      )}
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Page Content */}
       <main className="flex-1">
