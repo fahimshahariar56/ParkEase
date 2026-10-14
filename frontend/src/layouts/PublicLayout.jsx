@@ -16,7 +16,7 @@ export const PublicLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col font-sans selection:bg-text/15 selection:text-text">
+    <div className="min-h-screen bg-transparent text-text flex flex-col font-sans selection:bg-text/15 selection:text-text">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/90 backdrop-blur-md transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

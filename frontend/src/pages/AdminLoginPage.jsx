@@ -99,7 +99,7 @@ export const AdminLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text font-sans flex flex-col justify-between selection:bg-text/15 selection:text-text relative">
+    <div className="min-h-screen bg-transparent text-text font-sans flex flex-col justify-between selection:bg-text/15 selection:text-text relative">
       {/* Top Header */}
       <header className="h-16 border-b border-border bg-surface/90 backdrop-blur-md px-6 flex items-center justify-between relative z-10">
         <Link to="/" className="flex items-center gap-2.5 group">

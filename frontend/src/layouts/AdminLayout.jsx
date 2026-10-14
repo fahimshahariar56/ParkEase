@@ -48,7 +48,7 @@ export const AdminLayout = () => {
   const currentNavItem = adminNav.find((item) => item.path === location.pathname);
 
   return (
-    <div className="min-h-screen bg-bg text-text flex font-sans selection:bg-text/15 selection:text-text">
+    <div className="min-h-screen bg-transparent text-text flex font-sans selection:bg-text/15 selection:text-text">
       
       {/* Desktop Persistent Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface flex-shrink-0 min-h-screen">

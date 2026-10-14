@@ -19,9 +19,9 @@ This updated specification supersedes earlier conflicting color, typography, but
 
 ### Part 1 shared foundation
 
-The current shared foundation is implemented in `frontend/src/styles/tokens.css`, `frontend/src/styles/globals.css`, and `frontend/src/components/ui/`. It uses semantic CSS variables with Tailwind mappings, a static low-contrast dot grid on page backgrounds, dark as the default theme with a saved light/dark choice, and reusable button, input, card, badge, dialog, toast, skeleton, empty, and error primitives. Motion-based shared interactions must honor `prefers-reduced-motion`.
+The current shared foundation is implemented in `frontend/src/styles/tokens.css`, `frontend/src/styles/globals.css`, and `frontend/src/components/ui/`. It uses semantic CSS variables with Tailwind mappings, a shared canvas-based constellation grid behind routed content, dark as the default theme with a saved light/dark choice, and reusable button, input, card, badge, dialog, toast, skeleton, empty, and error primitives. Motion-based shared interactions must honor `prefers-reduced-motion`.
 
-The grid is a CSS background, so it stays beneath content and cannot intercept input. A cursor-reactive effect is intentionally not part of this foundation; if added later, use a lightweight decorative CSS/SVG/canvas layer, throttle updates, set `pointer-events: none`, and disable it for touch and reduced-motion contexts.
+`ConstellationGrid` is mounted once beside the router and reads the active theme tokens. It draws a low-contrast particle grid and local neighbor connections on a DPR-aware canvas with a 30fps desktop animation cap. The landing page uses the highest density/intensity; authentication and admin routes use reduced settings. Its fixed canvas has `pointer-events: none` and `aria-hidden`, so it cannot block controls or keyboard use. Mouse movement gently repels and highlights nearby particles; fast movement adds a short, restrained ripple. Motion pauses when the document is hidden. Coarse-pointer and reduced-motion environments render a sparse static grid without cursor interaction. If canvas context creation is unavailable, the semantic page background remains usable.
 
 ### Core user journeys
 
@@ -99,14 +99,12 @@ Build the core visual system from white, black, charcoal, and neutral gray. The 
 | `color.border.dark` | `#292B30` | Low-contrast borders and separators |
 | `color.text.dark` | `#F5F5F5` | Primary text on dark backgrounds |
 | `color.text.muted.dark` | `#A1A1AA` | Secondary text on dark backgrounds |
-| `color.texture.dot.dark` | `rgba(245, 245, 245, 0.035)` | Low-contrast dark-theme dot grid |
 | `color.bg.light` | `#FAFAFA` | Main light-theme background |
 | `color.surface.light` | `#FFFFFF` | Forms, cards, panels |
 | `color.surface.subtle.light` | `#F1F1F2` | Secondary light surfaces |
 | `color.border.light` | `#E4E4E7` | Light-theme borders |
 | `color.text.light` | `#111113` | Main text on light backgrounds |
 | `color.text.muted.light` | `#62626B` | Secondary text on light backgrounds |
-| `color.texture.dot.light` | `rgba(17, 17, 19, 0.045)` | Low-contrast light-theme dot grid |
 | `color.accent` | `#D4FF4F` | Optional restrained acid-lime accent, only if it fits existing brand assets; do not spread it across the UI |
 | `color.success` | `#16A34A` | Positive state, paired with a readable label |
 | `color.warning` | `#D97706` | Pending / attention |
@@ -126,16 +124,16 @@ Status must always include a readable label or icon—not color alone.
 - Cancelled / Failed: red/error
 - Informational: blue/info
 
-### Vercel-inspired background texture
+### Constellation Grid background
 
-Use a subtle, monochrome, developer-tool-inspired background texture: fine dot grid, micro-grid, faint radial light, or low-contrast noise. Keep it understated so text and product UI remain the focus.
+`frontend/src/components/ui/constellation-grid.jsx` provides one shared, decorative canvas mounted beside the router. It draws muted particles and short local neighbor connections using the active `--color-text` and `--color-text-muted` theme tokens; it replaces the prior static CSS dot grid. Route-level density and intensity are strongest on the landing page and restrained on authentication and admin routes.
 
-- Add a pointer-reactive **wave/ripple or gentle displacement effect** over the texture on capable desktop devices. The effect should follow cursor movement with a soft trailing response, not produce a large spotlight or distracting neon trail.
-- Prefer a lightweight CSS/SVG/canvas implementation or a proven existing dependency. Do not add a heavy WebGL background just to create a texture.
-- The texture must sit behind content and never intercept clicks, focus, selection, or navigation (`pointer-events: none` for purely decorative layers).
-- Limit redraws, debounce/animate efficiently, and disable or simplify the effect on touch devices, reduced-motion preferences, and low-power contexts.
-- Keep the texture visible but subtle in both themes; ensure text contrast remains high.
-- No full-screen cursor-following blur blobs, intense glow, or excessive particle effects.
+- Cap desktop animation at 30fps; use a DPR-aware canvas capped at 2x and connect only nearby grid neighbors.
+- On desktop mouse movement, gently repel and highlight nearby particles; fast movement adds a short, muted ripple. Keep the effect monochrome and behind content.
+- Set `pointer-events: none` and `aria-hidden`; never intercept controls, keyboard focus, scrolling, text selection, or navigation.
+- Pause while the document is hidden. Coarse-pointer and `prefers-reduced-motion` environments use a sparse static grid with no cursor interaction.
+- If a 2D canvas context is unavailable, retain the normal themed page background and full application functionality.
+- Do not add WebGL, large cursor-following blobs, neon glow, or unnecessary dependencies.
 
 ### Color rules
 - Black/white/gray should dominate the design.
@@ -566,7 +564,7 @@ Use for:
 - Avoid scroll hijacking, excessive parallax, and unnecessary cursor-following effects.
 - Respect reduced-motion preferences.
 - Ensure buttons and forms remain usable if animations fail or are disabled.
-- Cursor-reactive background texture must be subtle, throttled/efficient, decorative only, and disabled or reduced for touch devices and `prefers-reduced-motion`.
+- The shared cursor-reactive constellation background must remain subtle, neighbor-connected, and capped at 30fps; pause it when the document is hidden and disable continuous motion and pointer interaction for coarse pointers and `prefers-reduced-motion`.
 - Do not let pointer effects follow the cursor over form controls in a way that harms readability or interaction.
 
 ---
@@ -589,7 +587,7 @@ Use for:
 - Full-width primary actions where useful
 - Touch-friendly controls and slot cards
 - Forms must fit the viewport without horizontal scrolling
-- Simplify or disable expensive 3D effects and cursor-reactive texture
+- Simplify or disable expensive 3D effects; render the constellation grid statically on touch devices
 - Ensure the theme toggle, forms, tables, and dialogs remain usable
 
 Design and test at narrow mobile, standard mobile, tablet, and wide desktop sizes.

@@ -12,9 +12,6 @@
   --color-border-subtle:   #1F2125;
   --color-text:            #F5F5F5;
   --color-text-muted:      #A1A1AA;
-  --color-texture-dot:     rgba(245, 245, 245, 0.035);
-  --texture-grid-size:     24px;
-
   /* ─── Backward-compat brand token (for existing pages pending Phase 2 redesign) ───
    * Brand is now neutral, not emerald. Mapped to text color so existing
    * text-brand / bg-brand usages render as neutral monochrome rather than green.
@@ -87,8 +84,6 @@
   --color-border-subtle:   #D4D4D8;
   --color-text:            #111113;
   --color-text-muted:      #62626B;
-  --color-texture-dot:     rgba(17, 17, 19, 0.045);
-
   /* Brand backward-compat mapping for light theme */
   --color-brand:        #111113;
   --color-brand-hover:  #27272A;

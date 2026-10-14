@@ -10,7 +10,7 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <Spinner text="Verifying authentication permissions..." />
       </div>
     );
@@ -28,7 +28,7 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
     const hasRole = allowedRoles.includes(role);
     if (!hasRole) {
       return (
-        <div className="min-h-screen bg-bg text-text font-mono flex items-center justify-center p-4">
+        <div className="min-h-screen bg-transparent text-text font-mono flex items-center justify-center p-4">
           <div className="max-w-md w-full park-card p-6 md:p-8 text-center space-y-6 border-status-occupied/40">
             <div className="w-12 h-12 rounded-full bg-status-occupied/15 text-status-occupied border border-status-occupied/30 flex items-center justify-center mx-auto">
               <ShieldAlert className="w-6 h-6" />

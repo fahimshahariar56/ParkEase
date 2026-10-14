@@ -17,24 +17,12 @@
     font-family: var(--font-sans);
     background-color: var(--color-bg);
     color: var(--color-text);
-    background-image: radial-gradient(
-      circle,
-      var(--color-texture-dot) 1px,
-      transparent 1px
-    );
-    background-size: var(--texture-grid-size) var(--texture-grid-size);
     -webkit-text-size-adjust: 100%;
   }
 
   html.light,
   html[data-theme='light'] {
     color-scheme: light;
-    background-image: radial-gradient(
-      circle,
-      var(--color-texture-dot) 1px,
-      transparent 1px
-    );
-    background-size: var(--texture-grid-size) var(--texture-grid-size);
   }
 
   body {
@@ -198,16 +186,5 @@
     line-height: 1;
     color: var(--color-text);
     font-variant-numeric: tabular-nums;
-  }
-}
-
-@layer utilities {
-  .bg-bg {
-    background-image: radial-gradient(
-      circle,
-      var(--color-texture-dot) 1px,
-      transparent 1px
-    );
-    background-size: var(--texture-grid-size) var(--texture-grid-size);
   }
 }
