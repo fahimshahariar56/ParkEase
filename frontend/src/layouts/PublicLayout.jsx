@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Car, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button } from '../components/ui/Button';
@@ -138,14 +138,17 @@ export const PublicLayout = () => {
         </div>
 
         {/* Mobile Navigation Drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <div className="fixed inset-0 z-50 flex md:hidden">
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex md:hidden"
+          >
               <motion.button
                 type="button"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
                 onClick={() => setMobileMenuOpen(false)}
                 className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-sm"
@@ -159,7 +162,6 @@ export const PublicLayout = () => {
                 aria-label="Public navigation"
                 initial={{ x: -320 }}
                 animate={{ x: 0 }}
-                exit={{ x: -320 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 className="relative z-10 flex h-full w-[min(20rem,85vw)] flex-col border-r border-border bg-surface font-sans shadow-raised"
               >
@@ -230,9 +232,8 @@ export const PublicLayout = () => {
                   </Link>
                 </div>
               </motion.aside>
-            </div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
       </header>
 
       {/* Page Content */}

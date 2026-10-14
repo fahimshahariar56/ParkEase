@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck,
-  CheckCircle2,
   Lock,
   Layers,
   ArrowRight,
@@ -18,7 +16,7 @@ import { Button, Card, Badge } from '../components/ui';
 export const FeaturesPage = () => {
   const coreFeatures = [
     {
-      title: 'Collision-Free Slot Reservations',
+      title: 'Reservation Conflict Protection',
       category: 'Concurrency Control',
       badge: <Badge variant="confirmed" size="sm">Enforced</Badge>,
       icon: Lock,
@@ -28,10 +26,10 @@ export const FeaturesPage = () => {
     {
       title: 'Multi-Category Slot Architecture',
       category: 'Inventory Management',
-      badge: <Badge variant="available" size="sm">Active</Badge>,
+      badge: <Badge variant="neutral" size="sm">Configured</Badge>,
       icon: Grid3X3,
       description:
-        'Flexible bay classification supporting Sedan, SUV, Motorcycle, and EV parking specs across four distinct lifecycle states: Available, Reserved, Occupied, and Maintenance.',
+        'Parking slot records support Standard Car, SUV, Motorcycle, Van, and Truck categories, with availability and maintenance states managed through the inventory.',
     },
     {
       title: 'Automated Session & Entry/Exit Tracking',
@@ -39,7 +37,7 @@ export const FeaturesPage = () => {
       badge: <Badge variant="available" size="sm">Active</Badge>,
       icon: Clock,
       description:
-        'In-gate arrival timestamping and out-gate departure reconciliation. Applies configurable hourly billing rules with minimum 1-hour charge floors and duration rounding.',
+        'Administrators can record vehicle entry and exit. Session timing and fee calculation are handled by the existing backend workflow.',
     },
     {
       title: 'Role-Separated Operations Console',
@@ -47,15 +45,15 @@ export const FeaturesPage = () => {
       badge: <Badge variant="info" size="sm">Admin</Badge>,
       icon: LayoutDashboard,
       description:
-        'Complete administrative management of parking lots, slot assignments, customer records, session monitoring, and real-time occupancy reporting with strict route isolation.',
+        'Separate admin routes provide parking lot, slot, reservation, session, pricing, payment, and reporting views, protected by role-based routing.',
     },
     {
-      title: 'Simulated Demo Payment Gateway',
+      title: 'Demo Payment Records',
       category: 'Simulated Billing',
       badge: <Badge variant="pending" size="sm">Demo Only</Badge>,
       icon: CreditCard,
       description:
-        'Transparent demonstration checkout workflow simulating card, mobile wallet, and cash settlements with zero collection of real financial credentials or payment provider fees.',
+        'Payment records use demo-only methods. No payment gateway is connected and no real money or financial credentials are processed.',
     },
     {
       title: 'Customer Vehicle & History Hub',
@@ -91,7 +89,7 @@ export const FeaturesPage = () => {
         </h1>
 
         <p className="text-text-muted text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Explore the technical capabilities powering ParkEase — from transactional concurrency protection to role-separated operational control.
+          Explore the implemented ParkEase workflows, from time-window reservation checks to role-separated administration.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -115,7 +113,7 @@ export const FeaturesPage = () => {
             Implemented System Capabilities
           </h2>
           <p className="text-xs sm:text-sm text-text-muted mt-1">
-            Production-grade application modules verified against backend services and relational constraints.
+            Existing customer and admin capabilities, presented against their current API and data contracts.
           </p>
         </div>
 
@@ -187,7 +185,7 @@ export const FeaturesPage = () => {
             Ready to test slot availability?
           </h2>
           <p className="text-text-muted text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-            Experience our collision-free booking workflow or sign in to access customer vehicle management.
+            Review the server-checked reservation flow or sign in to manage registered vehicles.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link to="/parking">

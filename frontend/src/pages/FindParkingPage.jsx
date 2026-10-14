@@ -306,21 +306,8 @@ const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
   const statusLabel = STATUS_LABEL[slot.status] || slot.status;
   const slotTypeLabel = SLOT_TYPE_LABELS[slot.slotType] || slot.slotType;
 
-  const handleKey = (e) => {
-    if (isAvailable && (e.key === 'Enter' || e.key === ' ')) {
-      e.preventDefault();
-      onSelect(slot);
-    }
-  };
-
   return (
     <div
-      role="button"
-      aria-pressed={isSelected}
-      aria-disabled={!isAvailable}
-      tabIndex={isAvailable ? 0 : -1}
-      onKeyDown={handleKey}
-      onClick={isAvailable ? () => onSelect(slot) : undefined}
       className={`
         relative rounded-card border font-mono transition-all duration-150
         ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}
@@ -383,9 +370,7 @@ const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
               variant="primary"
               size="sm"
               icon={ArrowRight}
-              onClick={(e) => { e.stopPropagation(); onReserve(slot); }}
-              tabIndex={-1}
-              aria-hidden="true"
+              onClick={() => onReserve(slot)}
             >
               Reserve
             </Button>
@@ -394,9 +379,7 @@ const SlotCard = ({ slot, isSelected, onSelect, onReserve }) => {
             variant={isSelected ? 'outline' : isAvailable ? 'secondary' : 'secondary'}
             size="sm"
             disabled={!isAvailable}
-            onClick={isAvailable ? (e) => { e.stopPropagation(); onSelect(slot); } : undefined}
-            tabIndex={-1}
-            aria-hidden="true"
+            onClick={isAvailable ? () => onSelect(slot) : undefined}
           >
             {isSelected ? 'Deselect' : isAvailable ? 'Select' : 'Unavailable'}
           </Button>
@@ -835,11 +818,11 @@ export const FindParkingPage = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Page header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text">
+          <h1 className="park-page-title">
             Find Parking
           </h1>
           <p className="text-xs text-text-muted mt-1">

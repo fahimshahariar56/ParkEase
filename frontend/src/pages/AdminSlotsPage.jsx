@@ -5,20 +5,14 @@ import {
   Grid3X3,
   Plus,
   Search,
-  Filter,
   Edit2,
   Trash2,
   AlertTriangle,
   RefreshCw,
-  Building2,
   Car,
   ShieldAlert,
-  CheckCircle2,
-  Wrench,
-  Ban,
-  Layers,
 } from 'lucide-react';
-import { Card, Badge, Button, Input, Dialog, EmptyState, ErrorState, Skeleton } from '../components/ui';
+import { Badge, Button, Input, Dialog, EmptyState, ErrorState, Skeleton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { parkingApi } from '../lib/api';
@@ -284,7 +278,7 @@ export const AdminSlotsPage = () => {
   };
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div>
@@ -292,7 +286,7 @@ export const AdminSlotsPage = () => {
             <Grid3X3 className="w-4 h-4" />
             <span>Bay Inventory</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text">Parking Slots Inventory</h1>
+          <h1 className="park-page-title">Parking Slots Inventory</h1>
           <p className="text-xs text-text-muted mt-1">
             Track parking bays across facility lots, manage vehicle type designations, and toggle maintenance flags.
           </p>

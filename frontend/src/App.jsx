@@ -43,18 +43,11 @@ function AppRoutes() {
   const isAuthPage = ['/login', '/register', '/admin/login'].includes(pathname);
   const density = isLandingPage ? 0.9 : isAdminPage ? 0.42 : isAuthPage ? 0.5 : 0.65;
   const intensity = isLandingPage ? 0.8 : isAdminPage ? 0.32 : isAuthPage ? 0.38 : 0.52;
-  const routeGroup = pathname === '/admin/login'
-    ? 'admin-login'
-    : isAdminPage
-      ? 'admin'
-      : ['/parking', '/reservations', '/profile'].includes(pathname)
-        ? 'customer'
-        : 'public';
 
   return (
     <>
       <ConstellationGrid density={density} intensity={intensity} />
-      <RouteTransition transitionKey={routeGroup} className="relative z-10 min-h-screen">
+      <div className="relative z-10 min-h-screen">
         <Routes location={location}>
           {/* Public Customer / Landing Routes */}
           <Route element={<PublicLayout />}>
@@ -67,7 +60,14 @@ function AppRoutes() {
           </Route>
 
           {/* Dedicated Public Admin Login Route */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/login"
+            element={
+              <RouteTransition transitionKey={location.pathname}>
+                <AdminLoginPage />
+              </RouteTransition>
+            }
+          />
 
           {/* Protected Customer Routes */}
           <Route
@@ -105,7 +105,7 @@ function AppRoutes() {
           {/* 404 / Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </RouteTransition>
+      </div>
     </>
   );
 }

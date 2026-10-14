@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Badge, Button, Input } from '../components/ui';
-import { Plus, Building2, Grid3X3, CalendarCheck, ArrowRightLeft, Users, DollarSign, BarChart3 } from 'lucide-react';
+import { Users } from 'lucide-react';
+import { EmptyState } from '../components/ui';
 
 export { AdminLotsPage } from './AdminLotsPage';
 export { AdminSlotsPage } from './AdminSlotsPage';
@@ -11,19 +11,17 @@ export { AdminPricingPage } from './AdminPricingPage';
 export { AdminReportsPage } from './AdminReportsPage';
 
 export const AdminCustomersPage = () => (
-  <div className="space-y-6 font-mono">
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight">Registered Customers</h1>
-      <p className="text-xs text-text-muted mt-1">Customer accounts created through public registration.</p>
+  <div className="space-y-6 font-sans">
+    <div className="park-page-heading">
+      <h1 className="park-page-title">Registered Customers</h1>
+      <p className="park-page-description">
+        Customer directory is not connected to a list endpoint in the current frontend.
+      </p>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card title="Shahariar Ahammad Fahim" subtitle="fahim.shahariar.cse@gmail.com">
-        <div className="text-xs text-text-muted space-y-1">
-          <p>Role: <span className="text-brand font-bold">CUSTOMER</span></p>
-          <p>Registered Vehicles: 2</p>
-          <p>Total Reservations: 5</p>
-        </div>
-      </Card>
-    </div>
+    <EmptyState
+      icon={Users}
+      title="Customer records are unavailable"
+      description="No customer list is shown here because this page is not connected to a customer-directory API."
+    />
   </div>
 );

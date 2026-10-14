@@ -270,11 +270,11 @@ export const ReservationsPage = () => {
   );
 
   return (
-    <div className="space-y-8 font-mono">
+    <div className="space-y-8 font-sans">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text">
+          <h1 className="park-page-title">
             My Reservations
           </h1>
           <p className="text-xs text-text-muted mt-1">

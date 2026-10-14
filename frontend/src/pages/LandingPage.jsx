@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import {
   ArrowRight,
   Shield,
@@ -10,7 +9,6 @@ import {
   Sparkles,
   Building2,
   RefreshCw,
-  Layers,
   Lock,
 } from 'lucide-react';
 import { Button, Card, Badge, Skeleton, EmptyState } from '../components/ui';
@@ -27,9 +25,6 @@ export const LandingPage = () => {
   const [isLoadingLots, setIsLoadingLots] = useState(true);
   const [lotsError, setLotsError] = useState(null);
 
-  // Mouse tilt state for subtle, restrained desktop visual
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
   const fetchLots = async () => {
     setIsLoadingLots(true);
     setLotsError(null);
@@ -38,7 +33,7 @@ export const LandingPage = () => {
       const facilityList = res?.data?.lots || res?.lots || [];
       setLots(facilityList);
     } catch (err) {
-      setLotsError(err.message || 'Unable to connect to live facilities service.');
+      setLotsError(err.message || 'Unable to load the facility directory.');
     } finally {
       setIsLoadingLots(false);
     }
@@ -48,30 +43,17 @@ export const LandingPage = () => {
     fetchLots();
   }, []);
 
-  const handleMouseMove = (e) => {
-    // Restrained cursor response: max +/- 5 deg tilt on desktop
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
-    setMousePos({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
-  };
-
   const handleShowMore = () => {
     const target = '/parking';
 
     if (!isAuthenticated) {
       navigate('/login', {
-        replace: true,
         state: { from: { pathname: target, search: location.search, hash: location.hash } },
       });
       return;
     }
 
-    navigate(target, { replace: true });
+    navigate(target);
   };
 
   return (
@@ -88,13 +70,13 @@ export const LandingPage = () => {
               <span>Smart Parking Management Platform</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-text leading-[1.08]">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.055em] text-text leading-[1.03]">
               Your Space. Your Time.{' '}
-              <span className="text-text-muted">Smarter Parking.</span>
+              <span className="text-text-muted">Parking, planned.</span>
             </h1>
 
-            <p className="text-text-muted text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Collision-free parking slot reservations, live occupancy detection, and automated session management powered by relational database integrity.
+            <p className="text-text-muted text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Find a facility, check slot availability for your time window, and manage reservations and vehicles in one considered workspace.
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
@@ -103,58 +85,46 @@ export const LandingPage = () => {
                   Find Parking
                 </Button>
               </Link>
-              <a href="#how-it-works">
+              <Link to="/how-it-works">
                 <Button variant="secondary" size="lg">
-                  Explore How It Works
+                  How it works
                 </Button>
-              </a>
+              </Link>
             </div>
 
             {/* Micro Architecture Badges */}
             <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-text-muted font-mono">
               <span className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-status-available" aria-hidden="true" />
-                ACID Concurrency Safe
+                <Lock className="w-3.5 h-3.5 text-text" aria-hidden="true" />
+                Time-window checks
               </span>
               <span className="hidden sm:inline text-border">•</span>
               <span className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-status-info" aria-hidden="true" />
-                RBAC Protected
+                <Shield className="w-3.5 h-3.5 text-text" aria-hidden="true" />
+                Role-protected access
               </span>
               <span className="hidden sm:inline text-border">•</span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-status-pending" aria-hidden="true" />
-                Simulated Demo Billing
+                <Clock className="w-3.5 h-3.5 text-text" aria-hidden="true" />
+                Demo billing only
               </span>
             </div>
           </div>
 
-          {/* Hero Visual: Architectural Blueprint Card with Interactive Response */}
-          <div
-            className="lg:col-span-5 relative flex justify-center"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-          >
-            <motion.div
-              style={{
-                perspective: 1000,
-              }}
-              animate={{
-                rotateY: mousePos.x,
-                rotateX: mousePos.y,
-              }}
-              transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-              className="w-full max-w-md park-card bg-surface-raised border border-border p-6 shadow-raised relative overflow-hidden"
+          {/* Static slot-layout illustration; it does not represent live availability. */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            <div
+              className="w-full max-w-md park-card-raised p-5 sm:p-6 relative overflow-hidden"
+              aria-label="Illustrative parking slot layout"
             >
               {/* Header Telemetry */}
               <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-status-available animate-pulse" />
                   <span className="text-xs font-mono font-semibold tracking-wider text-text uppercase">
-                    Bay Monitor: Live
+                    Slot layout · illustration
                   </span>
                 </div>
-                <Badge variant="neutral" size="sm">Ground Level 01</Badge>
+                <Badge variant="neutral" size="sm">Demo view</Badge>
               </div>
 
               {/* Slot Grid Schematic */}
@@ -189,11 +159,11 @@ export const LandingPage = () => {
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <Car className="w-4 h-4 text-text-muted" aria-hidden="true" />
-                  <span className="text-text font-medium">Collision Shield Active</span>
+                  <span className="text-text font-medium">Availability checked on search</span>
                 </div>
-                <span className="text-status-available font-mono text-[11px] font-semibold">100% Lock Safe</span>
+                <span className="text-text-muted font-mono text-[11px]">Server verified</span>
               </div>
-            </motion.div>
+            </div>
           </div>
 
         </div>
@@ -204,13 +174,13 @@ export const LandingPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-text">
-                Live Parking Facilities
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-text">
+                Facility directory
               </h2>
-              <Badge variant="available" size="sm">Database Grounded</Badge>
+              <Badge variant="neutral" size="sm">API records</Badge>
             </div>
             <p className="text-xs sm:text-sm text-text-muted mt-1">
-              Active facilities registered in the ParkEase database. Live data updated automatically.
+              Facilities returned by the ParkEase API. Slot availability is checked for your selected time window.
             </p>
           </div>
           <Link to="/parking">
@@ -240,7 +210,7 @@ export const LandingPage = () => {
         {!isLoadingLots && lotsError && (
           <div className="park-card p-6 border-border flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-1 text-center sm:text-left">
-              <div className="font-semibold text-sm text-text">Live Preview Unavailable</div>
+              <div className="font-semibold text-sm text-text">Facility directory unavailable</div>
               <div className="text-xs text-text-muted">{lotsError}</div>
             </div>
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={fetchLots}>
@@ -253,8 +223,8 @@ export const LandingPage = () => {
         {!isLoadingLots && !lotsError && lots.length === 0 && (
           <EmptyState
             icon={Building2}
-            title="No Facilities Published"
-            description="There are currently no active parking facilities configured in the database."
+            title="No facility records found"
+            description="The facility directory did not return any parking locations."
             actionLabel="Browse Customer Parking"
             onAction={() => navigate('/parking')}
           />
@@ -276,7 +246,7 @@ export const LandingPage = () => {
                 footer={
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-mono text-text-muted">
-                      Total Capacity: <span className="font-semibold text-text">{lot.totalCapacity ?? '—'}</span>
+                      Total capacity: <span className="font-semibold text-text">{lot.totalCapacity ?? '—'}</span>
                     </span>
                     <Button
                       variant="ghost"
@@ -307,28 +277,28 @@ export const LandingPage = () => {
             Engineered for Concurrency & Precision
           </h2>
           <p className="text-text-muted text-sm leading-relaxed">
-            Eliminating double-booking conflicts and phantom parking spaces with database-backed guarantees.
+            A straightforward flow built around facility records, time-window search, and server-checked reservations.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card
-            title="Collision-Free Reservations"
-            subtitle="ACID Transaction Guarantees"
-            headerAction={<Badge variant="confirmed">Enforced</Badge>}
+            title="Reservation conflict checks"
+            subtitle="Server-validated requests"
+            headerAction={<Badge variant="neutral">Backend</Badge>}
           >
             <p className="text-xs text-text-muted leading-relaxed">
-              Interval overlapping queries run inside relational database transactions with row-level locks, mathematically preventing simultaneous booking of the same slot.
+              Reservation requests are checked against existing time windows by the backend before confirmation.
             </p>
           </Card>
 
           <Card
-            title="Real-Time Bay Matrix"
-            subtitle="Granular State Tracking"
-            headerAction={<Badge variant="available">Live</Badge>}
+            title="Time-specific availability"
+            subtitle="Inventory status"
+            headerAction={<Badge variant="neutral">API-backed</Badge>}
           >
             <p className="text-xs text-text-muted leading-relaxed">
-              Slots are tracked across four explicit lifecycle states: Available, Reserved, Occupied, and Maintenance with vehicle type matching (Sedan, SUV, Bike, EV).
+              Slot records use explicit availability and maintenance states. Search results are evaluated against the requested time window and vehicle category.
             </p>
           </Card>
 
@@ -351,7 +321,7 @@ export const LandingPage = () => {
             How It Works
           </h2>
           <p className="text-text-muted text-sm">
-            Four disciplined steps from slot discovery to confirmed arrival.
+            Explore facilities, choose a suitable time, and submit a reservation request.
           </p>
         </div>
 
@@ -360,22 +330,22 @@ export const LandingPage = () => {
             {
               step: '01',
               title: 'Discover',
-              desc: 'Inspect real parking facilities and review slots matched to your vehicle classification.',
+              desc: 'Browse facilities and supported slot categories from the parking inventory.',
             },
             {
               step: '02',
               title: 'Schedule',
-              desc: 'Select your arrival timestamp and duration window with transparent hourly rate preview.',
+              desc: 'Choose a start and end time for the availability search.',
             },
             {
               step: '03',
-              title: 'Authorize',
-              desc: 'Confirm your spot using a simulated demo checkout with zero real financial exposure.',
+              title: 'Reserve',
+              desc: 'Submit your selection. The server rechecks availability before confirming a reservation.',
             },
             {
               step: '04',
               title: 'Arrive',
-              desc: 'Park in your reserved bay with automated entry and exit parking session time tracking.',
+              desc: 'Review your reservation in the customer portal. Admins can record entry and exit sessions.',
             },
           ].map((item) => (
             <div key={item.step} className="park-card p-6 space-y-3 relative overflow-hidden">
@@ -400,7 +370,7 @@ export const LandingPage = () => {
             Ready to find and reserve your parking bay?
           </h2>
           <p className="text-text-muted text-sm max-w-lg mx-auto leading-relaxed">
-            Experience reliable, collision-free slot reservations backed by verifiable database architecture.
+            Start with a time-specific availability search and manage your booking from your customer account.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
             <Link to="/parking">

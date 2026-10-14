@@ -202,7 +202,7 @@ export const AdminLotsPage = () => {
   };
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div>
@@ -210,7 +210,7 @@ export const AdminLotsPage = () => {
             <Building2 className="w-4 h-4" />
             <span>Facility Management</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text">Parking Lots Management</h1>
+          <h1 className="park-page-title">Parking Lots Management</h1>
           <p className="text-xs text-text-muted mt-1">
             Configure physical parking facilities, location addresses, total capacity, and operational status.
           </p>

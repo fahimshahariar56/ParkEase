@@ -113,7 +113,7 @@ export const RegisterPage = () => {
             Create your account
           </h1>
           <p className="text-xs sm:text-sm text-text-muted">
-            Register as a customer to reserve slots and manage parking sessions.
+            Register as a customer to reserve slots and manage your vehicles and bookings.
           </p>
         </div>
 
@@ -144,7 +144,6 @@ export const RegisterPage = () => {
               disabled={isLoading}
               required
               autoComplete="name"
-              autoFocus
             />
 
             <Input

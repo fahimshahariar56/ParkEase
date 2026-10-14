@@ -8,7 +8,6 @@ import {
   EyeOff,
   LogIn,
   Shield,
-  UserCheck,
   CheckCircle2,
   Clock,
   AlertCircle,
@@ -22,13 +21,13 @@ import { useToast } from '../components/ui/Toast';
 const SYSTEM_BENEFITS = [
   {
     icon: CheckCircle2,
-    title: 'Real-Time Availability',
-    desc: 'Verify slot status and lot capacity live before arriving.',
+    title: 'Time-specific availability',
+    desc: 'Check slot availability for the time window you plan to park.',
   },
   {
     icon: Clock,
-    title: 'Instant Reservation',
-    desc: 'Lock in parking slots with automated duration calculations.',
+    title: 'Server-confirmed reservation',
+    desc: 'Your booking is confirmed only after the server accepts the request.',
   },
   {
     icon: Shield,
@@ -46,10 +45,20 @@ export const LoginPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { apiLogin, isLoading, setDemoRole } = useAuth();
+  const { apiLogin, isLoading } = useAuth();
   const { toast } = useToast();
 
-  const redirectPath = location.state?.from?.pathname;
+  const requestedPath = location.state?.from?.pathname;
+  const redirectPath = ['/parking', '/reservations', '/profile'].includes(requestedPath)
+    ? requestedPath
+    : '/parking';
+  const redirectTo = ['/parking', '/reservations', '/profile'].includes(requestedPath)
+    ? {
+      pathname: redirectPath,
+      search: typeof location.state?.from?.search === 'string' ? location.state.from.search : '',
+      hash: typeof location.state?.from?.hash === 'string' ? location.state.from.hash : '',
+    }
+    : redirectPath;
 
   // ── Client-side validation ──────────────────────────────────────────────────
   function validate() {
@@ -86,18 +95,10 @@ export const LoginPage = () => {
         title: 'Welcome back!',
         message: `Signed in as ${user.fullName}.`,
       });
-      const dest = redirectPath || '/parking';
-      navigate(dest, { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setServerError(err.message || 'Sign-in failed. Please verify your credentials.');
     }
-  };
-
-  // ── Demo role shortcut (preserved for fast evaluation) ─────────────────────
-  const handleQuickLogin = (role) => {
-    setDemoRole(role);
-    const dest = redirectPath || (role === 'ADMIN' ? '/admin' : '/parking');
-    navigate(dest, { replace: true });
   };
 
   return (
@@ -120,8 +121,7 @@ export const LoginPage = () => {
               <span className="text-text-muted">effortlessly managed.</span>
             </h1>
             <p className="text-sm text-text-muted leading-relaxed">
-              Reserve slots, manage entry sessions, and access simulated payments across
-              metropolitan facility networks.
+              Find facilities, manage vehicles, and review your reservation history from one account.
             </p>
           </div>
 
@@ -144,7 +144,7 @@ export const LoginPage = () => {
               to="/parking"
               className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text transition-colors font-medium group"
             >
-              <span>Explore live parking facilities</span>
+              <span>Browse parking facilities</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
@@ -164,7 +164,7 @@ export const LoginPage = () => {
             </Badge>
             <h1 className="text-2xl font-semibold tracking-tight text-text">Sign in to ParkEase</h1>
             <p className="text-xs text-text-muted">
-              Access slot discovery, reservations, and active parking sessions.
+              Find facilities, submit reservations, and manage registered vehicles.
             </p>
           </div>
 
@@ -256,38 +256,6 @@ export const LoginPage = () => {
                 {isLoading ? 'Signing in…' : 'Sign In'}
               </Button>
             </form>
-
-            {/* Quick Role Evaluation (Demo Switcher) */}
-            <div className="pt-4 border-t border-border space-y-2.5">
-              <div className="flex items-center justify-between text-[11px] text-text-muted">
-                <span className="font-medium">Quick Role Evaluation</span>
-                <span className="font-mono text-[10px] text-text-muted/70">MOCK SESSION</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  icon={UserCheck}
-                  onClick={() => handleQuickLogin('CUSTOMER')}
-                  disabled={isLoading}
-                  id="demo-customer-btn"
-                >
-                  Customer Demo
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  icon={Shield}
-                  onClick={() => handleQuickLogin('ADMIN')}
-                  disabled={isLoading}
-                  id="demo-admin-btn"
-                >
-                  Admin Demo
-                </Button>
-              </div>
-            </div>
 
             {/* Bottom Navigation Links */}
             <div className="pt-4 border-t border-border text-center text-xs text-text-muted space-y-2">

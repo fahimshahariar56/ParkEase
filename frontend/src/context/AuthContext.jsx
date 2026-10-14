@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
   }, [_persistSession]);
 
   /**
-   * Direct session setter — used by demo switcher and ProtectedRoute logic.
+   * Update session details after a successful profile edit.
    */
   const login = useCallback((authToken, authUser) => {
     _persistSession(authToken, authUser);
@@ -112,27 +112,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('parkease_token');
     localStorage.removeItem('parkease_user');
   }, []);
-
-  /**
-   * Demo role switcher — quick preview of route guards without a real backend call.
-   */
-  const setDemoRole = useCallback((role) => {
-    if (role === 'ADMIN') {
-      _persistSession('demo_admin_jwt_token', {
-        id: 99,
-        fullName: 'Admin Supervisor',
-        email: 'admin@parkease.io',
-        role: 'ADMIN',
-      });
-    } else {
-      _persistSession('demo_customer_jwt_token', {
-        id: 1,
-        fullName: 'Demo Customer',
-        email: 'customer@parkease.io',
-        role: 'CUSTOMER',
-      });
-    }
-  }, [_persistSession]);
 
   const value = {
     user,
@@ -150,7 +129,6 @@ export const AuthProvider = ({ children }) => {
     // Direct session helpers
     login,
     logout,
-    setDemoRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

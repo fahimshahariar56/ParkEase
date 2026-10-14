@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Car, MapPin, User, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '../components/navigation/ThemeToggle';
 import { Button, Badge } from '../components/ui';
@@ -8,8 +8,13 @@ import { useAuth } from '../context/AuthContext';
 import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const CustomerLayout = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const [mobileMenu, setMobileMenu] = useState({ pathname: location.pathname, open: false });
+  const mobileMenuOpen = mobileMenu.open && mobileMenu.pathname === location.pathname;
+  const setMobileMenuOpen = useCallback(
+    (open) => setMobileMenu({ pathname: location.pathname, open }),
+    [location.pathname],
+  );
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -96,6 +101,7 @@ export const CustomerLayout = () => {
               className="p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
               aria-label="Toggle mobile menu"
               aria-expanded={mobileMenuOpen}
+              aria-controls="customer-mobile-menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
@@ -103,15 +109,14 @@ export const CustomerLayout = () => {
         </div>
 
         {/* Mobile Nav Drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-2 overflow-hidden"
-            >
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            id="customer-mobile-menu"
+            className="md:hidden border-b border-border bg-surface-raised px-4 pt-3 pb-5 space-y-2 overflow-hidden"
+          >
               <div className="px-2 py-1 text-xs text-text-muted border-b border-border mb-2">
                 Signed in as <span className="text-text font-medium">{user?.fullName || user?.email}</span>
               </div>
@@ -141,9 +146,8 @@ export const CustomerLayout = () => {
                   Sign Out
                 </Button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
       </header>
 
       {/* Main Content */}

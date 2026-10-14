@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Car,
   Plus,
@@ -28,10 +29,11 @@ const VEHICLE_TYPE_CONFIG = {
 export const CustomerProfilePage = () => {
   const { user, token, login } = useAuth();
   const { addToast } = useToast();
+  const profileFallback = useRef(user);
 
   // Profile State
   const [profile, setProfile] = useState(user);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editFullName, setEditFullName] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -64,44 +66,56 @@ export const CustomerProfilePage = () => {
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
   const [deleteVehicleError, setDeleteVehicleError] = useState('');
 
+  useEffect(() => {
+    profileFallback.current = user;
+  }, [user]);
+
   // Synchronize profile data with API or Auth Context
   const loadProfile = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setProfileError('Your authentication session is unavailable. Please sign in again.');
+      setIsProfileLoading(false);
+      return;
+    }
     try {
       setIsProfileLoading(true);
+      setProfileError('');
       const res = await usersApi.getMyProfile(token);
       if (res?.data?.user) {
         setProfile(res.data.user);
-        login(token, res.data.user);
+      } else {
+        throw new Error('The profile service returned no user information.');
       }
-    } catch {
-      // Fallback to cached auth user if API is unreachable
-      if (user) setProfile(user);
+    } catch (err) {
+      setProfileError(err.message || 'Unable to load your profile from the server.');
+      if (profileFallback.current) setProfile(profileFallback.current);
     } finally {
       setIsProfileLoading(false);
     }
-  }, [token, login, user]);
+  }, [token]);
 
   // Fetch real registered vehicles
   const loadVehicles = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setVehiclesError('Your authentication session is unavailable. Please sign in again.');
+      setIsVehiclesLoading(false);
+      return;
+    }
     try {
       setIsVehiclesLoading(true);
       setVehiclesError('');
       const res = await vehiclesApi.getMyVehicles(token);
       if (res?.data?.vehicles) {
         setVehicles(res.data.vehicles);
+      } else {
+        throw new Error('The vehicle service returned no vehicle list.');
       }
     } catch (err) {
       setVehiclesError(err.message || 'Failed to load vehicles from server.');
-      // If error (e.g. mock session), provide fallback state
-      if (vehicles.length === 0) {
-        setVehicles([]);
-      }
     } finally {
       setIsVehiclesLoading(false);
     }
-  }, [token, vehicles.length]);
+  }, [token]);
 
   useEffect(() => {
     loadProfile();
@@ -281,14 +295,14 @@ export const CustomerProfilePage = () => {
   };
 
   return (
-    <div className="space-y-10 font-mono">
+    <div className="space-y-8 font-sans">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text">
+      <div className="park-page-heading">
+        <h1 className="park-page-title">
           Customer Profile & Vehicles
         </h1>
-        <p className="text-xs text-text-muted mt-1">
-          Manage your personal details, registered vehicles, and parking activities.
+        <p className="park-page-description">
+          Manage your personal details and registered vehicles, and review your reservations.
         </p>
       </div>
 
@@ -310,7 +324,21 @@ export const CustomerProfilePage = () => {
             }
           >
             {isProfileLoading ? (
-              <CardSkeleton />
+              <div className="space-y-5" role="status" aria-label="Loading customer profile">
+                <div className="flex items-center gap-3.5 pb-4 border-b border-border/60">
+                  <div className="h-12 w-12 rounded-full bg-surface-raised animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-2/3 rounded-sm bg-surface-raised animate-pulse" />
+                    <div className="h-3 w-1/2 rounded-sm bg-surface-raised animate-pulse" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-3 w-1/3 rounded-sm bg-surface-raised animate-pulse" />
+                  <div className="h-4 w-2/3 rounded-sm bg-surface-raised animate-pulse" />
+                  <div className="h-3 w-1/4 rounded-sm bg-surface-raised animate-pulse" />
+                  <div className="h-4 w-1/2 rounded-sm bg-surface-raised animate-pulse" />
+                </div>
+              </div>
             ) : (
               <div className="space-y-5 text-xs">
                 {/* Avatar and Name */}
@@ -324,7 +352,7 @@ export const CustomerProfilePage = () => {
                   </h3>
                   <span className="text-[11px] text-text-muted flex items-center gap-1 mt-0.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-brand" />
-                    Verified Customer Account
+                    Customer account
                   </span>
                 </div>
               </div>
@@ -335,7 +363,7 @@ export const CustomerProfilePage = () => {
                   <Mail className="w-3.5 h-3.5" /> Email Address
                 </span>
                 <span className="font-semibold text-text break-all block pl-5">
-                  {profile?.email || 'customer@parkease.io'}
+                  {profile?.email || 'Not available'}
                 </span>
               </div>
 
@@ -366,6 +394,17 @@ export const CustomerProfilePage = () => {
               )}
             </div>
             )}
+            {profileError && !isProfileLoading && (
+            <div
+              className="mt-4 flex flex-col gap-2 rounded-input border border-status-occupied/30 bg-status-occupied/10 p-3 text-xs text-status-occupied sm:flex-row sm:items-center sm:justify-between"
+              role="alert"
+            >
+              <span>{profileError} Showing the saved account details where available.</span>
+              <Button variant="outline" size="sm" onClick={loadProfile}>
+                Retry
+              </Button>
+            </div>
+            )}
           </Card>
         </div>
 
@@ -377,7 +416,7 @@ export const CustomerProfilePage = () => {
                 Registered Vehicles ({vehicles.length})
               </h2>
               <p className="text-xs text-text-muted">
-                Vehicles available for parking slot reservation and automated entry.
+                Registered to your account for use in reservation requests.
               </p>
             </div>
             <Button
@@ -469,8 +508,8 @@ export const CustomerProfilePage = () => {
                       </div>
                       <div className="flex items-center justify-between text-[11px]">
                         <span>Status:</span>
-                        <span className="text-status-available font-semibold flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Ready for Booking
+                        <span className="text-text-muted font-medium flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Registered
                         </span>
                       </div>
                     </div>
@@ -480,22 +519,26 @@ export const CustomerProfilePage = () => {
             </div>
           )}
 
-          {/* Activity / Reservations Section */}
+          {/* Account summary */}
           <div className="pt-6 border-t border-border/60 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-lg font-bold tracking-tight text-text">
-                Parking Activity & Reservations
+                Account overview
               </h2>
-              <span className="text-xs text-text-muted">Day 10 Profile Preview</span>
+              <Link to="/reservations">
+                <Button variant="outline" size="sm" icon={Calendar}>
+                  View reservations
+                </Button>
+              </Link>
             </div>
-            <div className="park-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="park-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
               <div className="space-y-1">
-                <div className="font-bold text-sm text-text">Fleet Overview</div>
+                <div className="font-semibold text-text">Registered vehicles</div>
                 <div className="text-text-muted">
-                  {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'} registered. Ready to book slots at Central Plaza & Downtown Hub.
+                  {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'} linked to your account.
                 </div>
               </div>
-              <Badge variant="available">Active Profile</Badge>
+              <Badge variant="neutral">Account</Badge>
             </div>
           </div>
         </div>

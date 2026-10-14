@@ -19,7 +19,6 @@ import {
   Clock,
   User,
   Car,
-  Grid3X3,
   ShieldAlert,
   Wallet,
   Banknote,
@@ -432,7 +431,7 @@ export const AdminPaymentsPage = () => {
   }, [payments]);
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div>
@@ -440,7 +439,7 @@ export const AdminPaymentsPage = () => {
             <CreditCard className="w-4 h-4" />
             <span>Demo Payment Console</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text">Payments</h1>
+          <h1 className="park-page-title">Demo Payments</h1>
           <p className="text-xs text-text-muted mt-1">
             Simulated payment flow for demonstration purposes. No real transactions.
           </p>

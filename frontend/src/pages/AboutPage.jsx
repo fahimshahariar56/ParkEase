@@ -5,7 +5,6 @@ import {
   Database,
   ShieldCheck,
   Server,
-  Layers,
   ArrowRight,
   Cpu,
   CheckCircle2,
@@ -177,7 +176,7 @@ export const AboutPage = () => {
             Explore ParkEase Today
           </h2>
           <p className="text-text-muted text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-            Test real slot reservations or sign in to experience the admin operations console.
+            Explore the customer reservation flow or sign in to review the admin operations console.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link to="/parking">

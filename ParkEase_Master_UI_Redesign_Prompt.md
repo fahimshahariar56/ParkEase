@@ -875,7 +875,7 @@ Keep content visible and understandable if animation is disabled or fails.
 
 Do not use scroll hijacking or force visitors through a fixed sequence of sections.
 
-### If GSAP Is Authorized
+### GSAP Is Authorized
 
 Use GSAP + ScrollTrigger only for the scroll storytelling that benefits from timeline-based control.
 
@@ -900,9 +900,9 @@ Use the available Motion APIs or lightweight CSS/Intersection Observer patterns 
 
 Document the limitation accurately.
 
-## 6. Optional 3D Car and Parking Scene
+## 6. 3D Car and Parking Scene
 
-Implement this section only if `RULES.md`, `PHASE.md`, existing dependencies, and project constraints explicitly allow it.
+Implement this section  existing dependencies, and project constraints explicitly allow it.
 
 First inspect:
 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   LayoutDashboard,
   Building2,
@@ -24,8 +24,13 @@ import { useAuth } from '../context/AuthContext';
 import { RouteTransition } from '../components/ui/RouteTransition';
 
 export const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const [sidebar, setSidebar] = useState({ pathname: location.pathname, open: false });
+  const sidebarOpen = sidebar.open && sidebar.pathname === location.pathname;
+  const setSidebarOpen = useCallback(
+    (open) => setSidebar({ pathname: location.pathname, open }),
+    [location.pathname],
+  );
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -138,6 +143,8 @@ export const AdminLayout = () => {
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-btn border border-border text-text-muted hover:text-text bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2"
               aria-label="Open sidebar navigation"
+              aria-expanded={sidebarOpen}
+              aria-controls="admin-mobile-navigation"
             >
               <Menu className="w-4 h-4" />
             </button>
@@ -153,8 +160,8 @@ export const AdminLayout = () => {
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex">
-              <Badge variant="available" size="sm">
-                System Live
+              <Badge variant="neutral" size="sm">
+                Operations Console
               </Badge>
             </div>
             <div className="lg:hidden">
@@ -172,13 +179,16 @@ export const AdminLayout = () => {
       </div>
 
       {/* Mobile Sidebar Overlay & Drawer */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden">
+      {sidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex lg:hidden"
+        >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               onClick={() => setSidebarOpen(false)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -187,7 +197,6 @@ export const AdminLayout = () => {
             <motion.div
               initial={{ x: -260 }}
               animate={{ x: 0 }}
-              exit={{ x: -260 }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               className="relative w-64 bg-surface border-r border-border flex flex-col h-full z-10 font-sans shadow-raised"
             >
@@ -210,7 +219,7 @@ export const AdminLayout = () => {
                 </button>
               </div>
 
-              <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Mobile Admin Navigation">
+              <nav id="admin-mobile-navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Mobile Admin Navigation">
                 {adminNav.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.path;
@@ -240,9 +249,8 @@ export const AdminLayout = () => {
                 </Button>
               </div>
             </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 };

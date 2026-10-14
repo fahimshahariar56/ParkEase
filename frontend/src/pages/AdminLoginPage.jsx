@@ -31,7 +31,19 @@ export const AdminLoginPage = () => {
   const { apiLoginAdmin, isAuthenticated, isAdmin, isLoading } = useAuth();
   const { toast } = useToast();
 
-  const redirectPath = location.state?.from?.pathname;
+  const requestedPath = location.state?.from?.pathname;
+  const adminReturnPaths = [
+    '/admin',
+    '/admin/lots',
+    '/admin/slots',
+    '/admin/reservations',
+    '/admin/sessions',
+    '/admin/payments',
+    '/admin/customers',
+    '/admin/pricing',
+    '/admin/reports',
+  ];
+  const redirectPath = adminReturnPaths.includes(requestedPath) ? requestedPath : '/admin';
 
   // If already authenticated as ADMIN, redirect to admin console
   useEffect(() => {

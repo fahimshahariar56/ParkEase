@@ -1,21 +1,19 @@
 /**
- * AdminReportsPage — Day 22: Reports and Database Demonstration
+ * AdminReportsPage — Operational and Audit Reports
  *
- * Real-time operational reporting powered by MySQL queries and aggregates.
+ * Operational reporting powered by backend queries and aggregates.
  * Supports:
- * - Real-time parking occupancy & slot distribution
+ * - Parking occupancy & slot distribution
  * - Reservation statistics, status breakdowns, and cancellation metrics
  * - Parking session durations, active entry/exit logs, and historical fee snapshots
  * - Demo payment audits strictly labelled as simulated transactions
  * - Date-range filters, lot filters, CSV export, and clean SVG/CSS visualizations
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BarChart3,
-  TrendingUp,
-  Car,
   CalendarCheck,
   Clock,
   DollarSign,
@@ -23,14 +21,8 @@ import {
   Grid3X3,
   RefreshCw,
   Download,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
   ShieldAlert,
-  Layers,
-  Filter,
   ArrowRight,
-  Info,
   Calendar,
   Wallet,
   CreditCard,
@@ -40,8 +32,6 @@ import {
   Card,
   Badge,
   Button,
-  Input,
-  EmptyState,
   ErrorState,
   Skeleton,
 } from '../components/ui';
@@ -70,21 +60,6 @@ function formatDateTime(isoString) {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  } catch {
-    return isoString;
-  }
-}
-
-function formatDate(isoString) {
-  if (!isoString) return '—';
-  try {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return isoString;
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
     });
   } catch {
     return isoString;
@@ -338,18 +313,17 @@ export const AdminReportsPage = () => {
   // ─── Render Components ──────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 font-mono pb-12">
+    <div className="space-y-6 font-sans pb-12">
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-card pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="park-page-title">
               Operational Reports & Analytics
             </h1>
-            <Badge variant="brand">Day 22</Badge>
           </div>
           <p className="text-xs text-text-muted mt-1">
-            Real MySQL reporting queries, slot occupancy analytics, session logs, and simulated demo audits.
+            Operational reports, slot occupancy, session records, and simulated payment audits.
           </p>
         </div>
 
@@ -378,7 +352,7 @@ export const AdminReportsPage = () => {
       </div>
 
       {/* ── Global Filter Bar ── */}
-      <div className="bg-bg-card border border-border-card rounded-lg p-4 space-y-3">
+      <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Preset Buttons */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -392,8 +366,8 @@ export const AdminReportsPage = () => {
                 onClick={() => handlePresetChange(p.id)}
                 className={`text-xs px-2.5 py-1 rounded transition-colors ${
                   selectedPreset === p.id
-                    ? 'bg-brand text-bg-page font-bold'
-                    : 'bg-bg-subtle text-text-muted hover:text-text-primary hover:bg-bg-card'
+                    ? 'bg-brand text-bg font-bold'
+                    : 'bg-bg-subtle text-text-muted hover:text-text hover:bg-surface'
                 }`}
               >
                 {p.label}
@@ -410,7 +384,7 @@ export const AdminReportsPage = () => {
               id="lotFilter"
               value={selectedLotId}
               onChange={(e) => setSelectedLotId(e.target.value)}
-              className="bg-bg-subtle border border-border-card rounded px-2.5 py-1 text-xs text-text-primary focus:outline-none focus:border-brand"
+              className="bg-bg-subtle border border-border rounded px-2.5 py-1 text-xs text-text focus:outline-none focus:border-brand"
             >
               <option value="">All Parking Facilities</option>
               {lotsList.map((lot) => (
@@ -424,14 +398,14 @@ export const AdminReportsPage = () => {
 
         {/* Custom Date Inputs if 'custom' is active */}
         {selectedPreset === 'custom' && (
-          <div className="pt-2 border-t border-border-card/50 flex flex-wrap items-center gap-4 text-xs">
+          <div className="pt-2 border-t border-border/50 flex flex-wrap items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <span className="text-text-muted">Start Date:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-bg-subtle border border-border-card rounded px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-brand"
+                className="bg-bg-subtle border border-border rounded px-2 py-1 text-xs text-text focus:outline-none focus:border-brand"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -440,7 +414,7 @@ export const AdminReportsPage = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-bg-subtle border border-border-card rounded px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-brand"
+                className="bg-bg-subtle border border-border rounded px-2 py-1 text-xs text-text focus:outline-none focus:border-brand"
               />
             </div>
           </div>
@@ -448,7 +422,7 @@ export const AdminReportsPage = () => {
       </div>
 
       {/* ── Category Navigation Tabs ── */}
-      <div className="flex flex-wrap gap-2 border-b border-border-card pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-border pb-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -458,8 +432,8 @@ export const AdminReportsPage = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-medium transition-all ${
                 isActive
-                  ? 'bg-bg-card text-brand border border-brand/40 shadow-sm'
-                  : 'text-text-muted hover:text-text-primary hover:bg-bg-subtle'
+                  ? 'bg-surface text-brand border border-brand/40 shadow-sm'
+                  : 'text-text-muted hover:text-text hover:bg-bg-subtle'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -510,7 +484,6 @@ export const AdminReportsPage = () => {
           >
             {activeTab === 'overview' && (
               <OverviewTab
-                summary={summaryData}
                 occupancy={occupancyData}
                 reservations={reservationsData}
                 sessions={sessionsData}
@@ -535,7 +508,7 @@ export const AdminReportsPage = () => {
 
 // ─── TAB 1: OVERVIEW ──────────────────────────────────────────────────────────
 
-function OverviewTab({ summary, occupancy, reservations, sessions, payments, onSelectTab }) {
+function OverviewTab({ occupancy, reservations, sessions, payments, onSelectTab }) {
   const occSum = occupancy?.summary || {};
   const resSum = reservations?.summary || {};
   const sessSum = sessions?.summary || {};
@@ -545,16 +518,17 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
     <div className="space-y-6">
       {/* 4 High-Level KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Real-time Occupancy */}
-        <div
+        {/* Card 1: Occupancy */}
+        <button
+          type="button"
           onClick={() => onSelectTab('occupancy')}
-          className="cursor-pointer bg-bg-card border border-border-card hover:border-brand/50 rounded-lg p-4 transition-all"
+          className="w-full text-left bg-surface border border-border hover:border-brand/50 rounded-lg p-4 transition-all"
         >
           <div className="flex items-center justify-between text-text-muted text-xs">
             <span>Slot Occupancy</span>
             <Grid3X3 className="w-4 h-4 text-brand" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-text-primary">
+          <div className="mt-2 text-2xl font-bold text-text">
             {formatPercent(occSum.occupancyRate)}
           </div>
           <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
@@ -565,18 +539,19 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               Details <ArrowRight className="w-3 h-3" />
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Card 2: Reservations */}
-        <div
+        <button
+          type="button"
           onClick={() => onSelectTab('reservations')}
-          className="cursor-pointer bg-bg-card border border-border-card hover:border-brand/50 rounded-lg p-4 transition-all"
+          className="w-full text-left bg-surface border border-border hover:border-brand/50 rounded-lg p-4 transition-all"
         >
           <div className="flex items-center justify-between text-text-muted text-xs">
             <span>Total Bookings</span>
             <CalendarCheck className="w-4 h-4 text-blue-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-text-primary">
+          <div className="mt-2 text-2xl font-bold text-text">
             {resSum.totalReservations || 0}
           </div>
           <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
@@ -587,18 +562,19 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               Details <ArrowRight className="w-3 h-3" />
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Card 3: Parking Sessions */}
-        <div
+        <button
+          type="button"
           onClick={() => onSelectTab('sessions')}
-          className="cursor-pointer bg-bg-card border border-border-card hover:border-brand/50 rounded-lg p-4 transition-all"
+          className="w-full text-left bg-surface border border-border hover:border-brand/50 rounded-lg p-4 transition-all"
         >
           <div className="flex items-center justify-between text-text-muted text-xs">
             <span>Active &amp; Past Sessions</span>
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-text-primary">
+          <div className="mt-2 text-2xl font-bold text-text">
             {sessSum.totalSessions || 0}
           </div>
           <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
@@ -609,12 +585,13 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               Details <ArrowRight className="w-3 h-3" />
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Card 4: Demo Revenue */}
-        <div
+        <button
+          type="button"
           onClick={() => onSelectTab('payments')}
-          className="cursor-pointer bg-bg-card border border-border-card hover:border-amber-500/50 rounded-lg p-4 transition-all"
+          className="w-full text-left bg-surface border border-border hover:border-amber-500/50 rounded-lg p-4 transition-all"
         >
           <div className="flex items-center justify-between text-text-muted text-xs">
             <span>Demo Revenue</span>
@@ -629,15 +606,15 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               Audit <ArrowRight className="w-3 h-3" />
             </span>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Overview Analytics Grids */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Occupancy by Facility Snapshot */}
-        <div className="bg-bg-card border border-border-card rounded-lg p-5 space-y-4">
+        <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+            <h3 className="text-sm font-bold text-text flex items-center gap-2">
               <Building2 className="w-4 h-4 text-brand" /> Facility Occupancy Breakdown
             </h3>
             <span className="text-xs text-text-muted">Current Snapshot</span>
@@ -648,7 +625,7 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               {occupancy.byLot.map((lot) => (
                 <div key={lot.lotId} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-text-primary">{lot.lotName}</span>
+                    <span className="font-semibold text-text">{lot.lotName}</span>
                     <span className="text-text-muted">
                       {lot.occupiedSlots + lot.reservedSlots} / {lot.totalSlots} slots ({lot.occupancyRate}%)
                     </span>
@@ -688,9 +665,9 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
         </div>
 
         {/* Demo Payment Methods Breakdown */}
-        <div className="bg-bg-card border border-border-card rounded-lg p-5 space-y-4">
+        <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+            <h3 className="text-sm font-bold text-text flex items-center gap-2">
               <Wallet className="w-4 h-4 text-amber-400" /> Demo Payment Methods
             </h3>
             <span className="text-xs text-amber-400/90 font-semibold">[DEMO DATA]</span>
@@ -701,7 +678,7 @@ function OverviewTab({ summary, occupancy, reservations, sessions, payments, onS
               {payments.byMethod.map((m) => (
                 <div key={m.demoMethod} className="bg-bg-subtle rounded p-3 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-semibold text-text-primary">{m.demoMethod.replace(/_/g, ' ')}</span>
+                    <span className="font-semibold text-text">{m.demoMethod.replace(/_/g, ' ')}</span>
                     <p className="text-[11px] text-text-muted mt-0.5">
                       {m.successfulCount} successful / {m.transactionCount} attempts
                     </p>
@@ -735,34 +712,34 @@ function OccupancyTab({ data }) {
     <div className="space-y-6">
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Total Slots</div>
-          <div className="text-xl font-bold text-text-primary mt-1">{summary.totalSlots || 0}</div>
+          <div className="text-xl font-bold text-text mt-1">{summary.totalSlots || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-brand font-semibold">Available</div>
           <div className="text-xl font-bold text-brand mt-1">{summary.availableSlots || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-red-400 font-semibold">Occupied</div>
           <div className="text-xl font-bold text-red-400 mt-1">{summary.occupiedSlots || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-amber-400 font-semibold">Reserved</div>
           <div className="text-xl font-bold text-amber-400 mt-1">{summary.reservedSlots || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-gray-400 font-semibold">Maintenance</div>
           <div className="text-xl font-bold text-gray-400 mt-1">{summary.maintenanceSlots || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted font-semibold">Occupancy %</div>
           <div className="text-xl font-bold text-brand mt-1">{formatPercent(summary.occupancyRate)}</div>
         </div>
       </div>
 
       {/* Visual Status Legend & Distribution Meter */}
-      <div className="bg-bg-card border border-border-card rounded-lg p-4 space-y-2">
+      <div className="bg-surface border border-border rounded-lg p-4 space-y-2">
         <div className="flex items-center justify-between text-xs font-semibold text-text-muted">
           <span>Overall Bay Utilization Meter</span>
           <span>{summary.totalSlots || 0} Total Installed Slots</span>
@@ -806,9 +783,9 @@ function OccupancyTab({ data }) {
       </div>
 
       {/* Lot-by-Lot Breakdown Table */}
-      <div className="bg-bg-card border border-border-card rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-border-card flex items-center justify-between">
-          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="text-xs font-bold text-text uppercase tracking-wider">
             Facility Occupancy Details (MySQL Aggregates)
           </h3>
           <span className="text-xs text-text-muted">{lots.length} Facilities Listed</span>
@@ -816,7 +793,7 @@ function OccupancyTab({ data }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-bg-subtle text-text-muted border-b border-border-card">
+            <thead className="bg-bg-subtle text-text-muted border-b border-border">
               <tr>
                 <th className="p-3">Facility Name</th>
                 <th className="p-3">Capacity</th>
@@ -832,17 +809,17 @@ function OccupancyTab({ data }) {
               {lots.length > 0 ? (
                 lots.map((lot) => (
                   <tr key={lot.lotId} className="hover:bg-bg-subtle/50 transition-colors">
-                    <td className="p-3 font-semibold text-text-primary">
+                    <td className="p-3 font-semibold text-text">
                       {lot.lotName}
                       <span className="block text-[10px] text-text-muted font-normal">{lot.address}</span>
                     </td>
                     <td className="p-3 text-text-muted">{lot.totalCapacity}</td>
-                    <td className="p-3 text-text-primary font-bold">{lot.totalSlots}</td>
+                    <td className="p-3 text-text font-bold">{lot.totalSlots}</td>
                     <td className="p-3 text-red-400 font-semibold">{lot.occupiedSlots}</td>
                     <td className="p-3 text-amber-400 font-semibold">{lot.reservedSlots}</td>
                     <td className="p-3 text-brand font-semibold">{lot.availableSlots}</td>
                     <td className="p-3 text-gray-400">{lot.maintenanceSlots}</td>
-                    <td className="p-3 text-right font-bold text-text-primary">
+                    <td className="p-3 text-right font-bold text-text">
                       <span
                         className={`px-2 py-0.5 rounded text-[11px] ${
                           lot.occupancyRate >= 80
@@ -870,8 +847,8 @@ function OccupancyTab({ data }) {
       </div>
 
       {/* Breakdown by Slot Type */}
-      <div className="bg-bg-card border border-border-card rounded-lg p-4 space-y-3">
-        <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
+        <h3 className="text-xs font-bold text-text uppercase tracking-wider">
           Breakdown by Vehicle / Slot Type
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
@@ -879,7 +856,7 @@ function OccupancyTab({ data }) {
             <div key={t.slotType} className="bg-bg-subtle rounded p-3 text-xs space-y-1">
               <span className="font-bold text-brand">{t.slotType.replace(/_/g, ' ')}</span>
               <div className="text-text-muted flex justify-between">
-                <span>Total:</span> <span className="font-semibold text-text-primary">{t.totalSlots}</span>
+                <span>Total:</span> <span className="font-semibold text-text">{t.totalSlots}</span>
               </div>
               <div className="text-text-muted flex justify-between">
                 <span>Avail:</span> <span className="text-brand">{t.availableSlots}</span>
@@ -900,32 +877,31 @@ function OccupancyTab({ data }) {
 function ReservationsTab({ data }) {
   const summary = data?.summary || {};
   const byStatus = data?.byStatus || [];
-  const timeline = data?.timeline || [];
   const records = data?.records || [];
 
   return (
     <div className="space-y-6">
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Total Reservations</div>
-          <div className="text-xl font-bold text-text-primary mt-1">{summary.totalReservations || 0}</div>
+          <div className="text-xl font-bold text-text mt-1">{summary.totalReservations || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-brand">Confirmed</div>
           <div className="text-xl font-bold text-brand mt-1">{summary.confirmedCount || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-red-400">Cancelled</div>
           <div className="text-xl font-bold text-red-400 mt-1">{summary.cancelledCount || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Cancellation Rate</div>
-          <div className="text-xl font-bold text-text-primary mt-1">
+          <div className="text-xl font-bold text-text mt-1">
             {formatPercent(summary.cancellationRate)}
           </div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Est. Revenue</div>
           <div className="text-xl font-bold text-brand mt-1">
             {formatCurrency(summary.totalEstimatedRevenue)}
@@ -934,20 +910,20 @@ function ReservationsTab({ data }) {
       </div>
 
       {/* Status Distribution Pills */}
-      <div className="bg-bg-card border border-border-card rounded-lg p-4 space-y-2">
-        <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg p-4 space-y-2">
+        <h3 className="text-xs font-bold text-text uppercase tracking-wider">
           Reservation Counts by Project Status
         </h3>
         <div className="flex flex-wrap gap-2 pt-1">
           {byStatus.map((s) => (
             <div
               key={s.status}
-              className="bg-bg-subtle border border-border-card rounded px-3 py-1.5 flex items-center gap-2 text-xs"
+              className="bg-bg-subtle border border-border rounded px-3 py-1.5 flex items-center gap-2 text-xs"
             >
               <Badge variant={s.status === 'CONFIRMED' ? 'available' : s.status === 'CANCELLED' ? 'occupied' : 'brand'}>
                 {s.status}
               </Badge>
-              <span className="font-bold text-text-primary">{s.count}</span>
+              <span className="font-bold text-text">{s.count}</span>
               <span className="text-text-muted text-[10px]">({formatCurrency(s.estimatedRevenue)})</span>
             </div>
           ))}
@@ -955,9 +931,9 @@ function ReservationsTab({ data }) {
       </div>
 
       {/* Detailed Reservations Table */}
-      <div className="bg-bg-card border border-border-card rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-border-card flex items-center justify-between">
-          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="text-xs font-bold text-text uppercase tracking-wider">
             Reservation Transaction Log ({records.length} Records)
           </h3>
           <span className="text-xs text-text-muted">Direct MySQL Query</span>
@@ -965,7 +941,7 @@ function ReservationsTab({ data }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-bg-subtle text-text-muted border-b border-border-card">
+            <thead className="bg-bg-subtle text-text-muted border-b border-border">
               <tr>
                 <th className="p-3">ID</th>
                 <th className="p-3">Customer</th>
@@ -982,7 +958,7 @@ function ReservationsTab({ data }) {
                 records.map((r) => (
                   <tr key={r.id} className="hover:bg-bg-subtle/50 transition-colors">
                     <td className="p-3 text-text-muted">#{r.id}</td>
-                    <td className="p-3 font-semibold text-text-primary">
+                    <td className="p-3 font-semibold text-text">
                       {r.customerName}
                       <span className="block text-[10px] text-text-muted font-normal">{r.customerEmail}</span>
                     </td>
@@ -991,7 +967,7 @@ function ReservationsTab({ data }) {
                       <span className="block text-[10px] text-text-muted">{r.vehicleType}</span>
                     </td>
                     <td className="p-3">
-                      <span className="text-text-primary">{r.lotName}</span>
+                      <span className="text-text">{r.lotName}</span>
                       <span className="block text-[10px] text-text-muted">Bay: {r.slotNumber}</span>
                     </td>
                     <td className="p-3 text-[11px] text-text-muted">
@@ -999,7 +975,7 @@ function ReservationsTab({ data }) {
                       <span className="block text-[10px] text-text-muted">to {formatDateTime(r.endTime)}</span>
                     </td>
                     <td className="p-3 font-mono text-text-muted">${r.hourlyRateSnapshot}/hr</td>
-                    <td className="p-3 font-mono font-bold text-text-primary">${r.totalEstimatedFee}</td>
+                    <td className="p-3 font-mono font-bold text-text">${r.totalEstimatedFee}</td>
                     <td className="p-3">
                       <Badge
                         variant={
@@ -1035,31 +1011,30 @@ function ReservationsTab({ data }) {
 function SessionsTab({ data }) {
   const summary = data?.summary || {};
   const records = data?.records || [];
-  const timeline = data?.timeline || [];
 
   return (
     <div className="space-y-6">
       {/* Sessions KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Total Sessions</div>
-          <div className="text-xl font-bold text-text-primary mt-1">{summary.totalSessions || 0}</div>
+          <div className="text-xl font-bold text-text mt-1">{summary.totalSessions || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-brand font-semibold">Active In-Facility</div>
           <div className="text-xl font-bold text-brand mt-1">{summary.activeSessions || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Completed</div>
-          <div className="text-xl font-bold text-text-primary mt-1">{summary.completedSessions || 0}</div>
+          <div className="text-xl font-bold text-text mt-1">{summary.completedSessions || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Avg Duration</div>
-          <div className="text-xl font-bold text-text-primary mt-1">
+          <div className="text-xl font-bold text-text mt-1">
             {summary.avgDurationMinutes || 0} mins
           </div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Total Recorded Fees</div>
           <div className="text-xl font-bold text-brand mt-1">
             {formatCurrency(summary.totalRecordedFees)}
@@ -1068,9 +1043,9 @@ function SessionsTab({ data }) {
       </div>
 
       {/* Sessions Table */}
-      <div className="bg-bg-card border border-border-card rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-border-card flex items-center justify-between">
-          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="text-xs font-bold text-text uppercase tracking-wider">
             Parking Entry/Exit Session Log ({records.length} Records)
           </h3>
           <span className="text-xs text-text-muted">Historical Snapshot Rates Preserved</span>
@@ -1078,7 +1053,7 @@ function SessionsTab({ data }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-bg-subtle text-text-muted border-b border-border-card">
+            <thead className="bg-bg-subtle text-text-muted border-b border-border">
               <tr>
                 <th className="p-3">Session ID</th>
                 <th className="p-3">Vehicle &amp; Customer</th>
@@ -1101,16 +1076,16 @@ function SessionsTab({ data }) {
                       <span className="block text-[10px] text-text-muted">{s.customerName}</span>
                     </td>
                     <td className="p-3">
-                      <span className="text-text-primary">{s.lotName}</span>
+                      <span className="text-text">{s.lotName}</span>
                       <span className="block text-[10px] text-text-muted">Slot #{s.slotNumber}</span>
                     </td>
                     <td className="p-3 text-text-muted">{formatDateTime(s.entryTime)}</td>
                     <td className="p-3 text-text-muted">
                       {s.exitTime ? formatDateTime(s.exitTime) : <span className="text-brand font-semibold">Active</span>}
                     </td>
-                    <td className="p-3 text-text-primary font-mono">{s.durationMinutes} mins</td>
+                    <td className="p-3 text-text font-mono">{s.durationMinutes} mins</td>
                     <td className="p-3 text-text-muted font-mono">${s.hourlyRateSnapshot}/hr</td>
-                    <td className="p-3 font-mono font-bold text-text-primary">
+                    <td className="p-3 font-mono font-bold text-text">
                       {s.totalFee !== null ? `$${s.totalFee}` : '—'}
                     </td>
                     <td className="p-3">
@@ -1158,19 +1133,19 @@ function DemoPaymentsTab({ data }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-text-muted">Total Demo Transactions</div>
-          <div className="text-xl font-bold text-text-primary mt-1">{summary.totalTransactions || 0}</div>
+          <div className="text-xl font-bold text-text mt-1">{summary.totalTransactions || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-brand font-semibold">Successful (PAID)</div>
           <div className="text-xl font-bold text-brand mt-1">{summary.successfulCount || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-red-400 font-semibold">Failed Attempts</div>
           <div className="text-xl font-bold text-red-400 mt-1">{summary.failedCount || 0}</div>
         </div>
-        <div className="bg-bg-card border border-border-card rounded p-3 text-center">
+        <div className="bg-surface border border-border rounded p-3 text-center">
           <div className="text-xs text-amber-400 font-semibold">Simulated Revenue Total</div>
           <div className="text-xl font-bold text-amber-400 mt-1">
             {formatCurrency(summary.successfulTotalAmount)}
@@ -1179,8 +1154,8 @@ function DemoPaymentsTab({ data }) {
       </div>
 
       {/* Method Distribution Cards */}
-      <div className="bg-bg-card border border-border-card rounded-lg p-4 space-y-3">
-        <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
+        <h3 className="text-xs font-bold text-text uppercase tracking-wider">
           Demo Payment Methods Breakdown
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1195,7 +1170,7 @@ function DemoPaymentsTab({ data }) {
                   <Banknote className="w-4 h-4 text-amber-400" />
                 )}
                 <div>
-                  <span className="font-semibold text-text-primary">{m.demoMethod.replace(/_/g, ' ')}</span>
+                  <span className="font-semibold text-text">{m.demoMethod.replace(/_/g, ' ')}</span>
                   <p className="text-[10px] text-text-muted">{m.successfulCount} paid of {m.transactionCount}</p>
                 </div>
               </div>
@@ -1206,9 +1181,9 @@ function DemoPaymentsTab({ data }) {
       </div>
 
       {/* Demo Payments Table */}
-      <div className="bg-bg-card border border-border-card rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-border-card flex items-center justify-between">
-          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="text-xs font-bold text-text uppercase tracking-wider">
             Simulated Payment Audit Ledger ({records.length} Records)
           </h3>
           <Badge variant="brand">isDemoTransaction: true</Badge>
@@ -1216,7 +1191,7 @@ function DemoPaymentsTab({ data }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-bg-subtle text-text-muted border-b border-border-card">
+            <thead className="bg-bg-subtle text-text-muted border-b border-border">
               <tr>
                 <th className="p-3">Reference</th>
                 <th className="p-3">Session</th>
@@ -1235,14 +1210,14 @@ function DemoPaymentsTab({ data }) {
                     <td className="p-3 font-mono text-amber-400 font-semibold">{p.transactionReference}</td>
                     <td className="p-3 text-text-muted">#{p.sessionId}</td>
                     <td className="p-3">
-                      <span className="text-text-primary font-semibold">{p.customerName}</span>
+                      <span className="text-text font-semibold">{p.customerName}</span>
                       <span className="block text-[10px] text-text-muted font-mono">{p.plateNumber}</span>
                     </td>
                     <td className="p-3">
-                      <span className="text-text-primary">{p.lotName}</span>
+                      <span className="text-text">{p.lotName}</span>
                       <span className="block text-[10px] text-text-muted">Slot #{p.slotNumber}</span>
                     </td>
-                    <td className="p-3 font-mono font-bold text-text-primary">${p.amount}</td>
+                    <td className="p-3 font-mono font-bold text-text">${p.amount}</td>
                     <td className="p-3 text-[11px] text-text-muted">{p.demoMethod.replace(/_/g, ' ')}</td>
                     <td className="p-3">
                       <Badge variant={p.status === 'PAID' ? 'available' : p.status === 'FAILED' ? 'occupied' : 'brand'}>

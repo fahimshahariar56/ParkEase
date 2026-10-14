@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   Search,
   CalendarCheck,
-  CreditCard,
   Car,
   ArrowRight,
   ShieldAlert,
@@ -21,7 +20,7 @@ export const HowItWorksPage = () => {
       title: 'Discover Compatible Bays',
       subtitle: 'Facility & Slot Search',
       description:
-        'Browse active parking facilities. Filter bays by vehicle category (Sedan, SUV, Motorcycle, or EV) and floor level. Review current hourly rates set by the facility admin.',
+        'Browse facility records and search slots by the supported vehicle category and requested time window.',
     },
     {
       step: '02',
@@ -29,23 +28,23 @@ export const HowItWorksPage = () => {
       title: 'Schedule Your Reservation',
       subtitle: 'Concurrency Checked',
       description:
-        'Select your arrival and departure timestamps. The backend instantly validates that the requested window does not intersect with any confirmed booking or active session.',
+        'Choose start and end times. The server checks availability and reservation conflicts before returning eligible slots.',
     },
     {
       step: '03',
-      icon: CreditCard,
-      title: 'Simulate Demo Authorization',
-      subtitle: 'Simulated Settlement',
+      icon: CalendarCheck,
+      title: 'Confirm the Reservation',
+      subtitle: 'Server-checked request',
       description:
-        'Complete the reservation using our simulated payment flow (Test Card, Demo Mobile Wallet, or Cash). No actual credit card, banking, or personal financial details are collected.',
+        'Submit a reservation request for the selected slot and vehicle. Confirmation is returned only after the server accepts the request.',
     },
     {
       step: '04',
       icon: Car,
-      title: 'Check-In & Park Seamlessly',
-      subtitle: 'Session Tracking',
+      title: 'Review Your Booking',
+      subtitle: 'Customer portal',
       description:
-        'Upon physical arrival, vehicle entry creates an active parking session. At exit, billable duration is calculated according to facility rules, and the slot is released.',
+        'Review your reservation history in the customer portal. Admins can record entry and exit, with demo payment records handled separately.',
     },
   ];
 
@@ -72,20 +71,20 @@ export const HowItWorksPage = () => {
 
   const systemRules = [
     {
-      q: 'Is live payment required to reserve a slot?',
-      a: 'No. ParkEase is an academic full-stack database application. All payments are strictly simulated for demonstration purposes with zero financial integration.',
+      q: 'Does ParkEase process real payments?',
+      a: 'No. Payment records are simulated for demonstration. No payment gateway or real-money transfer is connected.',
     },
     {
       q: 'How does ParkEase prevent double booking?',
-      a: 'Reservations are protected by relational SQL interval collision checks and transaction locks, guaranteeing that a slot cannot be booked by two vehicles for the same timeframe.',
+      a: 'The server checks requested time windows against reservation and session records before accepting a booking. The backend remains authoritative.',
     },
     {
-      q: 'What is the minimum booking and parking duration?',
-      a: 'Reservation requests enforce a minimum duration of 15 minutes. Parking sessions enforce a minimum 1-hour charge with ceiling-rounded duration billing.',
+      q: 'Can I manage more than one vehicle?',
+      a: 'Yes. The customer portal supports adding, editing, and removing registered vehicles, subject to the server’s reservation and session rules.',
     },
     {
-      q: 'Can customers register multiple vehicles?',
-      a: 'Yes. The customer portal allows users to register, update, and manage multiple vehicles (license plate, make/model, and category) under one account.',
+      q: 'Who records parking entry and exit?',
+      a: 'The existing operations console lets authorized admins record vehicle entry and exit for a parking session.',
     },
   ];
 
@@ -104,7 +103,7 @@ export const HowItWorksPage = () => {
         </h1>
 
         <p className="text-text-muted text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          A step-by-step look at how ParkEase coordinates slot search, collision-free reservation locks, and automated parking session tracking.
+          A step-by-step look at facility discovery, time-specific availability search, and reservation management.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -132,7 +131,7 @@ export const HowItWorksPage = () => {
               The four essential stages of reserving and using a ParkEase parking slot.
             </p>
           </div>
-          <Badge variant="available" size="sm">Self-Service</Badge>
+          <Badge variant="neutral" size="sm">Customer portal</Badge>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -236,7 +235,7 @@ export const HowItWorksPage = () => {
             Ready to find parking?
           </h2>
           <p className="text-text-muted text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-            Search live facilities, pick your bay, and confirm your reservation with full relational protection.
+            Search facilities, select a time, and submit a reservation request with server-side conflict checks.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link to="/parking">

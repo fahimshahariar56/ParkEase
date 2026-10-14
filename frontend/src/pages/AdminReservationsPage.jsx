@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   CalendarCheck,
   Search,
-  Filter,
   Clock,
   User,
   Car,
-  MapPin,
   Grid3X3,
   DollarSign,
   AlertTriangle,
@@ -17,13 +15,11 @@ import {
   RefreshCw,
   Eye,
   ShieldAlert,
-  Layers,
-  ArrowRight,
   Phone,
   Mail,
   Building2,
 } from 'lucide-react';
-import { Card, Badge, Button, Input, Dialog, EmptyState, ErrorState, Skeleton } from '../components/ui';
+import { Badge, Button, Dialog, EmptyState, ErrorState, Skeleton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { reservationsApi, parkingApi } from '../lib/api';
@@ -215,7 +211,7 @@ export const AdminReservationsPage = () => {
   };
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div>
@@ -223,7 +219,7 @@ export const AdminReservationsPage = () => {
             <CalendarCheck className="w-4 h-4" />
             <span>Operations Console</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text">Reservation Management</h1>
+          <h1 className="park-page-title">Reservation Management</h1>
           <p className="text-xs text-text-muted mt-1">
             Monitor customer bookings, inspect schedule windows, and transition operational reservation states.
           </p>

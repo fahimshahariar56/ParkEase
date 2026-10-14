@@ -74,7 +74,7 @@ export const AdminDashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // Live Data States
+  // Latest API response states
   const [lots, setLots] = useState([]);
   const [slots, setSlots] = useState([]);
   const [reservations, setReservations] = useState([]);
@@ -136,7 +136,7 @@ export const AdminDashboard = () => {
     fetchDashboardData(false);
   }, [fetchDashboardData]);
 
-  // ─── Metric Calculations (Real API + Seed-Labelled) ─────────────────────────
+  // ─── Metric Calculations (API response) ─────────────────────────────────────
 
   const totalLots = lots.length;
   const totalSlots = slots.length;
@@ -146,25 +146,13 @@ export const AdminDashboard = () => {
   const maintenanceSlots = slots.filter((s) => s.status === 'MAINTENANCE').length;
 
   const occupancyRate = totalSlots > 0
-    ? Math.round(((totalSlots - availableSlots) / totalSlots) * 100)
+    ? Math.round((occupiedSlots / totalSlots) * 100)
     : 0;
 
   const totalReservations = reservations.length;
   const activeReservations = reservations.filter(
     (r) => r.status === 'CONFIRMED' || r.status === 'PENDING'
   ).length;
-
-  // Real estimated total from recorded reservations
-  const realEstimatedRevenue = reservations.reduce((sum, r) => {
-    if (r.status !== 'CANCELLED' && r.status !== 'NO_SHOW') {
-      return sum + Number(r.totalEstimatedFee || 0);
-    }
-    return sum;
-  }, 0);
-
-  // Seed / Demo projection metrics (explicitly labeled per DESIGN.md & PHASE.md)
-  const seedActiveSessionsCount = 3; // Seed until Day 19 Entry/Exit session engine
-  const seedDemoRevenueTotal = Math.max(realEstimatedRevenue, 142.50); // Simulated demo revenue
 
   // Slot Types Breakdown (Real)
   const slotTypeCounts = slots.reduce((acc, slot) => {
@@ -180,11 +168,11 @@ export const AdminDashboard = () => {
 
   if (error && !isLoading && lots.length === 0) {
     return (
-      <div className="space-y-6 font-mono">
+      <div className="space-y-6 font-sans">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text">Operations Overview</h1>
-            <p className="text-xs text-text-muted mt-1">Live parking facilities monitoring and system metrics</p>
+            <h1 className="park-page-title">Operations Overview</h1>
+            <p className="park-page-description">Latest parking inventory and reservation data returned by the API.</p>
           </div>
         </div>
         <ErrorState
@@ -197,18 +185,18 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-8 font-mono">
+    <div className="space-y-8 font-sans">
       {/* ── Top Header & Actions Bar ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="park-page-title">
               Operations Overview
             </h1>
-            <Badge variant="brand" size="sm">LIVE MONITOR</Badge>
+            <Badge variant="neutral" size="sm">API snapshot</Badge>
           </div>
           <p className="text-xs text-text-muted mt-1 flex items-center gap-2 flex-wrap">
-            <span>Real-time parking infrastructure telemetry & metrics</span>
+            <span>Parking inventory and reservation data from the latest API response</span>
             {lastUpdated && (
               <>
                 <span className="text-border">•</span>
@@ -225,7 +213,7 @@ export const AdminDashboard = () => {
             variant="secondary"
             size="sm"
             icon={RefreshCw}
-            loading={isRefreshing}
+            isLoading={isRefreshing}
             onClick={() => fetchDashboardData(true)}
             title="Refresh metrics from server"
           >
@@ -250,26 +238,19 @@ export const AdminDashboard = () => {
       </div>
 
       {/* ── Operational Status Banner ───────────────────────────────────────── */}
-      <div className="p-4 rounded-card bg-surface-raised border border-brand/30 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-subtle">
+      <div className="p-4 rounded-card bg-surface-raised border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 text-sm shadow-subtle">
         <div className="flex items-center gap-3 text-brand">
-          <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-btn bg-surface border border-border flex items-center justify-center flex-shrink-0">
             <ShieldCheck className="w-4 h-4 text-brand" />
           </div>
           <div>
             <div className="font-bold text-text">
-              Operational Fleet: {totalLots} Parking {totalLots === 1 ? 'Facility' : 'Facilities'} Active & Connected
+              Inventory snapshot · {totalLots} {totalLots === 1 ? 'facility' : 'facilities'}
             </div>
             <div className="text-text-muted text-[11px] mt-0.5">
-              {availableSlots} of {totalSlots} slots currently available across all zones
+              {availableSlots} of {totalSlots} registered slots marked available in the latest response
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-status-available/10 text-status-available border border-status-available/30 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-status-available animate-pulse" />
-            TELEMETRY ACTIVE
-          </span>
         </div>
       </div>
 
@@ -294,8 +275,8 @@ export const AdminDashboard = () => {
               </div>
               <div className="text-[11px] text-text-muted mt-2 flex items-center justify-between">
                 <span className="text-brand font-medium">{availableSlots} free slots</span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">
-                  LIVE API
+                <span className="text-[10px] px-1 py-0.5 rounded bg-surface-raised text-text-muted border border-border">
+                  API
                 </span>
               </div>
             </div>
@@ -321,8 +302,8 @@ export const AdminDashboard = () => {
               </div>
               <div className="text-[11px] text-text-muted mt-2 flex items-center justify-between">
                 <span>{occupiedSlots + reservedSlots} slots filled</span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">
-                  LIVE API
+                <span className="text-[10px] px-1 py-0.5 rounded bg-surface-raised text-text-muted border border-border">
+                  API
                 </span>
               </div>
             </div>
@@ -348,15 +329,15 @@ export const AdminDashboard = () => {
               </div>
               <div className="text-[11px] text-text-muted mt-2 flex items-center justify-between">
                 <span className="text-brand font-medium">{activeReservations} active</span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">
-                  LIVE API
+                <span className="text-[10px] px-1 py-0.5 rounded bg-surface-raised text-text-muted border border-border">
+                  API
                 </span>
               </div>
             </div>
           )}
         </Card>
 
-        {/* KPI 4: Active Sessions (Seed-labelled per PHASE.md & DESIGN.md) */}
+        {/* Session data is not included in the dashboard's current API requests. */}
         <Card variant="raised" className="relative overflow-hidden border-border/80">
           {isLoading ? (
             <div className="space-y-3">
@@ -371,12 +352,12 @@ export const AdminDashboard = () => {
                 <ArrowRightLeft className="w-4 h-4 text-status-pending" />
               </div>
               <div className="text-2xl font-bold text-text tracking-tight font-mono">
-                {seedActiveSessionsCount}
+                —
               </div>
               <div className="text-[11px] text-text-muted mt-2 flex items-center justify-between">
-                <span className="text-text-muted">In-park gates</span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  SEED DATA
+                <span className="text-text-muted">Not included in this view</span>
+                <span className="text-[10px] px-1 py-0.5 rounded bg-surface-raised text-text-muted border border-border">
+                  NOT LOADED
                 </span>
               </div>
             </div>
@@ -398,13 +379,13 @@ export const AdminDashboard = () => {
                 <DollarSign className="w-4 h-4 text-status-available" />
               </div>
               <div className="text-2xl font-bold text-text tracking-tight font-mono">
-                {formatCurrency(seedDemoRevenueTotal)}
+                —
               </div>
               <div className="text-[11px] text-text-muted mt-2 flex items-center justify-between">
-                <span className="text-text-muted">Simulated test</span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  DEMO SEED
-                </span>
+                <span className="text-text-muted">No real money charged</span>
+                <Link to="/admin/payments" className="text-[10px] px-1 py-0.5 rounded bg-surface-raised text-text-muted border border-border hover:text-text">
+                  VIEW DEMO PAYMENTS
+                </Link>
               </div>
             </div>
           )}
@@ -418,7 +399,7 @@ export const AdminDashboard = () => {
         <div className="lg:col-span-2 space-y-4">
           <Card
             title="Parking Facilities Status"
-            subtitle="Live occupancy and capacity per geographic facility"
+            subtitle="Availability counts from the latest facility response"
             headerAction={
               <Link to="/admin/lots" className="text-xs text-brand hover:underline flex items-center gap-1">
                 Manage Lots <ArrowUpRight className="w-3.5 h-3.5" />
@@ -438,21 +419,17 @@ export const AdminDashboard = () => {
             ) : lots.length === 0 ? (
               <EmptyState
                 icon={Building2}
-                title="No Parking Lots Configured"
-                description="No active parking lots are registered in the system inventory."
-                actionLabel="Configure Lots"
-                onAction={() => {}}
+                title="No parking lots configured"
+                description="The parking inventory returned no facility records."
               />
             ) : (
               <div className="space-y-4">
                 {lots.map((lot) => {
-                  const capacity = Number(lot.totalCapacity || lot.slotCount || 0);
-                  const available = Number(lot.availableSlots !== undefined ? lot.availableSlots : 0);
-                  const occupied = Math.max(0, capacity - available);
-                  const percent = capacity > 0 ? Math.round((occupied / capacity) * 100) : 0;
-
-                  // Dynamic color indicator based on load
-                  const progressColor = percent > 85 ? 'bg-status-occupied' : percent > 60 ? 'bg-amber-500' : 'bg-status-available';
+                  const trackedSlots = Number(lot.slotCount || 0);
+                  const available = Number(lot.availableSlots || 0);
+                  const percent = trackedSlots > 0
+                    ? Math.min(100, Math.round((available / trackedSlots) * 100))
+                    : 0;
 
                   return (
                     <div
@@ -470,25 +447,26 @@ export const AdminDashboard = () => {
                           <p className="text-[11px] text-text-muted mt-0.5">{lot.address}</p>
                         </div>
                         <div className="text-right text-xs">
-                          <span className="font-bold text-text">{available} free</span>
-                          <span className="text-text-muted"> / {capacity} total</span>
+                          <span className="font-bold text-text">{available} available</span>
+                          <span className="text-text-muted"> / {trackedSlots} tracked</span>
                         </div>
                       </div>
 
-                      {/* Capacity Bar */}
+                      {/* Availability among registered slots */}
                       <div>
                         <div className="h-2 w-full bg-surface rounded-pill overflow-hidden border border-border/40 flex">
                           <div
-                            className={`h-full ${progressColor} transition-all duration-300`}
+                            className="h-full bg-text transition-all duration-300"
                             style={{ width: `${percent}%` }}
                             role="progressbar"
                             aria-valuenow={percent}
                             aria-valuemin="0"
                             aria-valuemax="100"
+                            aria-label={`${lot.name}: ${percent}% of registered slots available`}
                           />
                         </div>
                         <div className="flex justify-between items-center text-[10px] text-text-muted mt-1.5">
-                          <span>Occupancy load</span>
+                          <span>Registered slots available</span>
                           <span className="font-semibold text-text">{percent}%</span>
                         </div>
                       </div>
@@ -571,10 +549,10 @@ export const AdminDashboard = () => {
           <div className="p-4 rounded-card bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
             <div className="flex items-center gap-2 text-amber-500 font-bold">
               <Info className="w-4 h-4 flex-shrink-0" />
-              <span>Simulation Notice</span>
+              <span>Demo data notice</span>
             </div>
             <p className="text-[11px] text-text-muted leading-relaxed">
-              Parking lots, slot availability, and customer reservations reflect live database records. Physical gate sessions and monetary billing operate in demo simulation mode per design specification.
+              Inventory and reservations reflect the latest API response. Demo payment totals are simulated; no real money is charged.
             </p>
           </div>
         </div>
@@ -603,10 +581,8 @@ export const AdminDashboard = () => {
         ) : recentReservations.length === 0 ? (
           <EmptyState
             icon={CalendarCheck}
-            title="No Reservations Found"
-            description="No customer parking reservations have been placed yet."
-            actionLabel="View Parking Lots"
-            onAction={() => {}}
+            title="No reservations found"
+            description="The reservation API returned no records for this view."
           />
         ) : (
           <div className="overflow-x-auto">

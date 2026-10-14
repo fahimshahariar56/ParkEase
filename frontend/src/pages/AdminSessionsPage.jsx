@@ -13,14 +13,10 @@ import {
   Eye,
   LogIn,
   LogOut,
-  Building2,
   Timer,
   AlertTriangle,
-  TrendingUp,
-  X,
 } from 'lucide-react';
 import {
-  Card,
   Badge,
   Button,
   Dialog,
@@ -510,7 +506,7 @@ export const AdminSessionsPage = () => {
   }, [sessions]);
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div>
@@ -518,7 +514,7 @@ export const AdminSessionsPage = () => {
             <ArrowRightLeft className="w-4 h-4" />
             <span>Operations Console</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text">
+          <h1 className="park-page-title">
             Vehicle Entry &amp; Exit
           </h1>
           <p className="text-xs text-text-muted mt-1">
@@ -562,11 +558,12 @@ export const AdminSessionsPage = () => {
           <span className="text-[10px] text-status-info uppercase font-bold">Completed</span>
           <span className="text-xl font-bold text-status-info mt-1">{metrics.completed}</span>
         </div>
-        <div className="park-card p-3 flex flex-col justify-between border-status-available/30 bg-status-available/5">
-          <span className="text-[10px] text-status-available uppercase font-bold">Total Revenue</span>
-          <span className="text-xl font-bold text-status-available mt-1">
+        <div className="park-card p-3 flex flex-col justify-between border-border">
+          <span className="text-[10px] text-text-muted uppercase font-bold">Demo Revenue</span>
+          <span className="text-xl font-bold text-text mt-1">
             ${metrics.totalRevenue.toFixed(2)}
           </span>
+          <span className="text-[10px] text-text-muted">Simulated session fees; no real money charged</span>
         </div>
       </div>
 
@@ -669,7 +666,7 @@ export const AdminSessionsPage = () => {
                       {isActive && (
                         <span className="flex items-center gap-1 text-[10px] text-brand animate-pulse">
                           <Timer className="w-3 h-3" />
-                          Live
+                          Active
                         </span>
                       )}
                       {session.reservationId && (
